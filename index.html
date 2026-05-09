@@ -58,9 +58,9 @@
         }
 
         .menu-title {
-            font-size: 48px;
+            font-size: 42px;
             font-weight: bold;
-            margin-bottom: 60px;
+            margin-bottom: 30px;
             text-shadow: 4px 4px 0 #3a3a5a, 0 0 20px rgba(79, 195, 247, 0.5);
             letter-spacing: 4px;
             animation: titlePulse 2s ease-in-out infinite;
@@ -72,10 +72,10 @@
         }
 
         .menu-btn {
-            width: 280px;
-            padding: 18px 40px;
-            margin: 12px;
-            font-size: 20px;
+            width: 240px;
+            padding: 14px 30px;
+            margin: 10px;
+            font-size: 16px;
             font-family: 'Courier New', monospace;
             font-weight: bold;
             color: #fff;
@@ -109,6 +109,17 @@
             background: linear-gradient(180deg, #8a2d2d 0%, #4d1515 100%);
         }
 
+        .menu-btn.gold {
+            border-color: #f5d742;
+            background: linear-gradient(180deg, #b89a2f 0%, #8a6f18 100%);
+        }
+
+        .menu-btn.small {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
         .input-group {
             margin: 15px 0;
             display: flex;
@@ -124,9 +135,9 @@
         }
 
         .input-group input {
-            width: 260px;
-            padding: 12px 16px;
-            font-size: 18px;
+            width: 220px;
+            padding: 10px 14px;
+            font-size: 16px;
             font-family: 'Courier New', monospace;
             color: #fff;
             background: #1a1a2e;
@@ -190,7 +201,7 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            padding: 10px 20px;
+            padding: 8px 16px;
             font-size: 14px;
             font-family: 'Courier New', monospace;
             color: #8a8aaa;
@@ -286,9 +297,9 @@
         }
 
         .game-over-text {
-            font-size: 56px;
+            font-size: 48px;
             font-weight: bold;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             text-shadow: 4px 4px 0 #3a3a5a, 0 0 30px currentColor;
             animation: gameOverPulse 1s ease-in-out infinite;
         }
@@ -305,36 +316,237 @@
             display: flex;
             gap: 20px;
         }
+
+        /* Hero Grid */
+        .hero-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .hero-card {
+            padding: 12px;
+            background: rgba(42, 42, 74, 0.8);
+            border: 3px solid #4a4a6a;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .hero-card:hover {
+            border-color: #4fc3f7;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(79, 195, 247, 0.3);
+        }
+
+        .hero-card.selected {
+            border-color: #f5d742;
+            box-shadow: 0 0 20px rgba(245, 215, 66, 0.4);
+        }
+
+        .hero-card.banned {
+            opacity: 0.3;
+            pointer-events: none;
+            filter: grayscale(100%);
+        }
+
+        .hero-card.locked {
+            opacity: 0.5;
+        }
+
+        .hero-card .hero-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 8px;
+            border-radius: 4px;
+        }
+
+        .hero-card .hero-name {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .hero-card .hero-rarity {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+
+        .rarity-common { color: #aaa; }
+        .rarity-rare { color: #4fc3f7; }
+        .rarity-epic { color: #a855f7; }
+        .rarity-legendary { color: #f5d742; }
+
+        /* Player Info Panel */
+        .player-info-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #4a4a6a;
+            border-radius: 6px;
+            font-size: 12px;
+            text-align: right;
+        }
+
+        .player-info-panel .coins {
+            color: #f5d742;
+            font-weight: bold;
+        }
+
+        /* Settings Panel */
+        .settings-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .settings-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            opacity: 0.7;
+            transition: all 0.2s;
+        }
+
+        .settings-tab.active {
+            border-bottom-color: #4fc3f7;
+            opacity: 1;
+        }
+
+        .settings-content {
+            padding: 20px;
+            width: 400px;
+        }
+
+        .keybind-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(42, 42, 74, 0.5);
+            border-radius: 4px;
+        }
+
+        .keybind-btn {
+            padding: 6px 12px;
+            background: #2a2a4a;
+            border: 2px solid #4a4a6a;
+            border-radius: 4px;
+            cursor: pointer;
+            min-width: 80px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .keybind-btn.recording {
+            border-color: #f5d742;
+            animation: blink 0.5s infinite;
+        }
+
+        /* Gacha */
+        .gacha-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gacha-pack {
+            width: 150px;
+            height: 200px;
+            margin: 20px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .gacha-pack:hover {
+            transform: scale(1.05);
+        }
+
+        .gacha-result {
+            animation: cardReveal 0.8s ease-out;
+        }
+
+        @keyframes cardReveal {
+            0% { transform: scale(0) rotateY(180deg); opacity: 0; }
+            100% { transform: scale(1) rotateY(0deg); opacity: 1; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4a4a6a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6a6a8a;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 18px;
+            margin: 15px 0;
+            color: #4fc3f7;
+        }
     </style>
 </head>
 <body>
     <div id="game-container">
         <canvas id="gameCanvas" width="800" height="600"></canvas>
 
+        <!-- Player Info -->
+        <div id="playerInfo" class="player-info-panel" style="display: none;">
+            <div id="playerNameDisplay">玩家</div>
+            <div class="coins" id="coinsDisplay">💰 1000</div>
+            <div id="statsDisplay">胜: 0 | 负: 0</div>
+        </div>
+
         <div id="healthBars" class="hidden">
             <div class="health-container blue">
-                <div class="player-name blue">PLAYER 1</div>
+                <div class="player-name blue" id="p1HeroName">玩家1</div>
                 <div class="health-bar-bg">
                     <div id="health1" class="health-bar blue" style="width: 100%"></div>
                 </div>
             </div>
             <div class="health-container red">
-                <div class="player-name red">PLAYER 2</div>
+                <div class="player-name red" id="p2HeroName">玩家2</div>
                 <div class="health-bar-bg">
                     <div id="health2" class="health-bar red" style="width: 100%"></div>
                 </div>
             </div>
         </div>
 
+        <!-- Main Menu -->
         <div id="mainMenu" class="menu-overlay">
             <div class="menu-title">⚔ 机甲对决 ⚔</div>
             <button class="menu-btn blue" onclick="startLocalGame()">本地对战</button>
             <button class="menu-btn red" onclick="showNetworkMenu()">网络对战</button>
+            <button class="menu-btn" onclick="showGacha()">🎰 抽卡</button>
+            <button class="menu-btn" onclick="showSettings()">⚙️ 设置</button>
         </div>
 
+        <!-- Network Menu -->
         <div id="networkMenu" class="menu-overlay hidden">
             <button class="back-btn" onclick="showMainMenu()">← 返回</button>
-            <div class="menu-title" style="font-size: 36px;">网络对战</div>
+            <div class="menu-title" style="font-size: 32px;">网络对战</div>
             <button class="menu-btn" onclick="createRoom()">创建房间</button>
             <div class="input-group">
                 <label>或输入房间ID加入</label>
@@ -343,54 +555,198 @@
             <button class="menu-btn" onclick="joinRoom()">加入房间</button>
         </div>
 
+        <!-- Waiting Room -->
         <div id="waitingRoom" class="menu-overlay hidden">
             <button class="back-btn" onclick="leaveRoom()">← 返回</button>
-            <div class="menu-title" style="font-size: 32px;">等待连接...</div>
+            <div class="menu-title" style="font-size: 28px;">等待连接...</div>
             <div class="room-info">
                 <div class="label">房间 ID（发送给对方）</div>
                 <div id="roomIdDisplay" class="room-id">---</div>
-                <button class="menu-btn" style="margin-top: 15px; width: 200px;" onclick="copyRoomId()">复制房间ID</button>
+                <button class="menu-btn small" style="margin-top: 15px;" onclick="copyRoomId()">复制房间ID</button>
             </div>
             <div class="status-text">等待玩家加入...</div>
         </div>
 
+        <!-- Connecting -->
         <div id="connectingScreen" class="menu-overlay hidden">
             <button class="back-btn" onclick="cancelJoin()">← 返回</button>
-            <div class="menu-title" style="font-size: 32px;">连接中...</div>
+            <div class="menu-title" style="font-size: 28px;">连接中...</div>
             <div class="status-text">正在连接到房间...</div>
         </div>
 
+        <!-- Ban/Pick Screen -->
+        <div id="banPickScreen" class="menu-overlay hidden">
+            <div class="menu-title" style="font-size: 28px;" id="banPickTitle">禁用阶段</div>
+            <div class="status-text" id="banPickStatus">玩家1 禁用英雄</div>
+            <div class="hero-grid" id="heroGrid"></div>
+            <div style="margin-top: 20px;" id="banPickButtons" class="btn-group"></div>
+        </div>
+
+        <!-- Gacha Screen -->
+        <div id="gachaScreen" class="menu-overlay hidden">
+            <button class="back-btn" onclick="showMainMenu()">← 返回</button>
+            <div class="menu-title" style="font-size: 32px;">🎰 抽卡</div>
+            <div class="coins" style="font-size: 24px; margin-bottom: 20px;">💰 <span id="gachaCoins">1000</span></div>
+            
+            <div style="display: flex; gap: 40px; margin: 20px 0;">
+                <div style="text-align: center;">
+                    <div class="menu-btn gold" style="width: 180px; height: 200px; display: flex; flex-direction: column; justify-content: center;" onclick="doGacha('normal')">
+                        <div style="font-size: 40px;">📦</div>
+                        <div style="margin-top: 10px;">普通卡包</div>
+                        <div style="font-size: 14px; color: #f5d742;">💰 100</div>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <div class="menu-btn red" style="width: 180px; height: 200px; display: flex; flex-direction: column; justify-content: center;" onclick="doGacha('premium')">
+                        <div style="font-size: 40px;">✨</div>
+                        <div style="margin-top: 10px;">高级卡包</div>
+                        <div style="font-size: 14px; color: #ff8a80;">💰 300</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="gachaResult" style="display: none; text-align: center; margin-top: 20px;">
+                <div id="gachaResultHero" class="hero-card gacha-result" style="width: 150px; margin: 0 auto;"></div>
+                <button class="menu-btn" style="margin-top: 20px;" onclick="hideGachaResult()">确定</button>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <div class="section-title">我的英雄</div>
+                <div class="hero-grid" id="myHeroesGrid" style="max-height: 150px;"></div>
+            </div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settingsScreen" class="menu-overlay hidden">
+            <button class="back-btn" onclick="showMainMenu()">← 返回</button>
+            <div class="menu-title" style="font-size: 32px;">⚙️ 设置</div>
+            
+            <div style="display: flex; border-bottom: 2px solid #4a4a6a; margin-bottom: 20px;">
+                <div class="settings-tab active" onclick="switchSettingsTab('profile')">资料</div>
+                <div class="settings-tab" onclick="switchSettingsTab('controls')">控制</div>
+            </div>
+
+            <div id="settingsProfile" class="settings-content">
+                <div class="input-group">
+                    <label>玩家昵称</label>
+                    <input type="text" id="playerNameInput" placeholder="输入昵称">
+                </div>
+                <button class="menu-btn" onclick="saveProfile()">保存</button>
+                <div style="margin-top: 30px; font-size: 14px; color: #8a8aaa;">
+                    <div>每日登录奖励: +100 💰</div>
+                    <div>胜利奖励: +50 💰</div>
+                </div>
+            </div>
+
+            <div id="settingsControls" class="settings-content" style="display: none;">
+                <div class="section-title">玩家1 键位</div>
+                <div class="keybind-row"><span>跳跃</span><button class="keybind-btn" id="kb-p1-jump" onclick="startKeybind('p1', 'jump')">W</button></div>
+                <div class="keybind-row"><span>左移</span><button class="keybind-btn" id="kb-p1-left" onclick="startKeybind('p1', 'left')">A</button></div>
+                <div class="keybind-row"><span>右移</span><button class="keybind-btn" id="kb-p1-right" onclick="startKeybind('p1', 'right')">D</button></div>
+                <div class="keybind-row"><span>攻击</span><button class="keybind-btn" id="kb-p1-attack" onclick="startKeybind('p1', 'attack')">J</button></div>
+                <div class="keybind-row"><span>防御</span><button class="keybind-btn" id="kb-p1-defend" onclick="startKeybind('p1', 'defend')">K</button></div>
+                
+                <div class="section-title">玩家2 键位</div>
+                <div class="keybind-row"><span>跳跃</span><button class="keybind-btn" id="kb-p2-jump" onclick="startKeybind('p2', 'jump')">↑</button></div>
+                <div class="keybind-row"><span>左移</span><button class="keybind-btn" id="kb-p2-left" onclick="startKeybind('p2', 'left')">←</button></div>
+                <div class="keybind-row"><span>右移</span><button class="keybind-btn" id="kb-p2-right" onclick="startKeybind('p2', 'right')">→</button></div>
+                <div class="keybind-row"><span>攻击</span><button class="keybind-btn" id="kb-p2-attack" onclick="startKeybind('p2', 'attack')">.</button></div>
+                <div class="keybind-row"><span>防御</span><button class="keybind-btn" id="kb-p2-defend" onclick="startKeybind('p2', 'defend')">/</button></div>
+            </div>
+        </div>
+
+        <!-- Game Over -->
         <div id="gameOverScreen" class="game-over-overlay hidden">
             <div id="winnerText" class="game-over-text">玩家1 胜利!</div>
+            <div style="margin-bottom: 20px; color: #f5d742;" id="rewardText"></div>
             <div class="btn-group">
                 <button class="menu-btn blue" onclick="restartGame()">再来一局</button>
                 <button class="menu-btn" onclick="returnToMenu()">返回菜单</button>
             </div>
         </div>
 
-        <div class="controls-hint">
+        <div class="controls-hint" id="controlsHint">
             P1: W跳跃 A/D移动 J攻击 K防御 | P2: ↑跳跃 ←/→移动 .攻击 /防御
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        // ==================== GAME DATA ====================
+        const HEROES = {
+            blueKnight: {
+                id: 'blueKnight',
+                name: '蓝骑士',
+                rarity: 'common',
+                stats: { hp: 100, attack: 15, speed: 5 },
+                colors: { primary: '#1a4f8a', secondary: '#5c7c99', highlight: '#f5d742', armor: '#2d6bb3' },
+                abilities: ['普通攻击', '护盾防御']
+            },
+            redWarrior: {
+                id: 'redWarrior',
+                name: '红战士',
+                rarity: 'common',
+                stats: { hp: 100, attack: 15, speed: 5 },
+                colors: { primary: '#8a2d2d', secondary: '#4a4a4a', highlight: '#4fc3f7', armor: '#c94444' },
+                abilities: ['普通攻击', '护盾防御']
+            },
+            greenNinja: {
+                id: 'greenNinja',
+                name: '绿忍者',
+                rarity: 'rare',
+                stats: { hp: 85, attack: 20, speed: 7 },
+                colors: { primary: '#1a5f2a', secondary: '#3a8a4a', highlight: '#7aff9a', armor: '#2d7a3d' },
+                abilities: ['快速斩击', '闪避']
+            },
+            purpleMage: {
+                id: 'purpleMage',
+                name: '紫法师',
+                rarity: 'rare',
+                stats: { hp: 80, attack: 22, speed: 4 },
+                colors: { primary: '#5a1a8a', secondary: '#8a4aaa', highlight: '#d78aff', armor: '#7a2dba' },
+                abilities: ['魔法弹', '护盾']
+            },
+            goldTitan: {
+                id: 'goldTitan',
+                name: '黄金泰坦',
+                rarity: 'epic',
+                stats: { hp: 150, attack: 12, speed: 3 },
+                colors: { primary: '#8a6f18', secondary: '#c9a932', highlight: '#fff08a', armor: '#b89a2f' },
+                abilities: ['重击', '钢铁防御']
+            },
+            cyberSamurai: {
+                id: 'cyberSamurai',
+                name: '赛博武士',
+                rarity: 'epic',
+                stats: { hp: 90, attack: 25, speed: 6 },
+                colors: { primary: '#1a1a3a', secondary: '#4a4a7a', highlight: '#00ffff', armor: '#2a2a5a' },
+                abilities: ['居合斩', '相位闪避']
+            },
+            dragonLord: {
+                id: 'dragonLord',
+                name: '龙王',
+                rarity: 'legendary',
+                stats: { hp: 120, attack: 25, speed: 5 },
+                colors: { primary: '#8a1a1a', secondary: '#da4a4a', highlight: '#ffaa00', armor: '#ba2a2a' },
+                abilities: ['龙息', '龙鳞护盾']
+            },
+            phoenixKnight: {
+                id: 'phoenixKnight',
+                name: '凤凰骑士',
+                rarity: 'legendary',
+                stats: { hp: 100, attack: 20, speed: 6 },
+                colors: { primary: '#ff6a00', secondary: '#ffaa00', highlight: '#ffff00', armor: '#ff8a00' },
+                abilities: ['烈焰斩', '浴火重生']
+            }
+        };
 
-        const GRAVITY = 0.8;
-        const MOVE_SPEED = 5;
-        const JUMP_SPEED = -15;
-        const GROUND_Y = 450;
-        const PLATFORM_WIDTH = 700;
-        const PLATFORM_X = (800 - PLATFORM_WIDTH) / 2;
-        const ATTACK_DAMAGE = 15;
-        const DEFEND_REDUCTION = 0.5;
-        const ATTACK_COOLDOWN = 500;
-        const ATTACK_RANGE = 80;
-        const MECH_WIDTH = 64;
-        const MECH_HEIGHT = 64;
-        const SCALE = 3;
+        const GACHA_RATES = {
+            normal: { common: 0.7, rare: 0.25, epic: 0.04, legendary: 0.01 },
+            premium: { common: 0.4, rare: 0.35, epic: 0.2, legendary: 0.05 }
+        };
 
+        const GACHA_COSTS = { normal: 100, premium: 300 };
+
+        // ==================== STATE ====================
         let gameState = 'menu';
         let isNetworkGame = false;
         let isHost = false;
@@ -401,14 +757,81 @@
 
         const keys = {};
 
+        let player1, player2;
+        let lastTime = 0;
+
+        // Ban/Pick State
+        let banPickState = {
+            phase: 'ban',
+            currentTurn: 1,
+            bannedHeroes: [],
+            pickedHeroes: { player1: null, player2: null }
+        };
+
+        // Player Data
+        let playerData = {
+            id: 'player_' + Math.random().toString(36).substr(2, 9),
+            name: '玩家',
+            coins: 1000,
+            wins: 0,
+            losses: 0,
+            unlockedHeroes: ['blueKnight', 'redWarrior'],
+            lastLogin: null,
+            settings: {
+                keybinds: {
+                    player1: { jump: 'KeyW', left: 'KeyA', right: 'KeyD', attack: 'KeyJ', defend: 'KeyK' },
+                    player2: { jump: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', attack: 'Period', defend: 'Slash' }
+                }
+            }
+        };
+
+        // Keybind recording
+        let recordingKeybind = null;
+
+        // ==================== LOCAL STORAGE ====================
+        function loadPlayerData() {
+            const saved = localStorage.getItem('pixelMechPlayerData');
+            if (saved) {
+                playerData = { ...playerData, ...JSON.parse(saved) };
+            }
+            
+            // Daily login bonus
+            const today = new Date().toDateString();
+            if (playerData.lastLogin !== today) {
+                playerData.coins += 100;
+                playerData.lastLogin = today;
+                savePlayerData();
+            }
+            
+            updatePlayerInfo();
+        }
+
+        function savePlayerData() {
+            localStorage.setItem('pixelMechPlayerData', JSON.stringify(playerData));
+            updatePlayerInfo();
+        }
+
+        function updatePlayerInfo() {
+            document.getElementById('playerNameDisplay').textContent = playerData.name;
+            document.getElementById('coinsDisplay').textContent = '💰 ' + playerData.coins;
+            document.getElementById('statsDisplay').textContent = `胜: ${playerData.wins} | 负: ${playerData.losses}`;
+            document.getElementById('gachaCoins').textContent = playerData.coins;
+            document.getElementById('playerNameInput').value = playerData.name;
+        }
+
+        // ==================== MECH CLASS ====================
         class Mech {
-            constructor(x, y, isPlayer1) {
+            constructor(x, y, isPlayer1, heroId = 'blueKnight') {
                 this.x = x;
                 this.y = y;
                 this.vx = 0;
                 this.vy = 0;
-                this.hp = 100;
-                this.maxHp = 100;
+                this.heroId = heroId;
+                const hero = HEROES[heroId];
+                this.hp = hero.stats.hp;
+                this.maxHp = hero.stats.hp;
+                this.attackDamage = hero.stats.attack;
+                this.moveSpeed = hero.stats.speed;
                 this.direction = isPlayer1 ? 1 : -1;
                 this.state = 'idle';
                 this.animationFrame = 0;
@@ -421,18 +844,8 @@
                 this.hitTimer = 0;
                 this.invincible = false;
                 this.stateTimer = 0;
-
-                this.colors = isPlayer1 ? {
-                    primary: '#1a4f8a',
-                    secondary: '#5c7c99',
-                    highlight: '#f5d742',
-                    armor: '#2d6bb3'
-                } : {
-                    primary: '#8a2d2d',
-                    secondary: '#4a4a4a',
-                    highlight: '#4fc3f7',
-                    armor: '#c94444'
-                };
+                this.colors = hero.colors;
+                this.heroName = hero.name;
             }
 
             update(dt, opponent) {
@@ -507,14 +920,14 @@
 
             moveLeft() {
                 if (this.state !== 'hit') {
-                    this.vx = -MOVE_SPEED;
+                    this.vx = -this.moveSpeed;
                     this.direction = -1;
                 }
             }
 
             moveRight() {
                 if (this.state !== 'hit') {
-                    this.vx = MOVE_SPEED;
+                    this.vx = this.moveSpeed;
                     this.direction = 1;
                 }
             }
@@ -532,7 +945,8 @@
 
                 const dist = Math.abs(this.x - opponent.x);
                 if (dist < ATTACK_RANGE) {
-                    opponent.takeDamage(this.isDefending ? ATTACK_DAMAGE * DEFEND_REDUCTION : ATTACK_DAMAGE);
+                    const damage = opponent.isDefending ? this.attackDamage * DEFEND_REDUCTION : this.attackDamage;
+                    opponent.takeDamage(damage);
                     this.attackHit = true;
                 }
             }
@@ -558,7 +972,16 @@
 
                 if (this.hp <= 0) {
                     gameState = 'gameover';
-                    showGameOver(!this.isPlayer1);
+                    const winnerIsPlayer1 = !this.isPlayer1;
+                    showGameOver(winnerIsPlayer1);
+                    
+                    if (winnerIsPlayer1) {
+                        playerData.wins++;
+                    } else {
+                        playerData.losses++;
+                    }
+                    playerData.coins += 50;
+                    savePlayerData();
                 }
             }
 
@@ -706,12 +1129,24 @@
             }
         }
 
-        let player1, player2;
-        let lastTime = 0;
+        // ==================== CONSTANTS ====================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const GRAVITY = 0.8;
+        const JUMP_SPEED = -15;
+        const GROUND_Y = 450;
+        const PLATFORM_WIDTH = 700;
+        const PLATFORM_X = (800 - PLATFORM_WIDTH) / 2;
+        const DEFEND_REDUCTION = 0.5;
+        const ATTACK_COOLDOWN = 500;
+        const ATTACK_RANGE = 80;
 
-        function initGame() {
-            player1 = new Mech(200, GROUND_Y, true);
-            player2 = new Mech(600, GROUND_Y, false);
+        // ==================== GAME FUNCTIONS ====================
+        function initGame(hero1 = 'blueKnight', hero2 = 'redWarrior') {
+            player1 = new Mech(200, GROUND_Y, true, hero1);
+            player2 = new Mech(600, GROUND_Y, false, hero2);
+            document.getElementById('p1HeroName').textContent = player1.heroName;
+            document.getElementById('p2HeroName').textContent = player2.heroName;
             updateHealthBars();
         }
 
@@ -762,31 +1197,46 @@
             ctx.fillRect(PLATFORM_X, GROUND_Y + 60, PLATFORM_WIDTH, 8);
         }
 
+        function checkKey(key, player, action) {
+            const binds = playerData.settings.keybinds[player];
+            return keys[binds[action]] || keys[key];
+        }
+
         function handleLocalInput() {
             if (isNetworkGame && localPlayerId === 1) return;
 
-            if (keys['KeyA'] || keys['a']) player1.moveLeft();
-            if (keys['KeyD'] || keys['d']) player1.moveRight();
-            if (keys['KeyW'] || keys['w']) player1.jump();
-            if (keys['KeyJ'] || keys['j']) player1.attack(player2);
-            player1.defend(keys['KeyK'] || keys['k']);
+            // Player 1
+            if (checkKey('KeyA', 'player1', 'left')) player1.moveLeft();
+            if (checkKey('KeyD', 'player1', 'right')) player1.moveRight();
+            if (checkKey('KeyW', 'player1', 'jump')) player1.jump();
+            if (checkKey('KeyJ', 'player1', 'attack')) player1.attack(player2);
+            player1.defend(checkKey('KeyK', 'player1', 'defend'));
+
+            // Player 2 (only local)
+            if (!isNetworkGame) {
+                if (checkKey('ArrowLeft', 'player2', 'left')) player2.moveLeft();
+                if (checkKey('ArrowRight', 'player2', 'right')) player2.moveRight();
+                if (checkKey('ArrowUp', 'player2', 'jump')) player2.jump();
+                if (checkKey('Period', 'player2', 'attack')) player2.attack(player1);
+                player2.defend(checkKey('Slash', 'player2', 'defend'));
+            }
         }
 
         function handleNetworkInput() {
             if (!isNetworkGame) return;
 
             if (localPlayerId === 1) {
-                if (keys['KeyA'] || keys['a']) player1.moveLeft();
-                if (keys['KeyD'] || keys['d']) player1.moveRight();
-                if (keys['KeyW'] || keys['w']) player1.jump();
-                if (keys['KeyJ'] || keys['j']) player1.attack(player2);
-                player1.defend(keys['KeyK'] || keys['k']);
+                if (checkKey('KeyA', 'player1', 'left')) player1.moveLeft();
+                if (checkKey('KeyD', 'player1', 'right')) player1.moveRight();
+                if (checkKey('KeyW', 'player1', 'jump')) player1.jump();
+                if (checkKey('KeyJ', 'player1', 'attack')) player1.attack(player2);
+                player1.defend(checkKey('KeyK', 'player1', 'defend'));
             } else {
-                if (keys['ArrowLeft']) player2.moveLeft();
-                if (keys['ArrowRight']) player2.moveRight();
-                if (keys['ArrowUp']) player2.jump();
-                if (keys['Period']) player2.attack(player1);
-                player2.defend(keys['Slash']);
+                if (checkKey('ArrowLeft', 'player2', 'left')) player2.moveLeft();
+                if (checkKey('ArrowRight', 'player2', 'right')) player2.moveRight();
+                if (checkKey('ArrowUp', 'player2', 'jump')) player2.jump();
+                if (checkKey('Period', 'player2', 'attack')) player2.attack(player1);
+                player2.defend(checkKey('Slash', 'player2', 'defend'));
             }
         }
 
@@ -845,22 +1295,27 @@
             requestAnimationFrame(gameLoop);
         }
 
-        function startLocalGame() {
-            isNetworkGame = false;
-            initGame();
-            gameState = 'playing';
+        // ==================== MENU FUNCTIONS ====================
+        function hideAllMenus() {
             document.getElementById('mainMenu').classList.add('hidden');
-            document.getElementById('healthBars').classList.remove('hidden');
+            document.getElementById('networkMenu').classList.add('hidden');
+            document.getElementById('waitingRoom').classList.add('hidden');
+            document.getElementById('connectingScreen').classList.add('hidden');
+            document.getElementById('banPickScreen').classList.add('hidden');
+            document.getElementById('gachaScreen').classList.add('hidden');
+            document.getElementById('settingsScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('healthBars').classList.add('hidden');
+            document.getElementById('playerInfo').style.display = 'none';
+            document.getElementById('controlsHint').style.display = 'block';
         }
 
         function showMainMenu() {
             gameState = 'menu';
+            hideAllMenus();
             document.getElementById('mainMenu').classList.remove('hidden');
-            document.getElementById('networkMenu').classList.add('hidden');
-            document.getElementById('waitingRoom').classList.add('hidden');
-            document.getElementById('connectingScreen').classList.add('hidden');
-            document.getElementById('healthBars').classList.add('hidden');
-            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('playerInfo').style.display = 'block';
+            updatePlayerInfo();
 
             if (peer) {
                 peer.destroy();
@@ -869,17 +1324,23 @@
             conn = null;
         }
 
+        function startLocalGame() {
+            isNetworkGame = false;
+            startBanPick();
+        }
+
         function showNetworkMenu() {
-            document.getElementById('mainMenu').classList.add('hidden');
+            hideAllMenus();
             document.getElementById('networkMenu').classList.remove('hidden');
         }
 
         function createRoom() {
             isHost = true;
+            isNetworkGame = true;
             localPlayerId = 1;
             remotePlayerId = 2;
 
-            document.getElementById('networkMenu').classList.add('hidden');
+            hideAllMenus();
             document.getElementById('waitingRoom').classList.remove('hidden');
 
             peer = new Peer();
@@ -907,10 +1368,11 @@
             }
 
             isHost = false;
+            isNetworkGame = true;
             localPlayerId = 2;
             remotePlayerId = 1;
 
-            document.getElementById('networkMenu').classList.add('hidden');
+            hideAllMenus();
             document.getElementById('connectingScreen').classList.remove('hidden');
 
             peer = new Peer();
@@ -920,7 +1382,7 @@
                 setupConnection();
 
                 conn.on('open', () => {
-                    startNetworkGame();
+                    startBanPick();
                 });
             });
 
@@ -938,28 +1400,27 @@
                     } else {
                         player1.setState(data.player1);
                     }
+                } else if (data.type === 'banPick') {
+                    banPickState = data.state;
+                    renderBanPickScreen();
+                    if (banPickState.phase === 'done' && data.startGame) {
+                        startGameFromBanPick();
+                    }
+                } else if (data.type === 'restart') {
+                    restartGame();
                 }
             });
 
             conn.on('close', () => {
-                alert('连接已断开');
-                showMainMenu();
+                if (gameState === 'playing' || gameState === 'banpick') {
+                    alert('连接已断开');
+                    showMainMenu();
+                }
             });
-        }
 
-        function startNetworkGame() {
-            initGame();
-
-            if (localPlayerId === 2) {
-                const temp = player1;
-                player1 = player2;
-                player2 = temp;
+            if (isHost) {
+                startBanPick();
             }
-
-            gameState = 'playing';
-            document.getElementById('waitingRoom').classList.add('hidden');
-            document.getElementById('connectingScreen').classList.add('hidden');
-            document.getElementById('healthBars').classList.remove('hidden');
         }
 
         function leaveRoom() {
@@ -993,6 +1454,7 @@
 
         function showGameOver(player1Won) {
             const winnerText = document.getElementById('winnerText');
+            const rewardText = document.getElementById('rewardText');
             if (player1Won) {
                 winnerText.textContent = '玩家1 胜利!';
                 winnerText.className = 'game-over-text blue';
@@ -1000,20 +1462,16 @@
                 winnerText.textContent = '玩家2 胜利!';
                 winnerText.className = 'game-over-text red';
             }
+            rewardText.textContent = '+50 💰';
             document.getElementById('gameOverScreen').classList.remove('hidden');
         }
 
         function restartGame() {
             document.getElementById('gameOverScreen').classList.add('hidden');
-            initGame();
-            gameState = 'playing';
+            startBanPick();
 
             if (isNetworkGame && conn && conn.open) {
-                if (localPlayerId === 1) {
-                    conn.send({ type: 'restart' });
-                } else {
-                    conn.send({ type: 'restart' });
-                }
+                conn.send({ type: 'restart' });
             }
         }
 
@@ -1029,22 +1487,127 @@
             }
         }
 
-        document.addEventListener('keydown', (e) => {
-            keys[e.code] = true;
-            keys[e.key] = true;
+        // ==================== BAN/PICK ====================
+        function startBanPick() {
+            gameState = 'banpick';
+            banPickState = {
+                phase: 'ban',
+                currentTurn: 1,
+                bannedHeroes: [],
+                pickedHeroes: { player1: null, player2: null }
+            };
+            
+            hideAllMenus();
+            document.getElementById('banPickScreen').classList.remove('hidden');
+            renderBanPickScreen();
+        }
 
-            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
-                e.preventDefault();
+        function renderBanPickScreen() {
+            const titleEl = document.getElementById('banPickTitle');
+            const statusEl = document.getElementById('banPickStatus');
+            const gridEl = document.getElementById('heroGrid');
+            const buttonsEl = document.getElementById('banPickButtons');
+
+            if (banPickState.phase === 'ban') {
+                titleEl.textContent = '⚔️ 禁用阶段 ⚔️';
+                statusEl.textContent = `玩家${banPickState.currentTurn} 禁用英雄`;
+            } else if (banPickState.phase === 'pick') {
+                titleEl.textContent = '🎮 选择阶段 🎮';
+                if (banPickState.pickedHeroes.player1 && banPickState.pickedHeroes.player2) {
+                    statusEl.textContent = '双方已选择，准备战斗！';
+                } else {
+                    statusEl.textContent = `玩家${banPickState.currentTurn} 选择英雄`;
+                }
             }
-        });
 
-        document.addEventListener('keyup', (e) => {
-            keys[e.code] = false;
-            keys[e.key] = false;
-        });
+            gridEl.innerHTML = '';
+            Object.values(HEROES).forEach(hero => {
+                const card = document.createElement('div');
+                card.className = 'hero-card';
+                card.dataset.heroId = hero.id;
+                
+                if (banPickState.bannedHeroes.includes(hero.id)) {
+                    card.classList.add('banned');
+                }
+                if (banPickState.pickedHeroes.player1 === hero.id || banPickState.pickedHeroes.player2 === hero.id) {
+                    card.classList.add('selected');
+                }
+                if (!playerData.unlockedHeroes.includes(hero.id) && !isNetworkGame) {
+                    card.classList.add('locked');
+                }
 
-        initGame();
-        requestAnimationFrame(gameLoop);
-    </script>
-</body>
-</html>
+                const icon = document.createElement('div');
+                icon.className = 'hero-icon';
+                icon.style.background = hero.colors.primary;
+                icon.style.border = `3px solid ${hero.colors.armor}`;
+                card.appendChild(icon);
+
+                const name = document.createElement('div');
+                name.className = 'hero-name';
+                name.textContent = hero.name;
+                card.appendChild(name);
+
+                const rarity = document.createElement('div');
+                rarity.className = `hero-rarity rarity-${hero.rarity}`;
+                rarity.textContent = getRarityText(hero.rarity);
+                card.appendChild(rarity);
+
+                card.onclick = () => handleHeroClick(hero.id);
+                gridEl.appendChild(card);
+            });
+
+            buttonsEl.innerHTML = '';
+            if (banPickState.phase === 'pick' && banPickState.pickedHeroes.player1 && banPickState.pickedHeroes.player2) {
+                const btn = document.createElement('button');
+                btn.className = 'menu-btn blue';
+                btn.textContent = '开始战斗!';
+                btn.onclick = startGameFromBanPick;
+                buttonsEl.appendChild(btn);
+            }
+        }
+
+        function getRarityText(rarity) {
+            const map = { common: '普通', rare: '稀有', epic: '史诗', legendary: '传说' };
+            return map[rarity];
+        }
+
+        function handleHeroClick(heroId) {
+            if (isNetworkGame) {
+                const isMyTurn = (banPickState.currentTurn === localPlayerId);
+                if (!isMyTurn) return;
+            }
+
+            if (banPickState.phase === 'ban') {
+                if (banPickState.bannedHeroes.includes(heroId)) return;
+                banPickState.bannedHeroes.push(heroId);
+                
+                if (banPickState.bannedHeroes.length >= 2) {
+                    banPickState.phase = 'pick';
+                    banPickState.currentTurn = 1;
+                } else {
+                    banPickState.currentTurn = banPickState.currentTurn === 1 ? 2 : 1;
+                }
+            } else if (banPickState.phase === 'pick') {
+                if (banPickState.bannedHeroes.includes(heroId)) return;
+                if (banPickState.pickedHeroes.player1 === heroId || banPickState.pickedHeroes.player2 === heroId) return;
+                if (!playerData.unlockedHeroes.includes(heroId) && !isNetworkGame) return;
+
+                if (banPickState.currentTurn === 1 && !banPickState.pickedHeroes.player1) {
+                    banPickState.pickedHeroes.player1 = heroId;
+                    banPickState.currentTurn = 2;
+                } else if (banPickState.currentTurn === 2 && !banPickState.pickedHeroes.player2) {
+                    banPickState.pickedHeroes.player2 = heroId;
+                    banPickState.currentTurn = 1;
+                }
+            }
+
+            renderBanPickScreen();
+
+            if (isNetworkGame && conn && conn.open) {
+                conn.send({ type: 'banPick', state: banPickState });
+            }
+        }
+
+        function startGameFromBanPick() {
+            const h1 = banPickState.pickedHeroes.player1 || 'blueKnight';
+            const h2 = banPickState.pickedHeroes.player
