@@ -349,6 +349,7 @@
             <div class="room-info">
                 <div class="label">房间 ID（发送给对方）</div>
                 <div id="roomIdDisplay" class="room-id">---</div>
+                <button class="menu-btn" style="margin-top: 15px; width: 200px;" onclick="copyRoomId()">复制房间ID</button>
             </div>
             <div class="status-text">等待玩家加入...</div>
         </div>
@@ -968,6 +969,17 @@
             }
             conn = null;
             showNetworkMenu();
+        }
+
+        function copyRoomId() {
+            const roomId = document.getElementById('roomIdDisplay').textContent;
+            if (roomId && roomId !== '---') {
+                navigator.clipboard.writeText(roomId).then(() => {
+                    alert('房间ID已复制到剪贴板！');
+                }).catch(() => {
+                    prompt('请复制以下房间ID：', roomId);
+                });
+            }
         }
 
         function cancelJoin() {
