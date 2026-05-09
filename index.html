@@ -1269,6 +1269,8 @@
                     handleLocalInput();
                 }
 
+                handleMobileControls();
+
                 player1.update(dt, player2);
                 player2.update(dt, player1);
 
@@ -1610,4 +1612,380 @@
 
         function startGameFromBanPick() {
             const h1 = banPickState.pickedHeroes.player1 || 'blueKnight';
-            const h2 = banPickState.pickedHeroes.player
+            const h2 = banPickState.pickedHeroes.player2 || 'redWarrior';
+            
+            banPickState.phase = 'done';
+            hideAllMenus();
+            document.getElementById('healthBars').classList.remove('hidden');
+            document.getElementById('controlsHint').style.display = 'block';
+            
+            initGame(h1, h2);
+            gameState = 'playing';
+
+            if (isNetworkGame && conn && conn.open) {
+                conn.send({ type: 'banPick', state: banPickState, startGame: true });
+            }
+        }
+
+        // ==================== GACHA ====================
+        function showGacha() {
+            hideAllMenus();
+            document.getElementById('gachaScreen').classList.remove('hidden');
+            document.getElementById('playerInfo').style.display = 'block';
+            renderMyHeroes();
+        }
+
+        function renderMyHeroes() {
+            const grid = document.getElementById('myHeroesGrid');
+            grid.innerHTML = '';
+            
+            playerData.unlockedHeroes.forEach(heroId => {
+                const hero = HEROES[heroId];
+                const card = document.createElement('div');
+                card.className = 'hero-card';
+                
+                const icon = document.createElement('div');
+                icon.className = 'hero-icon';
+                icon.style.background = hero.colors.primary;
+                icon.style.border = `3px solid ${hero.colors.armor}`;
+                card.appendChild(icon);
+
+                const name = document.createElement('div');
+                name.className = 'hero-name';
+                name.textContent = hero.name;
+                card.appendChild(name);
+
+                const rarity = document.createElement('div');
+                rarity.className = `hero-rarity rarity-${hero.rarity}`;
+                rarity.textContent = getRarityText(hero.rarity);
+                card.appendChild(rarity);
+
+                grid.appendChild(card);
+            });
+        }
+
+        function doGacha(packType) {
+            const cost = GACHA_COSTS[packType];
+            if (playerData.coins < cost) {
+                alert('金币不足!');
+                return;
+            }
+
+            playerData.coins -= cost;
+            
+            const rates = GACHA_RATES[packType];
+            const rand = Math.random();
+            let rarity;
+            if (rand < rates.legendary) {
+                rarity = 'legendary';
+            } else if (rand < rates.legendary + rates.epic) {
+                rarity = 'epic';
+            } else if (rand < rates.legendary + rates.epic + rates.rare) {
+                rarity = 'rare';
+            } else {
+                rarity = 'common';
+            }
+
+            const heroesOfRarity = Object.values(HEROES).filter(h => h.rarity === rarity);
+            const selectedHero = heroesOfRarity[Math.floor(Math.random() * heroesOfRarity.length)];
+
+            let isNew = false;
+            if (!playerData.unlockedHeroes.includes(selectedHero.id)) {
+                playerData.unlockedHeroes.push(selectedHero.id);
+                isNew = true;
+            } else {
+                const refund = rarity === 'legendary' ? 150 : rarity === 'epic' ? 80 : rarity === 'rare' ? 40 : 10;
+                playerData.coins += refund;
+            }
+
+            savePlayerData();
+            showGachaResult(selectedHero, isNew);
+        }
+
+        function showGachaResult(hero, isNew) {
+            const resultDiv = document.getElementById('gachaResult');
+            const heroCard = document.getElementById('gachaResultHero');
+            
+            heroCard.innerHTML = '';
+            heroCard.className = `hero-card gacha-result rarity-${hero.rarity}`;
+            
+            const icon = document.createElement('div');
+            icon.className = 'hero-icon';
+            icon.style.background = hero.colors.primary;
+            icon.style.border = `3px solid ${hero.colors.armor}`;
+            heroCard.appendChild(icon);
+
+            const name = document.createElement('div');
+            name.className = 'hero-name';
+            name.textContent = hero.name;
+            heroCard.appendChild(name);
+
+            const rarity = document.createElement('div');
+            rarity.className = `hero-rarity rarity-${hero.rarity}`;
+            rarity.textContent = getRarityText(hero.rarity) + (isNew ? ' (新!)' : ' (重复)');
+            heroCard.appendChild(rarity);
+
+            resultDiv.style.display = 'block';
+        }
+
+        function hideGachaResult() {
+            document.getElementById('gachaResult').style.display = 'none';
+            renderMyHeroes();
+        }
+
+        // ==================== SETTINGS ====================
+        function showSettings() {
+            hideAllMenus();
+            document.getElementById('settingsScreen').classList.remove('hidden');
+            updateKeybindDisplay();
+        }
+
+        function switchSettingsTab(tab) {
+            document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.settings-content').forEach(c => c.style.display = 'none');
+            
+            event.target.classList.add('active');
+            document.getElementById('settings' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
+        }
+
+        function updateKeybindDisplay() {
+            Object.keys(playerData.settings.keybinds).forEach(player => {
+                Object.keys(playerData.settings.keybinds[player]).forEach(action => {
+                    const key = playerData.settings.keybinds[player][action];
+                    const displayKey = key.replace('Key', '').replace('Arrow', '');
+                    const btnId = `kb-${player}-${action}`;
+                    const btn = document.getElementById(btnId);
+                    if (btn) btn.textContent = displayKey;
+                });
+            });
+        }
+
+        function startKeybind(player, action) {
+            if (recordingKeybind) {
+                document.getElementById(`kb-${recordingKeybind.player}-${recordingKeybind.action}`).classList.remove('recording');
+            }
+            
+            recordingKeybind = { player, action };
+            const btn = document.getElementById(`kb-${player}-${action}`);
+            btn.classList.add('recording');
+            btn.textContent = '...';
+        }
+
+        function saveProfile() {
+            playerData.name = document.getElementById('playerNameInput').value;
+            savePlayerData();
+            alert('保存成功!');
+        }
+
+        // ==================== MOBILE CONTROLS ====================
+        let mobileControls = {
+            p1: {
+                jump: null, left: null, right: null, attack: null, defend: null
+            },
+            p2: {
+                jump: null, left: null, right: null, attack: null, defend: null
+            }
+        };
+        let activeMobileKeys = new Set();
+
+        function createMobileControls() {
+            const container = document.getElementById('mobileControls');
+            if (container) return;
+
+            const controlsDiv = document.createElement('div');
+            controlsDiv.id = 'mobileControls';
+            controlsDiv.style.cssText = `
+                position: absolute;
+                bottom: 60px;
+                left: 0;
+                right: 0;
+                display: flex;
+                justify-content: space-between;
+                padding: 0 20px;
+                pointer-events: none;
+                z-index: 15;
+            `;
+
+            const createPlayerControls = (playerId) => {
+                const playerDiv = document.createElement('div');
+                playerDiv.style.cssText = `
+                    display: grid;
+                    grid-template-columns: repeat(3, 50px);
+                    grid-template-rows: repeat(2, 50px);
+                    gap: 5px;
+                    pointer-events: auto;
+                `;
+
+                const actions = [
+                    { action: 'jump', label: '↑', gridArea: '1 / 2' },
+                    { action: 'left', label: '←', gridArea: '2 / 1' },
+                    { action: 'attack', label: '⚔', gridArea: '2 / 2' },
+                    { action: 'right', label: '→', gridArea: '2 / 3' }
+                ];
+
+                actions.forEach(({ action, label, gridArea }) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'mobile-btn';
+                    btn.dataset.player = playerId;
+                    btn.dataset.action = action;
+                    btn.textContent = label;
+                    btn.style.cssText = `
+                        width: 50px;
+                        height: 50px;
+                        border-radius: 50%;
+                        border: 3px solid ${playerId === 'p1' ? '#2d6bb3' : '#c94444'};
+                        background: rgba(42, 42, 74, 0.8);
+                        color: #fff;
+                        font-size: 20px;
+                        cursor: pointer;
+                        touch-action: manipulation;
+                        user-select: none;
+                        -webkit-user-select: none;
+                    `;
+
+                    btn.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        handleMobileInput(playerId, action, true);
+                    });
+                    btn.addEventListener('touchend', (e) => {
+                        e.preventDefault();
+                        handleMobileInput(playerId, action, false);
+                    });
+                    btn.addEventListener('touchcancel', (e) => {
+                        e.preventDefault();
+                        handleMobileInput(playerId, action, false);
+                    });
+
+                    playerDiv.appendChild(btn);
+                });
+
+                return playerDiv;
+            };
+
+            controlsDiv.appendChild(createPlayerControls('p1'));
+            controlsDiv.appendChild(createPlayerControls('p2'));
+            document.getElementById('game-container').appendChild(controlsDiv);
+        }
+
+        function handleMobileInput(player, action, isPressed) {
+            const key = `${player}_${action}`;
+            if (isPressed) {
+                activeMobileKeys.add(key);
+            } else {
+                activeMobileKeys.delete(key);
+            }
+            updateMobileKeysState();
+        }
+
+        function updateMobileKeysState() {
+            mobileControls.p1 = {
+                jump: activeMobileKeys.has('p1_jump'),
+                left: activeMobileKeys.has('p1_left'),
+                right: activeMobileKeys.has('p1_right'),
+                attack: activeMobileKeys.has('p1_attack'),
+                defend: activeMobileKeys.has('p1_defend')
+            };
+            mobileControls.p2 = {
+                jump: activeMobileKeys.has('p2_jump'),
+                left: activeMobileKeys.has('p2_left'),
+                right: activeMobileKeys.has('p2_right'),
+                attack: activeMobileKeys.has('p2_attack'),
+                defend: activeMobileKeys.has('p2_defend')
+            };
+        }
+
+        function handleMobileControls() {
+            if (isNetworkGame && localPlayerId === 1) {
+                if (mobileControls.p1.left) player1.moveLeft();
+                if (mobileControls.p1.right) player1.moveRight();
+                if (mobileControls.p1.jump) player1.jump();
+                if (mobileControls.p1.attack) player1.attack(player2);
+                player1.defend(mobileControls.p1.defend);
+            } else if (!isNetworkGame) {
+                if (mobileControls.p1.left) player1.moveLeft();
+                if (mobileControls.p1.right) player1.moveRight();
+                if (mobileControls.p1.jump) player1.jump();
+                if (mobileControls.p1.attack) player1.attack(player2);
+                player1.defend(mobileControls.p1.defend);
+
+                if (mobileControls.p2.left) player2.moveLeft();
+                if (mobileControls.p2.right) player2.moveRight();
+                if (mobileControls.p2.jump) player2.jump();
+                if (mobileControls.p2.attack) player2.attack(player1);
+                player2.defend(mobileControls.p2.defend);
+            } else {
+                if (mobileControls.p2.left) player2.moveLeft();
+                if (mobileControls.p2.right) player2.moveRight();
+                if (mobileControls.p2.jump) player2.jump();
+                if (mobileControls.p2.attack) player2.attack(player1);
+                player2.defend(mobileControls.p2.defend);
+            }
+        }
+
+        function detectMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                || window.innerWidth < 768;
+        }
+
+        function showMobileControls() {
+            createMobileControls();
+            document.getElementById('mobileControls').style.display = 'flex';
+        }
+
+        function hideMobileControls() {
+            const controls = document.getElementById('mobileControls');
+            if (controls) {
+                document.getElementById('mobileControls').style.display = 'none';
+            }
+        }
+
+        // ==================== INPUT HANDLERS ====================
+        document.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+            keys[e.key] = true;
+
+            if (recordingKeybind) {
+                e.preventDefault();
+                const { player, action } = recordingKeybind;
+                
+                playerData.settings.keybinds[player][action] = e.code;
+                
+                const btn = document.getElementById(`kb-${player}-${action}`);
+                btn.classList.remove('recording');
+                btn.textContent = e.code.replace('Key', '').replace('Arrow', '');
+                
+                savePlayerData();
+                recordingKeybind = null;
+            }
+
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+            keys[e.key] = false;
+        });
+
+        // ==================== INIT ====================
+        loadPlayerData();
+        initGame();
+        showMainMenu();
+
+        if (detectMobile()) {
+            showMobileControls();
+        }
+
+        window.addEventListener('resize', () => {
+            if (detectMobile()) {
+                showMobileControls();
+            } else {
+                hideMobileControls();
+            }
+        });
+
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
