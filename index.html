@@ -134,12 +134,23 @@
         let bounceCount = 0; // 记录弹跳次数，用于调试
         let xOffset = 0; // X方向偏移
         
-        // 鼠标移动监听
+        // 鼠标移动监听 - 视觉上的一比一，球跟随鼠标
         let targetX = 0;
         window.addEventListener('mousemove', (event) => {
-            // 将鼠标X坐标从屏幕范围转换到-2到2的范围
-            const normalizedX = (event.clientX / window.innerWidth) * 2 - 1;
-            targetX = normalizedX * 2.5; // 限制在轨道宽度内
+            // 将鼠标坐标归一化到[-1, 1]范围
+            const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            
+            // 计算相机视野
+            const fov = 75; // 视角
+            const aspect = window.innerWidth / window.innerHeight;
+            const distance = camera.position.y - groundLevel; // 相机到地面的距离
+            
+            // 计算在地面高度处的视口宽度
+            const viewHeight = 2 * Math.tan((fov * Math.PI / 180) / 2) * distance;
+            const viewWidth = viewHeight * aspect;
+            
+            // 鼠标位置直接对应球的世界坐标
+            targetX = mouseX * viewWidth / 2;
         });
 
         // 创建落点特效
