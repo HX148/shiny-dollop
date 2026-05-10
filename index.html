@@ -1,51 +1,24 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>访问统计</title>
-    <style>
-        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-    </style>
-</head>
-<body>
-    <p>欢迎访问～</p>
-
-    <script>
-        // 自动获取访问信息
-        const getVisitInfo = () => {
-            const u = navigator.userAgent;
-            return {
-                time: new Date().toLocaleString("zh-CN"),
-                ip: "正在获取...",
-                browser: u.includes("Chrome") ? "Chrome" : u.includes("Firefox") ? "Firefox" : "其他浏览器",
-                device: u.includes("Mobile") ? "手机" : "电脑"
-            };
-        };
-
-        // 获取IP并提交到金数据
-        fetch("https://api.ipify.org?format=json")
-        .then(res => res.json())
-        .then(ipData => {
-            const info = getVisitInfo();
-            info.ip = ipData.ip;
-
-            // 👇 已替换为你的金数据表单接口
-            const FORM_URL = "https://sgvny9ot.jsjform.com/f/j8Uiri";
-
-            // 构造提交数据
-            const data = new URLSearchParams();
-            data.append("field_1", info.time);  // field_1对应「访问时间」
-            data.append("field_2", info.ip);    // field_2对应「访问IP」
-            data.append("field_3", info.browser); // field_3对应「浏览器」
-            data.append("field_4", info.device);  // field_4对应「设备」
-
-            // 提交数据
-            fetch(FORM_URL, {
-                method: "POST",
-                body: data
-            });
-        });
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Trae Project</title>
+    <script type="module">
+      if (import.meta.hot?.on) {
+        import.meta.hot.on('vite:error', (error) => {
+          if (error.err) {
+            console.error(
+              [error.err.message, error.err.frame].filter(Boolean).join('\n'),
+            )
+          }
+        })
+      }
     </script>
-</body>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

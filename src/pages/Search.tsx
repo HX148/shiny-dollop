@@ -1,0 +1,103 @@
+import { useEffect, useState } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import NewsCard from '../components/NewsCard';
+import { searchNews } from '../services/api';
+import { News } from '../types';
+import { Search as SearchIcon, ArrowLeft } from 'lucide-react';
+
+export default function Search() {
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get('q') || '';
+  const [news, setNews] = useState<News[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchResults() {
+      if (!query) {
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        const response = await searchNews(query);
+        setNews(response.data);
+      } catch (error) {
+        console.error('Failed to search news:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchResults();
+  }, [query]);
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <Navbar />
+
+      <div className="pt-24 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-slate-600 hover:text-blue-600 mb-8 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to home
+          </Link>
+
+          <div className="mb-10">
+            <div className="flex items-center gap-3 mb-4">
+              <SearchIcon className="h-6 w-6 text-slate-400" />
+              <h1 className="text-3xl font-bold text-slate-900">
+                Search Results
+              </h1>
+            </div>
+            {query && (
+              <p className="text-lg text-slate-600">
+                Showing results for: <span className="font-semibold text-slate-900">"{query}"</span>
+              </p>
+            )}
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100">
+                  <div className="h-48 bg-slate-200 animate-pulse" />
+                  <div className="p-6 space-y-3">
+                    <div className="h-3 bg-slate-200 rounded w-1/3 animate-pulse" />
+                    <div className="h-6 bg-slate-200 rounded w-full animate-pulse" />
+                    <div className="h-4 bg-slate-200 rounded w-2/3 animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : news.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {news.map((item) => (
+                <NewsCard key={item.id} news={item} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20">
+              <SearchIcon className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-slate-700 mb-2">No results found</h2>
+              <p className="text-slate-500">
+                {query ? 'Try a different search term' : 'Enter a search term to find news'}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <footer className="bg-slate-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-slate-400">
+            © 2024 Daily AI News. Stay informed, stay ahead.
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}
