@@ -115,13 +115,14 @@
         function createThreePieceTrack(zCenter) {
             const pieceWidth = 1.2;
             const gap = 0.6;
-            const startX = -trackWidth / 2 + pieceWidth / 2;
+            // 总宽度 = 3 * 1.2 + 2 * 0.6 = 4.8，在trackWidth=6内居中
+            const margin = (trackWidth - (3 * pieceWidth + 2 * gap)) / 2;
             
             for (let i = 0; i < 3; i++) {
                 const material = new THREE.MeshBasicMaterial({ color: colors[colorKeys[i]] });
                 const geometry = new THREE.BoxGeometry(pieceWidth, 0.1, trackPieceSize);
                 const track = new THREE.Mesh(geometry, material);
-                track.position.set(startX + i * (pieceWidth + gap), 0, zCenter);
+                track.position.set(margin + pieceWidth / 2 + i * (pieceWidth + gap), 0, zCenter);
                 scene.add(track);
                 trackSegments.push(track);
             }
@@ -131,6 +132,8 @@
         function createTwoPieceTrack(zCenter) {
             const pieceWidth = 1.5;
             const gap = 2;
+            // 总宽度 = 2 * 1.5 + 2 = 5，在trackWidth=6内居中
+            const margin = (trackWidth - (2 * pieceWidth + gap)) / 2;
             // 随机选择两个不同的颜色索引
             const pieceIndices = [0, 1, 2].sort(() => Math.random() - 0.5).slice(0, 2);
             
@@ -138,7 +141,7 @@
                 const material = new THREE.MeshBasicMaterial({ color: colors[colorKeys[pieceIndices[i]]] });
                 const geometry = new THREE.BoxGeometry(pieceWidth, 0.1, trackPieceSize);
                 const track = new THREE.Mesh(geometry, material);
-                const offsetX = i === 0 ? -gap/2 - pieceWidth/2 : gap/2 + pieceWidth/2;
+                const offsetX = margin + pieceWidth / 2 + i * (pieceWidth + gap);
                 track.position.set(offsetX, 0, zCenter);
                 scene.add(track);
                 trackSegments.push(track);
