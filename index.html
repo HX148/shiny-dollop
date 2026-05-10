@@ -129,9 +129,9 @@
         // 调整 zVelocity 使得每次弹跳轨道移动一个轨道片+间隙的距离
         let zVelocity = -(trackPieceSize + trackGap) / bounceTime;
 
-        // 追踪球体上一帧的位置
-        let lastSphereY = targetHeight + 1;
-        let isInAir = true; // 标记球体是否在空中
+        // 追踪球体状态
+        let lastVelocity = velocity;
+        let bounceCount = 0; // 记录弹跳次数，用于调试
 
         // 创建落点特效
         function createImpactEffect(x, z) {
@@ -185,20 +185,22 @@
             sphere.rotation.y += 0.01;
             
             // 弹跳物理 - 保持恒定高度
+            const oldVelocity = velocity;
             velocity += gravity;
             sphere.position.y += velocity;
             
-            // 检测是否刚落地
-            const wasInAir = isInAir;
-            isInAir = sphere.position.y > groundLevel + 0.1;
+            // 检测落地 - 通过速度方向变化判断
+            const isLanding = oldVelocity < 0 && velocity >= 0;
             
             if (sphere.position.y <= groundLevel) {
                 sphere.position.y = groundLevel;
                 velocity = requiredVelocity;
                 
-                // 如果是从空中落下，创建特效
-                if (wasInAir) {
+                // 如果速度方向发生变化，创建特效
+                if (isLanding || velocity > 0) {
                     createImpactEffect(0, 0);
+                    bounceCount++;
+                    console.log('Bounce:', bounceCount); // 调试日志
                 }
             }
 
