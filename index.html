@@ -88,13 +88,19 @@
         const trackSegments = []; // 存储当前轨道段
         let lastGeneratedTrackZ = 0; // 最后生成的轨道段的Z位置
 
-        // 创建单个轨道段
+        // 创建单个轨道段（多个并排）
         function createTrackSegment(zCenter) {
-            const trackGeometry = new THREE.BoxGeometry(0.3, 0.1, trackSegmentLength);
-            const track = new THREE.Mesh(trackGeometry, trackMaterial);
-            track.position.set(0, 0, zCenter);
-            scene.add(track);
-            trackSegments.push(track);
+            const trackWidth = 6; // 轨道总宽度
+            const trackPieceWidth = 0.5; // 每片轨道的宽度
+            const gap = 0.2; // 轨道片之间的间隙
+            
+            for (let x = -trackWidth/2; x <= trackWidth/2; x += trackPieceWidth + gap) {
+                const trackGeometry = new THREE.BoxGeometry(trackPieceWidth, 0.1, trackSegmentLength);
+                const track = new THREE.Mesh(trackGeometry, trackMaterial);
+                track.position.set(x, 0, zCenter);
+                scene.add(track);
+                trackSegments.push(track);
+            }
         }
 
         // 初始化轨道 - 创建初始轨道段
