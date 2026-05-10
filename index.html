@@ -132,6 +132,8 @@
         // 追踪球体状态
         let lastVelocity = velocity;
         let bounceCount = 0; // 记录弹跳次数，用于调试
+        let xOffset = 0; // X方向偏移
+        let xDirection = 1; // X方向移动方向
 
         // 创建落点特效
         function createImpactEffect(x, z) {
@@ -184,6 +186,13 @@
             sphere.rotation.x += 0.005;
             sphere.rotation.y += 0.01;
             
+            // X方向移动 - 在轨道宽度范围内来回移动
+            xOffset += xDirection * 0.03;
+            if (Math.abs(xOffset) > 2) {
+                xDirection *= -1;
+            }
+            sphere.position.x = xOffset;
+            
             // 弹跳物理 - 保持恒定高度
             const oldVelocity = velocity;
             velocity += gravity;
@@ -198,9 +207,8 @@
                 
                 // 如果速度方向发生变化，创建特效
                 if (isLanding || velocity > 0) {
-                    createImpactEffect(0, 0);
+                    createImpactEffect(xOffset, 0); // 特效位置跟随球的X位置
                     bounceCount++;
-                    console.log('Bounce:', bounceCount); // 调试日志
                 }
             }
 
