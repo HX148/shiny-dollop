@@ -82,12 +82,26 @@
         gridHelper.position.y = -1.5;
         scene.add(gridHelper);
 
-        // 添加球体正下方的直线轨道
+        // 轨道管理
         const trackMaterial = new THREE.MeshBasicMaterial({ color: 0x4488ff });
-        const trackGeometry = new THREE.BoxGeometry(0.3, 0.1, 200);
-        const track = new THREE.Mesh(trackGeometry, trackMaterial);
-        track.position.y = 0;
-        scene.add(track);
+        const trackSegmentLength = 20; // 每个轨道段的长度
+        const trackSegments = []; // 存储当前轨道段
+        let lastGeneratedTrackZ = 0; // 最后生成的轨道段的Z位置
+
+        // 创建单个轨道段
+        function createTrackSegment(zCenter) {
+            const trackGeometry = new THREE.BoxGeometry(0.3, 0.1, trackSegmentLength);
+            const track = new THREE.Mesh(trackGeometry, trackMaterial);
+            track.position.set(0, 0, zCenter);
+            scene.add(track);
+            trackSegments.push(track);
+        }
+
+        // 初始化轨道 - 创建初始轨道段
+        for (let i = 0; i < 10; i++) {
+            createTrackSegment(-i * trackSegmentLength);
+            lastGeneratedTrackZ = -i * trackSegmentLength;
+        }
 
         // 弹跳物理参数 - 球体半径1，轨道顶部y=0.05，所以球体最低点y=0.05时球体位置y=1.05
         const groundLevel = 1.05;
@@ -121,9 +135,33 @@
 
             // 沿轨道向深处移动
             sphere.position.z += zVelocity;
+
+            // 动态轨道管理
+            manageTrackSegments();
             
             renderer.render(scene, camera);
         }
+
+        // 动态加载和回收轨道段
+        function manageTrackSegments() {
+            // 检查是否需要生成新的轨道段
+            while (sphere.position.z < lastGeneratedTrackZ + 3 * trackSegmentLength) {
+                lastGeneratedTrackZ -= trackSegmentLength;
+                createTrackSegment(lastGeneratedTrackZ);
+            }
+
+            // 回收远离相机的轨道段
+            const maxDistance = 8 * trackSegmentLength;
+            for (let i = trackSegments.length - 1; i >= 0; i--) {
+                const track = trackSegments[i];
+                if (track.position.z > sphere.position.z + maxDistance) {
+                    scene.remove(track);
+                    track.geometry.dispose();
+                    trackSegments.splice(i, 1);
+                }
+            }
+        }
+
         animate();
 
         // 处理窗口大小变化
