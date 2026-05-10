@@ -133,8 +133,10 @@
                 velocity = requiredVelocity;
             }
 
-            // 沿轨道向深处移动
-            sphere.position.z += zVelocity;
+            // 轨道向后移动（向Z正方向）
+            for (const track of trackSegments) {
+                track.position.z -= zVelocity;
+            }
 
             // 动态轨道管理
             manageTrackSegments();
@@ -144,17 +146,28 @@
 
         // 动态加载和回收轨道段
         function manageTrackSegments() {
-            // 检查是否需要生成新的轨道段
-            while (sphere.position.z < lastGeneratedTrackZ + 3 * trackSegmentLength) {
+            // 检查是否需要生成新的轨道段（在前面）
+            while (lastGeneratedTrackZ > -3 * trackSegmentLength) {
                 lastGeneratedTrackZ -= trackSegmentLength;
                 createTrackSegment(lastGeneratedTrackZ);
             }
 
-            // 回收远离相机的轨道段
+            // 更新最后生成的位置
+            if (trackSegments.length > 0) {
+                let minZ = Infinity;
+                for (const track of trackSegments) {
+                    if (track.position.z < minZ) {
+                        minZ = track.position.z;
+                    }
+                }
+                lastGeneratedTrackZ = minZ;
+            }
+
+            // 回收远离的轨道段（后面的轨道）
             const maxDistance = 8 * trackSegmentLength;
             for (let i = trackSegments.length - 1; i >= 0; i--) {
                 const track = trackSegments[i];
-                if (track.position.z > sphere.position.z + maxDistance) {
+                if (track.position.z > maxDistance) {
                     scene.remove(track);
                     track.geometry.dispose();
                     trackSegments.splice(i, 1);
