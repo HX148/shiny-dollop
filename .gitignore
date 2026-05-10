@@ -1,0 +1,20 @@
+# Electron打包输出
+dist/
+out/
+
+# 依赖
+node_modules/
+
+# 日志
+*.log
+npm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+
+# 临时文件
+*.swp
+*.tmp
+.DS_Store
+Thumbs.db
