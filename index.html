@@ -84,32 +84,23 @@
 
         // 轨道管理
         const trackMaterial = new THREE.MeshBasicMaterial({ color: 0x4488ff });
-        const trackPieceSize = 2; // 每片轨道的大小
+        const trackPieceSize = 2; // 每片轨道的长度（Z轴方向）
+        const trackWidth = 6; // 轨道总宽度
         const trackSegments = []; // 存储当前轨道段
         let lastGeneratedTrackZ = 0; // 最后生成的轨道的Z位置
 
-        // 创建单个轨道片
-        function createTrackPiece(x, zCenter) {
-            const trackGeometry = new THREE.BoxGeometry(0.5, 0.1, trackPieceSize);
+        // 创建单个轨道片（宽度方向连续）
+        function createTrackPiece(zCenter) {
+            const trackGeometry = new THREE.BoxGeometry(trackWidth, 0.1, trackPieceSize);
             const track = new THREE.Mesh(trackGeometry, trackMaterial);
-            track.position.set(x, 0, zCenter);
+            track.position.set(0, 0, zCenter);
             scene.add(track);
             trackSegments.push(track);
         }
 
-        // 创建一排轨道片
-        function createTrackRow(zCenter) {
-            const trackWidth = 6; // 轨道总宽度
-            const gap = 0.2; // 轨道片之间的间隙
-            
-            for (let x = -trackWidth/2; x <= trackWidth/2; x += 0.5 + gap) {
-                createTrackPiece(x, zCenter);
-            }
-        }
-
         // 初始化轨道 - 创建初始轨道片
         for (let i = 0; i < 50; i++) {
-            createTrackRow(-i * (trackPieceSize + 0.2));
+            createTrackPiece(-i * (trackPieceSize + 0.2));
             lastGeneratedTrackZ = -i * (trackPieceSize + 0.2);
         }
 
@@ -156,10 +147,10 @@
 
         // 动态加载和回收轨道片
         function manageTrackSegments() {
-            // 检查是否需要生成新的轨道排（在前面）
+            // 检查是否需要生成新的轨道片（在前面）
             while (lastGeneratedTrackZ > -3 * trackPieceSize) {
                 lastGeneratedTrackZ -= (trackPieceSize + 0.2);
-                createTrackRow(lastGeneratedTrackZ);
+                createTrackPiece(lastGeneratedTrackZ);
             }
 
             // 更新最后生成的位置
