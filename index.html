@@ -24,7 +24,7 @@
 
         // 创建相机
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 8, 0);
+        camera.position.set(4, 7, 4);
         camera.lookAt(0, 0, 0);
 
         // 创建渲染器
@@ -84,7 +84,7 @@
 
         // 添加球体正下方的直线轨道
         const trackMaterial = new THREE.MeshBasicMaterial({ color: 0x4488ff });
-        const trackGeometry = new THREE.BoxGeometry(0.3, 0.1, 6);
+        const trackGeometry = new THREE.BoxGeometry(0.3, 0.1, 200);
         const track = new THREE.Mesh(trackGeometry, trackMaterial);
         track.position.y = 0;
         scene.add(track);
