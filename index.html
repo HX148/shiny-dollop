@@ -82,6 +82,9 @@
         gridHelper.position.y = -1.5;
         scene.add(gridHelper);
 
+        // 特效管理
+        const effects = []; // 存储特效对象
+
         // 轨道管理
         const trackMaterial1 = new THREE.MeshBasicMaterial({ color: 0x4488ff });
         const trackMaterial2 = new THREE.MeshBasicMaterial({ color: 0x88ff44 });
@@ -126,6 +129,50 @@
         // 调整 zVelocity 使得每次弹跳轨道移动一个轨道片+间隙的距离
         let zVelocity = -(trackPieceSize + trackGap) / bounceTime;
 
+        // 创建落点特效
+        function createImpactEffect(x, z) {
+            const ringGeometry = new THREE.RingGeometry(0.1, 0.3, 32);
+            const ringMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x00ff88, 
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 1
+            });
+            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.set(x, 0.06, z);
+            scene.add(ring);
+            
+            effects.push({
+                mesh: ring,
+                startTime: Date.now(),
+                duration: 500
+            });
+        }
+
+        // 更新特效
+        function updateEffects() {
+            const now = Date.now();
+            for (let i = effects.length - 1; i >= 0; i--) {
+                const effect = effects[i];
+                const elapsed = now - effect.startTime;
+                const progress = elapsed / effect.duration;
+                
+                if (progress >= 1) {
+                    scene.remove(effect.mesh);
+                    effect.mesh.geometry.dispose();
+                    effect.mesh.material.dispose();
+                    effects.splice(i, 1);
+                } else {
+                    // 扩大圆环
+                    const scale = 1 + progress * 2;
+                    effect.mesh.scale.set(scale, scale, 1);
+                    // 淡出
+                    effect.mesh.material.opacity = 1 - progress;
+                }
+            }
+        }
+
         // 动画循环
         function animate() {
             requestAnimationFrame(animate);
@@ -138,9 +185,15 @@
             velocity += gravity;
             sphere.position.y += velocity;
             
+            const wasInAir = sphere.position.y > groundLevel + 0.01;
             if (sphere.position.y <= groundLevel) {
                 sphere.position.y = groundLevel;
                 velocity = requiredVelocity;
+                
+                // 如果是从空中落下，创建特效
+                if (wasInAir) {
+                    createImpactEffect(0, 0);
+                }
             }
 
             // 轨道向后移动（向Z正方向）
@@ -148,8 +201,16 @@
                 track.position.z -= zVelocity;
             }
 
+            // 特效也跟着轨道一起移动
+            for (const effect of effects) {
+                effect.mesh.position.z -= zVelocity;
+            }
+
             // 动态轨道管理
             manageTrackSegments();
+            
+            // 更新特效
+            updateEffects();
             
             renderer.render(scene, camera);
         }
