@@ -4,27 +4,31 @@ import Navbar from '../components/Navbar';
 import NewsCard from '../components/NewsCard';
 import { getNewsById, getNews } from '../services/api';
 import { News } from '../types';
-import { Calendar, ExternalLink, ArrowLeft } from 'lucide-react';
+import { Calendar, ExternalLink, ArrowLeft, AlertCircle } from 'lucide-react';
+import { formatDate } from '../lib/utils';
 
 export default function NewsDetail() {
   const { id } = useParams<{ id: string }>();
   const [news, setNews] = useState<News | null>(null);
   const [relatedNews, setRelatedNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
       if (!id) return;
       try {
         setLoading(true);
+        setError(null);
         const [newsData, allNews] = await Promise.all([
           getNewsById(id),
           getNews(1, 6)
         ]);
         setNews(newsData);
         setRelatedNews(allNews.data.filter(n => n.id !== id).slice(0, 3));
-      } catch (error) {
-        console.error('Failed to fetch news:', error);
+      } catch (err) {
+        console.error('Failed to fetch news:', err);
+        setError('加载新闻失败，请稍后重试');
       } finally {
         setLoading(false);
       }
@@ -32,15 +36,6 @@ export default function NewsDetail() {
 
     fetchData();
   }, [id]);
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
 
   if (loading) {
     return (
@@ -57,6 +52,27 @@ export default function NewsDetail() {
                 <div className="h-4 bg-slate-200 rounded w-full" />
                 <div className="h-4 bg-slate-200 rounded w-5/6" />
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <Navbar />
+        <div className="pt-24 pb-16">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
+              <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-slate-800 mb-2">出错了</h2>
+              <p className="text-slate-600 mb-6">{error}</p>
+              <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors">
+                <ArrowLeft className="h-4 w-4" />
+                返回首页
+              </Link>
             </div>
           </div>
         </div>
@@ -97,6 +113,7 @@ export default function NewsDetail() {
               <img
                 src={news.imageUrl || 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=600&fit=crop'}
                 alt={news.title}
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -108,7 +125,7 @@ export default function NewsDetail() {
                 <div className="flex items-center gap-4 text-sm opacity-90">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
-                    {formatDate(news.publishedAt)}
+                    {formatDate(news.publishedAt, { month: 'long' })}
                   </span>
                   <span className="flex items-center gap-1">
                     <ExternalLink className="h-4 w-4" />

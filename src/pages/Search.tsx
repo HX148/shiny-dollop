@@ -1,36 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import NewsCard from '../components/NewsCard';
 import { searchNews } from '../services/api';
 import { News } from '../types';
-import { Search as SearchIcon, ArrowLeft } from 'lucide-react';
+import { Search as SearchIcon, ArrowLeft, AlertCircle } from 'lucide-react';
 
 export default function Search() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchResults = useCallback(async () => {
+    if (!query) {
+      setLoading(false);
+      setError(null);
+      return;
+    }
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await searchNews(query);
+      setNews(response.data);
+    } catch (err) {
+      console.error('Failed to search news:', err);
+      setError('搜索失败，请稍后重试');
+    } finally {
+      setLoading(false);
+    }
+  }, [query]);
 
   useEffect(() => {
-    async function fetchResults() {
-      if (!query) {
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        const response = await searchNews(query);
-        setNews(response.data);
-      } catch (error) {
-        console.error('Failed to search news:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchResults();
-  }, [query]);
+  }, [fetchResults]);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -59,6 +63,20 @@ export default function Search() {
               </p>
             )}
           </div>
+
+          {error && (
+            <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
+              <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-slate-800 mb-2">出错了</h2>
+              <p className="text-slate-600 mb-6">{error}</p>
+              <button 
+                onClick={fetchResults}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors"
+              >
+                重试
+              </button>
+            </div>
+          )}
 
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

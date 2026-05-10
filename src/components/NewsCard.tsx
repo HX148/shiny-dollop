@@ -1,21 +1,14 @@
-import { Calendar, ExternalLink, Clock } from 'lucide-react';
+import { Calendar, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { memo } from 'react';
 import { News } from '../types';
+import { formatDate } from '../lib/utils';
 
 interface NewsCardProps {
   news: News;
 }
 
-export default function NewsCard({ news }: NewsCardProps) {
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
+function NewsCard({ news }: NewsCardProps) {
   return (
     <Link
       to={`/news/${news.id}`}
@@ -25,6 +18,7 @@ export default function NewsCard({ news }: NewsCardProps) {
         <img
           src={news.imageUrl || 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop'}
           alt={news.title}
+          loading="lazy"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
         <div className="absolute top-3 left-3">
@@ -62,3 +56,6 @@ export default function NewsCard({ news }: NewsCardProps) {
     </Link>
   );
 }
+
+export default memo(NewsCard);
+
