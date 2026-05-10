@@ -24,7 +24,8 @@
 
         // 创建相机
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 5;
+        camera.position.set(0, 8, 0);
+        camera.lookAt(0, 0, 0);
 
         // 创建渲染器
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -81,20 +82,15 @@
         gridHelper.position.y = -1.5;
         scene.add(gridHelper);
 
-        // 弹跳物理参数
-        const groundLevel = -0.5;
-
         // 添加球体正下方的直线轨道
         const trackMaterial = new THREE.MeshBasicMaterial({ color: 0x4488ff });
-        const track1Geometry = new THREE.BoxGeometry(6, 0.05, 0.3);
-        const track1 = new THREE.Mesh(track1Geometry, trackMaterial);
-        track1.position.y = groundLevel - 0.1;
-        scene.add(track1);
+        const trackGeometry = new THREE.BoxGeometry(0.3, 0.1, 6);
+        const track = new THREE.Mesh(trackGeometry, trackMaterial);
+        track.position.y = 0;
+        scene.add(track);
 
-        const track2Geometry = new THREE.BoxGeometry(0.3, 0.05, 6);
-        const track2 = new THREE.Mesh(track2Geometry, trackMaterial);
-        track2.position.y = groundLevel - 0.1;
-        scene.add(track2);
+        // 弹跳物理参数 - 球体半径1，轨道顶部y=0.05，所以球体最低点y=0.05时球体位置y=1.05
+        const groundLevel = 1.05;
 
         let velocity = 0;
         const gravity = -0.015;
