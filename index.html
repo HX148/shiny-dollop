@@ -37,33 +37,96 @@
         const material = new THREE.MeshStandardMaterial({ 
             color: 0x00ff88,
             roughness: 0.3,
-            metalness: 0.7
+            metalness: 0.7,
+            emissive: 0x003322,
+            emissiveIntensity: 0.5
         });
         const sphere = new THREE.Mesh(geometry, material);
         scene.add(sphere);
 
-        // 添加光源
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        // 添加环形轨道
+        const torusGeometry = new THREE.TorusGeometry(3, 0.05, 16, 100);
+        const torusMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0x4488ff,
+            transparent: true,
+            opacity: 0.6
+        });
+        const torus = new THREE.Mesh(torusGeometry, torusMaterial);
+        torus.rotation.x = Math.PI / 2;
+        torus.position.y = 1.5;
+        scene.add(torus);
+
+        // 添加第二条轨道
+        const torus2Geometry = new THREE.TorusGeometry(4, 0.03, 16, 100);
+        const torus2Material = new THREE.MeshBasicMaterial({ 
+            color: 0xff4488,
+            transparent: true,
+            opacity: 0.4
+        });
+        const torus2 = new THREE.Mesh(torus2Geometry, torus2Material);
+        torus2.rotation.x = Math.PI / 3;
+        torus2.position.y = 2;
+        scene.add(torus2);
+
+        // 添加第三条轨道
+        const torus3Geometry = new THREE.TorusGeometry(3.5, 0.02, 16, 100);
+        const torus3Material = new THREE.MeshBasicMaterial({ 
+            color: 0xffff00,
+            transparent: true,
+            opacity: 0.3
+        });
+        const torus3 = new THREE.Mesh(torus3Geometry, torus3Material);
+        torus3.rotation.z = Math.PI / 4;
+        torus3.position.y = 1;
+        scene.add(torus3);
+
+        // 增强光照
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
 
-        const pointLight = new THREE.PointLight(0xffffff, 1);
+        const pointLight = new THREE.PointLight(0xffffff, 1.5);
         pointLight.position.set(5, 5, 5);
         scene.add(pointLight);
 
-        const pointLight2 = new THREE.PointLight(0x00ffff, 0.8);
+        const pointLight2 = new THREE.PointLight(0x00ffff, 1);
         pointLight2.position.set(-5, -5, -5);
         scene.add(pointLight2);
+
+        const pointLight3 = new THREE.PointLight(0xff00ff, 0.8);
+        pointLight3.position.set(0, 5, 0);
+        scene.add(pointLight3);
+
+        const pointLight4 = new THREE.PointLight(0xffff00, 0.6);
+        pointLight4.position.set(0, -5, 0);
+        scene.add(pointLight4);
+
+        // 添加聚光灯
+        const spotLight = new THREE.SpotLight(0x00ff88, 2);
+        spotLight.position.set(0, 10, 0);
+        spotLight.angle = Math.PI / 6;
+        spotLight.penumbra = 0.5;
+        spotLight.target = sphere;
+        scene.add(spotLight);
+
+        // 跟随球体的点光源
+        const sphereLight = new THREE.PointLight(0x00ff88, 1, 10);
+        sphere.add(sphereLight);
 
         // 添加辅助网格
         const gridHelper = new THREE.GridHelper(10, 10, 0x444444, 0x222222);
         gridHelper.position.y = -1.5;
         scene.add(gridHelper);
 
-        // 弹跳物理参数
+        // 弹跳物理参数 - 恒定高度
         let velocity = 0;
         const gravity = -0.015;
-        const initialVelocity = 0.4;
+        const targetHeight = 3;
         const groundLevel = -0.5;
+        
+        // 计算达到目标高度所需的速度
+        const heightDiff = targetHeight - groundLevel;
+        const requiredVelocity = Math.sqrt(2 * Math.abs(gravity) * heightDiff);
+        velocity = requiredVelocity;
 
         // 动画循环
         function animate() {
@@ -73,17 +136,19 @@
             sphere.rotation.x += 0.005;
             sphere.rotation.y += 0.01;
             
-            // 弹跳物理
+            // 弹跳物理 - 保持恒定高度
             velocity += gravity;
             sphere.position.y += velocity;
             
             if (sphere.position.y <= groundLevel) {
                 sphere.position.y = groundLevel;
-                velocity = -velocity;
-                if (Math.abs(velocity) < 0.2) {
-                    velocity = initialVelocity;
-                }
+                velocity = requiredVelocity;
             }
+            
+            // 轨道旋转动画
+            torus.rotation.z += 0.002;
+            torus2.rotation.z -= 0.001;
+            torus3.rotation.y += 0.003;
             
             renderer.render(scene, camera);
         }
