@@ -85,30 +85,81 @@
         // 特效管理
         const effects = []; // 存储特效对象
 
-        // 轨道管理
-        const trackMaterial1 = new THREE.MeshBasicMaterial({ color: 0x4488ff });
-        const trackMaterial2 = new THREE.MeshBasicMaterial({ color: 0x88ff44 });
+        // 轨道颜色定义
+        const colors = {
+            pink: new THREE.Color(255/255, 104/255, 253/255),    // RGB(255,104,253)
+            yellow: new THREE.Color(255/255, 229/255, 40/255),   // RGB(255,229,40)
+            blue: new THREE.Color(21/255, 190/255, 252/255)     // RGB(21,190,252)
+        };
+        const colorKeys = ['pink', 'yellow', 'blue'];
+
+        // 轨道参数
         const trackPieceSize = 2; // 每片轨道的长度（Z轴方向）
         const trackGap = 0.3; // 轨道片之间的间隙
         const trackWidth = 6; // 轨道总宽度
         const trackSegments = []; // 存储当前轨道段
         let lastGeneratedTrackZ = 0; // 最后生成的轨道的Z位置
-        let trackColorIndex = 0; // 用于切换轨道颜色
 
-        // 创建单个轨道片（宽度方向连续）
-        function createTrackPiece(zCenter) {
-            const trackGeometry = new THREE.BoxGeometry(trackWidth, 0.1, trackPieceSize);
-            const trackMaterial = trackColorIndex % 2 === 0 ? trackMaterial1 : trackMaterial2;
-            const track = new THREE.Mesh(trackGeometry, trackMaterial);
+        // 类型1: 长直轨道（粉、黄、蓝三种颜色中随机一种）
+        function createLongTrack(zCenter) {
+            const randomColor = colors[colorKeys[Math.floor(Math.random() * 3)]];
+            const material = new THREE.MeshBasicMaterial({ color: randomColor });
+            const geometry = new THREE.BoxGeometry(trackWidth, 0.1, trackPieceSize);
+            const track = new THREE.Mesh(geometry, material);
             track.position.set(0, 0, zCenter);
             scene.add(track);
             trackSegments.push(track);
-            trackColorIndex++;
+        }
+
+        // 类型2: 三块有间隔的方形轨道（粉、黄、蓝三种颜色都有）
+        function createThreePieceTrack(zCenter) {
+            const pieceWidth = 1.2;
+            const gap = 0.6;
+            const startX = -trackWidth / 2 + pieceWidth / 2;
+            
+            for (let i = 0; i < 3; i++) {
+                const material = new THREE.MeshBasicMaterial({ color: colors[colorKeys[i]] });
+                const geometry = new THREE.BoxGeometry(pieceWidth, 0.1, trackPieceSize);
+                const track = new THREE.Mesh(geometry, material);
+                track.position.set(startX + i * (pieceWidth + gap), 0, zCenter);
+                scene.add(track);
+                trackSegments.push(track);
+            }
+        }
+
+        // 类型3: 两块有间隔的方形轨道（粉、黄、蓝中三选二）
+        function createTwoPieceTrack(zCenter) {
+            const pieceWidth = 1.5;
+            const gap = 2;
+            // 随机选择两个不同的颜色索引
+            const pieceIndices = [0, 1, 2].sort(() => Math.random() - 0.5).slice(0, 2);
+            
+            for (let i = 0; i < 2; i++) {
+                const material = new THREE.MeshBasicMaterial({ color: colors[colorKeys[pieceIndices[i]]] });
+                const geometry = new THREE.BoxGeometry(pieceWidth, 0.1, trackPieceSize);
+                const track = new THREE.Mesh(geometry, material);
+                const offsetX = i === 0 ? -gap/2 - pieceWidth/2 : gap/2 + pieceWidth/2;
+                track.position.set(offsetX, 0, zCenter);
+                scene.add(track);
+                trackSegments.push(track);
+            }
+        }
+
+        // 创建一段轨道（随机选择类型）
+        function createTrackSegment(zCenter) {
+            const type = Math.floor(Math.random() * 3);
+            if (type === 0) {
+                createLongTrack(zCenter);
+            } else if (type === 1) {
+                createThreePieceTrack(zCenter);
+            } else {
+                createTwoPieceTrack(zCenter);
+            }
         }
 
         // 初始化轨道 - 创建初始轨道片
         for (let i = 0; i < 50; i++) {
-            createTrackPiece(-i * (trackPieceSize + trackGap));
+            createTrackSegment(-i * (trackPieceSize + trackGap));
             lastGeneratedTrackZ = -i * (trackPieceSize + trackGap);
         }
 
@@ -254,7 +305,7 @@
             // 检查是否需要生成新的轨道片（在前面）
             while (lastGeneratedTrackZ > -3 * trackPieceSize) {
                 lastGeneratedTrackZ -= (trackPieceSize + trackGap);
-                createTrackPiece(lastGeneratedTrackZ);
+                createTrackSegment(lastGeneratedTrackZ);
             }
 
             // 更新最后生成的位置
