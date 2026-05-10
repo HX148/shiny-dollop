@@ -133,7 +133,14 @@
         let lastVelocity = velocity;
         let bounceCount = 0; // 记录弹跳次数，用于调试
         let xOffset = 0; // X方向偏移
-        let xDirection = 1; // X方向移动方向
+        
+        // 鼠标移动监听
+        let targetX = 0;
+        window.addEventListener('mousemove', (event) => {
+            // 将鼠标X坐标从屏幕范围转换到-2到2的范围
+            const normalizedX = (event.clientX / window.innerWidth) * 2 - 1;
+            targetX = normalizedX * 2.5; // 限制在轨道宽度内
+        });
 
         // 创建落点特效
         function createImpactEffect(x, z) {
@@ -186,11 +193,8 @@
             sphere.rotation.x += 0.005;
             sphere.rotation.y += 0.01;
             
-            // X方向移动 - 在轨道宽度范围内来回移动
-            xOffset += xDirection * 0.03;
-            if (Math.abs(xOffset) > 2) {
-                xDirection *= -1;
-            }
+            // 平滑地向鼠标目标位置移动
+            xOffset += (targetX - xOffset) * 0.08;
             sphere.position.x = xOffset;
             
             // 弹跳物理 - 保持恒定高度
