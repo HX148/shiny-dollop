@@ -84,7 +84,8 @@
 
         // 轨道管理
         const trackMaterial = new THREE.MeshBasicMaterial({ color: 0x4488ff });
-        const trackPieceSize = 2; // 每片轨道的长度（Z轴方向）
+        const trackPieceSize = 1.5; // 每片轨道的长度（Z轴方向）
+        const trackGap = 0.1; // 轨道片之间的间隙
         const trackWidth = 6; // 轨道总宽度
         const trackSegments = []; // 存储当前轨道段
         let lastGeneratedTrackZ = 0; // 最后生成的轨道的Z位置
@@ -100,8 +101,8 @@
 
         // 初始化轨道 - 创建初始轨道片
         for (let i = 0; i < 50; i++) {
-            createTrackPiece(-i * (trackPieceSize + 0.2));
-            lastGeneratedTrackZ = -i * (trackPieceSize + 0.2);
+            createTrackPiece(-i * (trackPieceSize + trackGap));
+            lastGeneratedTrackZ = -i * (trackPieceSize + trackGap));
         }
 
         // 弹跳物理参数 - 球体半径1，轨道顶部y=0.05，所以球体最低点y=0.05时球体位置y=1.05
@@ -110,12 +111,16 @@
         let velocity = 0;
         const gravity = -0.015;
         const targetHeight = 3;
-        let zVelocity = -0.03;
         
         // 计算达到目标高度所需的速度
         const heightDiff = targetHeight - groundLevel;
         const requiredVelocity = Math.sqrt(2 * Math.abs(gravity) * heightDiff);
         velocity = requiredVelocity;
+
+        // 计算弹跳周期（上升+下降）
+        const bounceTime = 2 * requiredVelocity / Math.abs(gravity);
+        // 调整 zVelocity 使得每次弹跳轨道移动一个轨道片+间隙的距离
+        let zVelocity = -(trackPieceSize + trackGap) / bounceTime;
 
         // 动画循环
         function animate() {
@@ -149,7 +154,7 @@
         function manageTrackSegments() {
             // 检查是否需要生成新的轨道片（在前面）
             while (lastGeneratedTrackZ > -3 * trackPieceSize) {
-                lastGeneratedTrackZ -= (trackPieceSize + 0.2);
+                lastGeneratedTrackZ -= (trackPieceSize + trackGap);
                 createTrackPiece(lastGeneratedTrackZ);
             }
 
