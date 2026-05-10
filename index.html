@@ -129,24 +129,26 @@
         // 调整 zVelocity 使得每次弹跳轨道移动一个轨道片+间隙的距离
         let zVelocity = -(trackPieceSize + trackGap) / bounceTime;
 
+        // 追踪球体上一帧的位置
+        let lastSphereY = targetHeight + 1;
+
         // 创建落点特效
         function createImpactEffect(x, z) {
-            const ringGeometry = new THREE.RingGeometry(0.1, 0.3, 32);
+            const ringGeometry = new THREE.TorusGeometry(0.5, 0.05, 16, 100);
             const ringMaterial = new THREE.MeshBasicMaterial({ 
-                color: 0x00ff88, 
-                side: THREE.DoubleSide,
+                color: 0x00ffff, 
                 transparent: true,
                 opacity: 1
             });
             const ring = new THREE.Mesh(ringGeometry, ringMaterial);
             ring.rotation.x = Math.PI / 2;
-            ring.position.set(x, 0.06, z);
+            ring.position.set(x, 0.2, z); // 提高位置避免被遮挡
             scene.add(ring);
             
             effects.push({
                 mesh: ring,
                 startTime: Date.now(),
-                duration: 500
+                duration: 800 // 延长动画时间
             });
         }
 
@@ -164,9 +166,9 @@
                     effect.mesh.material.dispose();
                     effects.splice(i, 1);
                 } else {
-                    // 扩大圆环
-                    const scale = 1 + progress * 2;
-                    effect.mesh.scale.set(scale, scale, 1);
+                    // 扩大圆环 - 更大的缩放
+                    const scale = 1 + progress * 4;
+                    effect.mesh.scale.set(scale, scale, scale);
                     // 淡出
                     effect.mesh.material.opacity = 1 - progress;
                 }
@@ -185,13 +187,16 @@
             velocity += gravity;
             sphere.position.y += velocity;
             
-            const wasInAir = sphere.position.y > groundLevel + 0.01;
+            // 检测是否刚落地
+            const isLanding = lastSphereY > groundLevel + 0.1 && sphere.position.y <= groundLevel;
+            lastSphereY = sphere.position.y;
+            
             if (sphere.position.y <= groundLevel) {
                 sphere.position.y = groundLevel;
                 velocity = requiredVelocity;
                 
                 // 如果是从空中落下，创建特效
-                if (wasInAir) {
+                if (isLanding) {
                     createImpactEffect(0, 0);
                 }
             }
