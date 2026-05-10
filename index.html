@@ -88,8 +88,8 @@
         // 轨道管理
         const trackMaterial1 = new THREE.MeshBasicMaterial({ color: 0x4488ff });
         const trackMaterial2 = new THREE.MeshBasicMaterial({ color: 0x88ff44 });
-        const trackPieceSize = 1.5; // 每片轨道的长度（Z轴方向）
-        const trackGap = 0.1; // 轨道片之间的间隙
+        const trackPieceSize = 2; // 每片轨道的长度（Z轴方向）
+        const trackGap = 0.3; // 轨道片之间的间隙
         const trackWidth = 6; // 轨道总宽度
         const trackSegments = []; // 存储当前轨道段
         let lastGeneratedTrackZ = 0; // 最后生成的轨道的Z位置
@@ -131,6 +131,7 @@
 
         // 追踪球体上一帧的位置
         let lastSphereY = targetHeight + 1;
+        let isInAir = true; // 标记球体是否在空中
 
         // 创建落点特效
         function createImpactEffect(x, z) {
@@ -188,15 +189,15 @@
             sphere.position.y += velocity;
             
             // 检测是否刚落地
-            const isLanding = lastSphereY > groundLevel + 0.1 && sphere.position.y <= groundLevel;
-            lastSphereY = sphere.position.y;
+            const wasInAir = isInAir;
+            isInAir = sphere.position.y > groundLevel + 0.1;
             
             if (sphere.position.y <= groundLevel) {
                 sphere.position.y = groundLevel;
                 velocity = requiredVelocity;
                 
                 // 如果是从空中落下，创建特效
-                if (isLanding) {
+                if (wasInAir) {
                     createImpactEffect(0, 0);
                 }
             }
