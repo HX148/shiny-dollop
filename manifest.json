@@ -1,0 +1,28 @@
+{
+  "name": "机甲对决",
+  "short_name": "机甲对决",
+  "description": "机甲对决 - 终极版，一款精彩的本地和网络对战游戏",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0a1a",
+  "theme_color": "#4fc3f7",
+  "orientation": "landscape",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ]
+}
