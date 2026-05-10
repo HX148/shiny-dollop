@@ -1,3 +1,1221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>像素机甲对战 - Mech Battle</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0f1f3f 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #gameCanvas {
+            border: 4px solid #4a4a7a;
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(79, 195, 247, 0.4), 
+                        0 0 80px rgba(79, 195, 247, 0.2),
+                        inset 0 0 20px rgba(0, 0, 0, 0.5);
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .menu-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 800px;
+            height: 600px;
+            background: rgba(10, 10, 26, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+        }
+
+        .menu-overlay.hidden {
+            display: none;
+        }
+
+        .menu-title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 4px 4px 0 #4a4a7a, 0 0 20px rgba(79, 195, 247, 0.5), 0 0 40px rgba(79, 195, 247, 0.3);
+            letter-spacing: 4px;
+            animation: titlePulse 2s ease-in-out infinite;
+            background: linear-gradient(180deg, #fff 0%, #4fc3f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .menu-btn {
+            width: 260px;
+            padding: 16px 32px;
+            margin: 10px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(180deg, #5a5a8a 0%, #3a3a6a 100%);
+            border: 3px solid #7a7aaa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .menu-btn:hover {
+            background: linear-gradient(180deg, #6a6a9a 0%, #4a4a7a 100%);
+            border-color: #9a9aca;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(79, 195, 247, 0.4);
+        }
+
+        .menu-btn:active {
+            transform: translateY(0);
+        }
+
+        .menu-btn.blue {
+            border-color: #3d7bc3;
+            background: linear-gradient(180deg, #2a5f9a 0%, #1a3f6a 100%);
+            box-shadow: 0 4px 15px rgba(61, 123, 195, 0.4);
+        }
+
+        .menu-btn.red {
+            border-color: #d95454;
+            background: linear-gradient(180deg, #9a3d3d 0%, #5a1d1d 100%);
+            box-shadow: 0 4px 15px rgba(217, 84, 84, 0.4);
+        }
+
+        .menu-btn.gold {
+            border-color: #ffe762;
+            background: linear-gradient(180deg, #caa73f 0%, #8a6f18 100%);
+            box-shadow: 0 4px 15px rgba(255, 231, 98, 0.4);
+        }
+
+        .menu-btn.purple {
+            border-color: #a855f7;
+            background: linear-gradient(180deg, #7c3aed 0%, #5b21b6 100%);
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+        }
+
+        .menu-btn.small {
+            width: auto;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #8a8aaa;
+            letter-spacing: 1px;
+        }
+
+        .input-group input {
+            width: 240px;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            color: #fff;
+            background: #1a1a3a;
+            border: 2px solid #5a5a8a;
+            border-radius: 8px;
+            text-align: center;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: #4fc3f7;
+            box-shadow: 0 0 15px rgba(79, 195, 247, 0.3);
+        }
+
+        .room-info {
+            margin: 20px 0;
+            padding: 20px 30px;
+            background: rgba(79, 195, 247, 0.15);
+            border: 2px solid #4fc3f7;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.2);
+        }
+
+        .room-info .label {
+            font-size: 12px;
+            color: #8a8aaa;
+            margin-bottom: 8px;
+        }
+
+        .room-info .room-id {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4fc3f7;
+            letter-spacing: 3px;
+            word-break: break-all;
+        }
+
+        .status-text {
+            margin: 15px 0;
+            font-size: 16px;
+            color: #ffe762;
+            animation: blink 1s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .controls-hint {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #6a6a9a;
+            text-align: center;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            color: #8a8aaa;
+            background: transparent;
+            border: 2px solid #5a5a8a;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .back-btn:hover {
+            border-color: #9a9aca;
+            color: #fff;
+            background: rgba(90, 90, 138, 0.3);
+        }
+
+        #healthBars {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 760px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .health-container {
+            width: 340px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            border: 3px solid #4a4a7a;
+            backdrop-filter: blur(5px);
+        }
+
+        .health-container.blue {
+            border-color: #3d7bc3;
+            box-shadow: 0 0 15px rgba(61, 123, 195, 0.3);
+        }
+
+        .health-container.red {
+            border-color: #d95454;
+            box-shadow: 0 0 15px rgba(217, 84, 84, 0.3);
+        }
+
+        .player-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .player-name.blue { color: #7cb8f4; }
+        .player-name.red { color: #ff9999; }
+
+        .health-bar-bg {
+            width: 100%;
+            height: 24px;
+            background: #1a1a3a;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #3a3a6a;
+        }
+
+        .health-bar {
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .health-bar.blue {
+            background: linear-gradient(180deg, #5fc3f7 0%, #2a5f9a 50%, #1a3f6a 100%);
+            box-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+
+        .health-bar.red {
+            background: linear-gradient(180deg, #ff9980 0%, #d95454 50%, #8a2d2d 100%);
+            box-shadow: 0 0 10px rgba(255, 153, 128, 0.5);
+        }
+
+        .skill-cooldown-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .skill-cooldown {
+            flex: 1;
+            height: 8px;
+            background: #1a1a3a;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .skill-cooldown-bar {
+            height: 100%;
+            background: #ffe762;
+            border-radius: 4px;
+            transition: width 0.1s;
+        }
+
+        .game-over-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 800px;
+            height: 600px;
+            background: rgba(10, 10, 26, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .game-over-overlay.hidden {
+            display: none;
+        }
+
+        .game-over-text {
+            font-size: 52px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 4px 4px 0 #4a4a7a, 0 0 30px currentColor;
+            animation: gameOverPulse 1s ease-in-out infinite;
+        }
+
+        .game-over-text.blue { color: #4fc3f7; }
+        .game-over-text.red { color: #ff7777; }
+
+        @keyframes gameOverPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 20px;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 20px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .hero-card {
+            padding: 15px;
+            background: rgba(52, 52, 92, 0.9);
+            border: 3px solid #6a6a9a;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .hero-card:hover::before {
+            left: 100%;
+        }
+
+        .hero-card:hover {
+            border-color: #4fc3f7;
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(79, 195, 247, 0.4);
+            background: rgba(62, 62, 102, 0.9);
+        }
+
+        .hero-card.selected {
+            border-color: #ffe762;
+            box-shadow: 0 0 25px rgba(255, 231, 98, 0.5), 0 0 50px rgba(255, 231, 98, 0.2);
+            animation: selectedPulse 1s infinite;
+        }
+
+        @keyframes selectedPulse {
+            0%, 100% { box-shadow: 0 0 25px rgba(255, 231, 98, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(255, 231, 98, 0.7); }
+        }
+
+        .hero-card.banned {
+            opacity: 0.3;
+            pointer-events: none;
+            filter: grayscale(100%);
+            position: relative;
+        }
+
+        .hero-card.banned::after {
+            content: '✕';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: #ff4444;
+            text-shadow: 0 0 10px #ff0000;
+        }
+
+        .hero-card.locked {
+            opacity: 0.5;
+        }
+
+        .hero-card.locked::after {
+            content: '🔒';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 16px;
+        }
+
+        .hero-card .hero-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+            border-radius: 10px;
+            border: 3px solid;
+            position: relative;
+        }
+
+        .hero-card .hero-name {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .hero-card .hero-rarity {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+
+        .hero-card .hero-stats {
+            font-size: 10px;
+            color: #9a9aca;
+            margin-top: 5px;
+        }
+
+        .hero-card .hero-ability {
+            font-size: 9px;
+            color: #ffe762;
+            margin-top: 3px;
+        }
+
+        .rarity-common { color: #aaa; }
+        .rarity-rare { color: #4fc3f7; }
+        .rarity-epic { color: #a855f7; }
+        .rarity-legendary { color: #ffe762; }
+
+        .player-info-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #5a5a8a;
+            border-radius: 12px;
+            font-size: 13px;
+            text-align: right;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .player-info-panel .coins {
+            color: #ffe762;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .settings-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .settings-tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            opacity: 0.7;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .settings-tab:hover {
+            opacity: 0.9;
+        }
+
+        .settings-tab.active {
+            border-bottom-color: #4fc3f7;
+            opacity: 1;
+            color: #4fc3f7;
+        }
+
+        .settings-content {
+            padding: 25px;
+            width: 420px;
+        }
+
+        .keybind-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 12px 0;
+            padding: 12px;
+            background: rgba(52, 52, 92, 0.6);
+            border-radius: 8px;
+        }
+
+        .keybind-btn {
+            padding: 8px 16px;
+            background: #2a2a5a;
+            border: 2px solid #5a5a8a;
+            border-radius: 6px;
+            cursor: pointer;
+            min-width: 90px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .keybind-btn:hover {
+            background: #3a3a6a;
+            border-color: #7a7aaa;
+        }
+
+        .keybind-btn.recording {
+            border-color: #ffe762;
+            animation: blink 0.5s infinite;
+            background: #4a4a2a;
+        }
+
+        .gacha-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gacha-pack {
+            width: 160px;
+            height: 220px;
+            margin: 20px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .gacha-pack:hover {
+            transform: scale(1.08);
+        }
+
+        .gacha-result {
+            animation: cardReveal 0.8s ease-out;
+        }
+
+        @keyframes cardReveal {
+            0% { transform: scale(0) rotateY(180deg); opacity: 0; }
+            50% { transform: scale(1.2) rotateY(90deg); }
+            100% { transform: scale(1) rotateY(0deg); opacity: 1; }
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a3a;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #5a5a8a;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7a7aaa;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 20px;
+            margin: 15px 0;
+            color: #4fc3f7;
+            font-weight: bold;
+        }
+
+        .events-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+
+        .event-card {
+            background: rgba(52, 52, 92, 0.8);
+            border: 2px solid #5a5a8a;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .event-card:hover {
+            border-color: #4fc3f7;
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.2);
+        }
+
+        .event-card.completed {
+            opacity: 0.6;
+            border-color: #4a9a4a;
+        }
+
+        .event-card.claimable {
+            border-color: #ffe762;
+            animation: claimablePulse 1.5s infinite;
+        }
+
+        @keyframes claimablePulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 231, 98, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(255, 231, 98, 0.6); }
+        }
+
+        .event-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .event-desc {
+            font-size: 13px;
+            color: #9a9aca;
+            margin-bottom: 15px;
+        }
+
+        .event-reward {
+            font-size: 14px;
+            color: #ffe762;
+            margin-bottom: 10px;
+        }
+
+        .event-progress {
+            height: 8px;
+            background: #1a1a3a;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .event-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4fc3f7, #a855f7);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .checkin-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .checkin-day {
+            padding: 15px 10px;
+            background: rgba(52, 52, 92, 0.6);
+            border: 2px solid #5a5a8a;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .checkin-day.checked {
+            background: rgba(79, 195, 247, 0.2);
+            border-color: #4fc3f7;
+        }
+
+        .checkin-day.today {
+            border-color: #ffe762;
+            animation: todayPulse 1s infinite;
+        }
+
+        @keyframes todayPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 231, 98, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(255, 231, 98, 0.5); }
+        }
+
+        .checkin-day .day-num {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .checkin-day .day-reward {
+            font-size: 12px;
+            color: #ffe762;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            background: rgba(79, 195, 247, 0.95);
+            border: 3px solid #4fc3f7;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: bold;
+            z-index: 1000;
+            animation: notificationSlide 0.5s ease-out;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes notificationSlide {
+            0% { transform: translateX(-50%) translateY(-100px); opacity: 0; }
+            100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        .free-pull-info {
+            font-size: 14px;
+            color: #4fc3f7;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <div id="playerInfo" class="player-info-panel" style="display: none;">
+            <div id="playerNameDisplay">玩家</div>
+            <div class="coins" id="coinsDisplay">💰 1000</div>
+            <div id="statsDisplay">胜: 0 | 负: 0</div>
+        </div>
+
+        <div id="healthBars" class="hidden">
+            <div class="health-container blue">
+                <div class="player-name blue" id="p1HeroName">玩家1</div>
+                <div class="health-bar-bg">
+                    <div id="health1" class="health-bar blue" style="width: 100%"></div>
+                </div>
+                <div class="skill-cooldown-container">
+                    <div class="skill-cooldown">
+                        <div id="skill1-p1" class="skill-cooldown-bar" style="width: 100%"></div>
+                    </div>
+                    <div class="skill-cooldown">
+                        <div id="skill2-p1" class="skill-cooldown-bar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="health-container red">
+                <div class="player-name red" id="p2HeroName">玩家2</div>
+                <div class="health-bar-bg">
+                    <div id="health2" class="health-bar red" style="width: 100%"></div>
+                </div>
+                <div class="skill-cooldown-container">
+                    <div class="skill-cooldown">
+                        <div id="skill1-p2" class="skill-cooldown-bar" style="width: 100%"></div>
+                    </div>
+                    <div class="skill-cooldown">
+                        <div id="skill2-p2" class="skill-cooldown-bar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="mainMenu" class="menu-overlay">
+            <div class="menu-title">⚔ 机甲对决 ⚔</div>
+            <button class="menu-btn blue" onclick="startLocalGame()">本地对战</button>
+            <button class="menu-btn red" onclick="showNetworkMenu()">网络对战</button>
+            <button class="menu-btn gold" onclick="showGacha()">🎰 抽卡</button>
+            <button class="menu-btn purple" onclick="showEvents()">🎉 活动</button>
+            <button class="menu-btn" onclick="showSettings()">⚙️ 设置</button>
+        </div>
+
+        <div id="networkMenu" class="menu-overlay hidden">
+            <button class="back-btn" onclick="showMainMenu()">← 返回</button>
+            <div class="menu-title" style="font-size: 32px;">网络对战</div>
+            <button class="menu-btn blue" onclick="createRoom()">创建房间</button>
+            <div class="input-group">
+                <label>或输入房间ID加入</label>
+                <input type="text" id="roomInput" placeholder="输入房间ID">
+            </div>
+            <button class="menu-btn red" onclick="joinRoom()">加入房间</button>
+        </div>
+
+        <div id="waitingRoom" class="menu-overlay hidden">
+            <button class="back-btn" onclick="leaveRoom()">← 返回</button>
+            <div class="menu-title" style="font-size: 28px;">等待连接...</div>
+            <div class="room-info">
+                <div class="label">房间 ID（发送给对方）</div>
+                <div id="roomIdDisplay" class="room-id">---</div>
+                <button class="menu-btn small" style="margin-top: 15px;" onclick="copyRoomId()">复制房间ID</button>
+            </div>
+            <div class="status-text">等待玩家加入...</div>
+        </div>
+
+        <div id="connectingScreen" class="menu-overlay hidden">
+            <button class="back-btn" onclick="cancelJoin()">← 返回</button>
+            <div class="menu-title" style="font-size: 28px;">连接中...</div>
+            <div class="status-text">正在连接到房间...</div>
+        </div>
+
+        <div id="banPickScreen" class="menu-overlay hidden">
+            <button class="back-btn" onclick="showMainMenu()">← 返回</button>
+            <div class="menu-title" style="font-size: 28px;" id="banPickTitle">⚔️ 禁用阶段 ⚔️</div>
+            <div class="status-text" id="banPickStatus">玩家1 禁用英雄</div>
+            <div id="bannedHeroesDisplay" style="margin-bottom: 10px; font-size: 14px; color: #ff7777;"></div>
+            <div class="hero-grid" id="heroGrid"></div>
+            <div style="margin-top: 20px;" id="banPickButtons" class="btn-group"></div>
+        </div>
+
+        <div id="gachaScreen" class="menu-overlay hidden">
+            <button class="back-btn" onclick="showMainMenu()">← 返回</button>
+            <div class="menu-title" style="font-size: 32px;">🎰 抽卡</div>
+            <div class="coins" style="font-size: 24px; margin-bottom: 10px;">💰 <span id="gachaCoins">1000</span></div>
+            <div class="free-pull-info" id="freePullInfo"></div>
+            
+            <div style="display: flex; gap: 40px; margin: 20px 0;">
+                <div style="text-align: center;">
+                    <div class="menu-btn gold" style="width: 180px; height: 220px; display: flex; flex-direction: column; justify-content: center;" onclick="doGacha('normal')">
+                        <div style="font-size: 48px;">📦</div>
+                        <div style="margin-top: 10px;">普通卡包</div>
+                        <div style="font-size: 14px; color: #ffe762;" id="normalCost">💰 50</div>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <div class="menu-btn purple" style="width: 180px; height: 220px; display: flex; flex-direction: column; justify-content: center;" onclick="doGacha('premium')">
+                        <div style="font-size: 48px;">✨</div>
+                        <div style="margin-top: 10px;">高级卡包</div>
+                        <div style="font-size: 14px; color: #ff9999;" id="premiumCost">💰 150</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="gachaResult" style="display: none; text-align: center; margin-top: 20px;">
+                <div id="gachaResultHero" class="hero-card gacha-result" style="width: 180px; margin: 0 auto;"></div>
+                <button class="menu-btn" style="margin-top: 20px;" onclick="hideGachaResult()">确定</button>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <div class="section-title">我的英雄</div>
+                <div class="hero-grid" id="myHeroesGrid" style="max-height: 150px;"></div>
+            </div>
+        </div>
+
+        <div id="eventsScreen" class="menu-overlay hidden">
+            <button class="back-btn" onclick="showMainMenu()">← 返回</button>
+            <div class="menu-title" style="font-size: 32px;">🎉 活动</div>
+            <div class="events-container" id="eventsContainer"></div>
+        </div>
+
+        <div id="settingsScreen" class="menu-overlay hidden">
+            <button class="back-btn" onclick="showMainMenu()">← 返回</button>
+            <div class="menu-title" style="font-size: 32px;">⚙️ 设置</div>
+            
+            <div style="display: flex; border-bottom: 3px solid #5a5a8a; margin-bottom: 20px;">
+                <div class="settings-tab active" onclick="switchSettingsTab('profile')">资料</div>
+                <div class="settings-tab" onclick="switchSettingsTab('controls')">控制</div>
+            </div>
+
+            <div id="settingsProfile" class="settings-content">
+                <div class="input-group">
+                    <label>玩家昵称</label>
+                    <input type="text" id="playerNameInput" placeholder="输入昵称">
+                </div>
+                <button class="menu-btn" onclick="saveProfile()">保存</button>
+            </div>
+
+            <div id="settingsControls" class="settings-content" style="display: none;">
+                <div class="section-title">玩家1 键位</div>
+                <div class="keybind-row"><span>跳跃</span><button class="keybind-btn" id="kb-p1-jump" onclick="startKeybind('p1', 'jump')">W</button></div>
+                <div class="keybind-row"><span>左移</span><button class="keybind-btn" id="kb-p1-left" onclick="startKeybind('p1', 'left')">A</button></div>
+                <div class="keybind-row"><span>右移</span><button class="keybind-btn" id="kb-p1-right" onclick="startKeybind('p1', 'right')">D</button></div>
+                <div class="keybind-row"><span>攻击</span><button class="keybind-btn" id="kb-p1-attack" onclick="startKeybind('p1', 'attack')">J</button></div>
+                <div class="keybind-row"><span>防御</span><button class="keybind-btn" id="kb-p1-defend" onclick="startKeybind('p1', 'defend')">K</button></div>
+                <div class="keybind-row"><span>技能1</span><button class="keybind-btn" id="kb-p1-skill1" onclick="startKeybind('p1', 'skill1')">U</button></div>
+                <div class="keybind-row"><span>技能2</span><button class="keybind-btn" id="kb-p1-skill2" onclick="startKeybind('p1', 'skill2')">I</button></div>
+                
+                <div class="section-title">玩家2 键位</div>
+                <div class="keybind-row"><span>跳跃</span><button class="keybind-btn" id="kb-p2-jump" onclick="startKeybind('p2', 'jump')">↑</button></div>
+                <div class="keybind-row"><span>左移</span><button class="keybind-btn" id="kb-p2-left" onclick="startKeybind('p2', 'left')">←</button></div>
+                <div class="keybind-row"><span>右移</span><button class="keybind-btn" id="kb-p2-right" onclick="startKeybind('p2', 'right')">→</button></div>
+                <div class="keybind-row"><span>攻击</span><button class="keybind-btn" id="kb-p2-attack" onclick="startKeybind('p2', 'attack')">.</button></div>
+                <div class="keybind-row"><span>防御</span><button class="keybind-btn" id="kb-p2-defend" onclick="startKeybind('p2', 'defend')">/</button></div>
+                <div class="keybind-row"><span>技能1</span><button class="keybind-btn" id="kb-p2-skill1" onclick="startKeybind('p2', 'skill1')">7</button></div>
+                <div class="keybind-row"><span>技能2</span><button class="keybind-btn" id="kb-p2-skill2" onclick="startKeybind('p2', 'skill2')">8</button></div>
+            </div>
+        </div>
+
+        <div id="gameOverScreen" class="game-over-overlay hidden">
+            <div id="winnerText" class="game-over-text">玩家1 胜利!</div>
+            <div style="margin-bottom: 20px; color: #ffe762;" id="rewardText"></div>
+            <div class="btn-group">
+                <button class="menu-btn blue" onclick="restartGame()">再来一局</button>
+                <button class="menu-btn" onclick="returnToMenu()">返回菜单</button>
+            </div>
+        </div>
+
+        <div class="controls-hint" id="controlsHint">
+            P1: W/A/D 移动跳跃, J攻击, K防御, U/I技能 | P2: ↑←→移动跳跃, .攻击, /防御, 7/8技能
+        </div>
+    </div>
+
+    <script>
+        const HEROES = {
+            blueKnight: {
+                id: 'blueKnight',
+                name: '蓝骑士',
+                rarity: 'common',
+                stats: { hp: 120, attack: 18, speed: 5 },
+                colors: { primary: '#1a4f8a', secondary: '#5c7c99', highlight: '#ffe762', armor: '#3d7bc3' },
+                abilities: ['普通攻击', '护盾防御'],
+                skills: [
+                    { name: '冲锋斩', damage: 30, cooldown: 3000, range: 100, effect: 'dash' },
+                    { name: '铁壁', damage: 0, cooldown: 5000, range: 0, effect: 'shield', duration: 2000 }
+                ],
+                visual: { type: 'knight', horns: false, cape: true }
+            },
+            redWarrior: {
+                id: 'redWarrior',
+                name: '红战士',
+                rarity: 'common',
+                stats: { hp: 120, attack: 18, speed: 5 },
+                colors: { primary: '#8a2d2d', secondary: '#5a5a5a', highlight: '#4fc3f7', armor: '#d95454' },
+                abilities: ['普通攻击', '护盾防御'],
+                skills: [
+                    { name: '烈焰斩', damage: 28, cooldown: 2800, range: 90, effect: 'fire' },
+                    { name: '战吼', damage: 0, cooldown: 6000, range: 0, effect: 'buff', duration: 4000, attackBonus: 10 }
+                ],
+                visual: { type: 'warrior', horns: true, cape: false }
+            },
+            greenNinja: {
+                id: 'greenNinja',
+                name: '绿忍者',
+                rarity: 'rare',
+                stats: { hp: 90, attack: 25, speed: 8 },
+                colors: { primary: '#1a5f2a', secondary: '#3a8a4a', highlight: '#7aff9a', armor: '#2d7a3d' },
+                abilities: ['快速斩击', '闪避'],
+                skills: [
+                    { name: '影刃', damage: 40, cooldown: 2500, range: 80, effect: 'critical' },
+                    { name: '瞬身', damage: 0, cooldown: 4000, range: 0, effect: 'dodge', duration: 1500 }
+                ],
+                visual: { type: 'ninja', horns: false, cape: false, mask: true }
+            },
+            purpleMage: {
+                id: 'purpleMage',
+                name: '紫法师',
+                rarity: 'rare',
+                stats: { hp: 85, attack: 28, speed: 4 },
+                colors: { primary: '#5a1a8a', secondary: '#8a4aaa', highlight: '#d78aff', armor: '#7a2dba' },
+                abilities: ['魔法弹', '护盾'],
+                skills: [
+                    { name: '暗能爆发', damage: 45, cooldown: 3500, range: 120, effect: 'aoe' },
+                    { name: '能量屏障', damage: 0, cooldown: 5500, range: 0, effect: 'shield', duration: 3000 }
+                ],
+                visual: { type: 'mage', horns: false, cape: true, staff: true }
+            },
+            goldTitan: {
+                id: 'goldTitan',
+                name: '黄金泰坦',
+                rarity: 'epic',
+                stats: { hp: 160, attack: 15, speed: 3 },
+                colors: { primary: '#8a6f18', secondary: '#caa73f', highlight: '#fff7a2', armor: '#ba9a2f' },
+                abilities: ['重击', '钢铁防御'],
+                skills: [
+                    { name: '地震', damage: 35, cooldown: 4000, range: 150, effect: 'stun', stunDuration: 1000 },
+                    { name: '不屈', damage: 0, cooldown: 7000, range: 0, effect: 'heal', healAmount: 40 }
+                ],
+                visual: { type: 'titan', horns: false, cape: false, big: true }
+            },
+            cyberSamurai: {
+                id: 'cyberSamurai',
+                name: '赛博武士',
+                rarity: 'epic',
+                stats: { hp: 100, attack: 32, speed: 7 },
+                colors: { primary: '#1a1a3a', secondary: '#5a5a8a', highlight: '#00ffff', armor: '#3a3a6a' },
+                abilities: ['居合斩', '相位闪避'],
+                skills: [
+                    { name: '千本樱', damage: 50, cooldown: 3000, range: 100, effect: 'multihit', hits: 3 },
+                    { name: '刹那', damage: 0, cooldown: 4500, range: 0, effect: 'speed', duration: 3000, speedBonus: 3 }
+                ],
+                visual: { type: 'samurai', horns: false, cape: false, katana: true }
+            },
+            dragonLord: {
+                id: 'dragonLord',
+                name: '龙王',
+                rarity: 'legendary',
+                stats: { hp: 140, attack: 30, speed: 6 },
+                colors: { primary: '#8a1a1a', secondary: '#da5a5a', highlight: '#ffc700', armor: '#ba3a3a' },
+                abilities: ['龙息', '龙鳞护盾'],
+                skills: [
+                    { name: '龙炎吐息', damage: 55, cooldown: 3500, range: 130, effect: 'fire', burn: true },
+                    { name: '龙威', damage: 20, cooldown: 5000, range: 200, effect: 'fear', slowDuration: 2000 }
+                ],
+                visual: { type: 'dragon', horns: true, cape: false, wings: true }
+            },
+            phoenixKnight: {
+                id: 'phoenixKnight',
+                name: '凤凰骑士',
+                rarity: 'legendary',
+                stats: { hp: 110, attack: 26, speed: 7 },
+                colors: { primary: '#ff6a00', secondary: '#ffaa00', highlight: '#ffff00', armor: '#ff8a00' },
+                abilities: ['烈焰斩', '浴火重生'],
+                skills: [
+                    { name: '凤凰俯冲', damage: 48, cooldown: 3000, range: 110, effect: 'dash' },
+                    { name: '涅槃', damage: 0, cooldown: 8000, range: 0, effect: 'revive', healAmount: 60 }
+                ],
+                visual: { type: 'phoenix', horns: false, cape: true, fire: true }
+            }
+        };
+
+        const GACHA_RATES = {
+            normal: { common: 0.55, rare: 0.3, epic: 0.12, legendary: 0.03 },
+            premium: { common: 0.3, rare: 0.35, epic: 0.25, legendary: 0.1 }
+        };
+
+        const GACHA_COSTS = { normal: 50, premium: 150 };
+
+        let gameState = 'menu';
+        let isNetworkGame = false;
+        let isHost = false;
+        let peer = null;
+        let conn = null;
+        let localPlayerId = 0;
+        let remotePlayerId = 1;
+
+        const keys = {};
+
+        let player1, player2;
+        let lastTime = 0;
+        let effects = [];
+        let particles = [];
+
+        let banPickState = {
+            phase: 'ban',
+            currentTurn: 1,
+            bannedHeroes: [],
+            pickedHeroes: { player1: null, player2: null }
+        };
+
+        let playerData = {
+            id: 'player_' + Math.random().toString(36).substr(2, 9),
+            name: '玩家',
+            coins: 2000,
+            wins: 0,
+            losses: 0,
+            unlockedHeroes: ['blueKnight', 'redWarrior'],
+            lastLogin: null,
+            lastCheckinDay: null,
+            checkinStreak: 0,
+            dailyTasksDone: [],
+            firstWinClaimed: false,
+            freePullsToday: 0,
+            isNewPlayer: true,
+            settings: {
+                keybinds: {
+                    p1: { jump: 'KeyW', left: 'KeyA', right: 'KeyD', attack: 'KeyJ', defend: 'KeyK', skill1: 'KeyU', skill2: 'KeyI' },
+                    p2: { jump: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', attack: 'Period', defend: 'Slash', skill1: 'Digit7', skill2: 'Digit8' }
+                }
+            }
+        };
+
+        let recordingKeybind = null;
+
+        const GRAVITY = 0.8;
+        const JUMP_SPEED = -15;
+        const GROUND_Y = 450;
+        const PLATFORM_WIDTH = 700;
+        const PLATFORM_X = (800 - PLATFORM_WIDTH) / 2;
+        const DEFEND_REDUCTION = 0.5;
+        const ATTACK_COOLDOWN = 450;
+        const ATTACK_RANGE = 80;
+
+        class Mech {
+            constructor(x, y, isPlayer1, heroId = 'blueKnight') {
+                this.x = x;
+                this.y = y;
+                this.vx = 0;
+                this.vy = 0;
+                this.heroId = heroId;
+                const hero = HEROES[heroId];
+                this.hp = hero.stats.hp;
+                this.maxHp = hero.stats.hp;
+                this.attackDamage = hero.stats.attack;
+                this.baseAttack = hero.stats.attack;
+                this.moveSpeed = hero.stats.speed;
+                this.baseSpeed = hero.stats.speed;
+                this.direction = isPlayer1 ? 1 : -1;
+                this.state = 'idle';
+                this.animationFrame = 0;
+                this.animationTimer = 0;
+                this.isPlayer1 = isPlayer1;
+                this.lastAttackTime = 0;
+                this.isAttacking = false;
+                this.attackHit = false;
+                this.isDefending = false;
+                this.hitTimer = 0;
+                this.invincible = false;
+                this.stateTimer = 0;
+                this.colors = hero.colors;
+                this.heroName = hero.name;
+                this.hero = hero;
+                this.skills = hero.skills.map(s => ({ ...s, currentCd: 0 }));
+                this.shieldActive = false;
+                this.shieldTimer = 0;
+                this.buffActive = false;
+                this.buffTimer = 0;
+                this.dodgeActive = false;
+                this.dodgeTimer = 0;
+                this.stunned = false;
+                this.stunTimer = 0;
+                this.slowed = false;
+                this.slowTimer = 0;
+            }
+
+            update(dt, opponent) {
+                this.animationTimer += dt;
+                if (this.animationTimer > 100) {
+                    this.animationTimer = 0;
+                    this.animationFrame = (this.animationFrame + 1) % 4;
+                }
+
+                this.skills.forEach(s => {
+                    if (s.currentCd > 0) s.currentCd = Math.max(0, s.currentCd - dt);
+                });
+
+                if (this.shieldTimer > 0) {
+                    this.shieldTimer -= dt;
+                    if (this.shieldTimer <= 0) this.shieldActive = false;
+                }
+
+                if (this.buffTimer > 0) {
+                    this.buffTimer -= dt;
+                    if (this.buffTimer <= 0) {
+                        this.buffActive = false;
+                        this.attackDamage = this.baseAttack;
+                    }
+                }
+
+                if (this.dodgeTimer > 0) {
+                    this.dodgeTimer -= dt;
+                    if (this.dodgeTimer <= 0) this.dodgeActive = false;
+                }
+
+                if (this.stunTimer > 0) {
+                    this.stunTimer -= dt;
+                    if (this.stunTimer <= 0) this.stunned = false;
+                }
+
+                if (this.slowTimer > 0) {
+                    this.slowTimer -= dt;
+                    if (this.slowTimer <= 0) {
+                        this.slowed = false;
+                        this.moveSpeed = this.baseSpeed;
+                    }
+                }
+
+                if (this.hitTimer > 0) {
+                    this.hitTimer -= dt;
+                    if (this.hitTimer <= 0) {
+                        this.invincible = false;
+                    }
+                }
+
+                if (this.state === 'hit') {
+                    this.stateTimer -= dt;
+                    if (this.stateTimer <= 0) {
+                        this.state = 'idle';
+                    }
+                    return;
+                }
+
                 if (this.isAttacking) {
                     this.stateTimer -= dt;
                     if (this.stateTimer <= 0) {
@@ -7,14 +1225,18 @@
                     }
                 }
 
-                if (!this.stunned) return;
+                if (!this.stunned) {
+                    this.vy += GRAVITY;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                }
 
-                this.vy += GRAVITY;
-                this.x += this.vx;
-                this.y += this.vy;
-
-                if (this.x < PLATFORM_X + 30) this.x = PLATFORM_X + 30;
-                if (this.x > PLATFORM_X + PLATFORM_WIDTH - 30) this.x = PLATFORM_X + PLATFORM_WIDTH - 30;
+                if (this.x < PLATFORM_X + 30) {
+                    this.x = PLATFORM_X + 30;
+                }
+                if (this.x > PLATFORM_X + PLATFORM_WIDTH - 30) {
+                    this.x = PLATFORM_X + PLATFORM_WIDTH - 30;
+                }
 
                 if (this.y >= GROUND_Y) {
                     this.y = GROUND_Y;
@@ -24,10 +1246,14 @@
                     }
                 }
 
-                if (this.state !== 'attack' && this.state !== 'hit' && this.state !== 'defend' && !this.stunned) {
-                    if (this.vx !== 0) this.state = 'walk';
-                    else if (this.y < GROUND_Y) this.state = this.vy < 0 ? 'jump' : 'fall';
-                    else this.state = 'idle';
+                if (this.state !== 'attack' && this.state !== 'hit' && !this.stunned) {
+                    if (this.vx !== 0) {
+                        this.state = 'walk';
+                    } else if (this.y < GROUND_Y) {
+                        this.state = this.vy < 0 ? 'jump' : 'fall';
+                    } else {
+                        this.state = 'idle';
+                    }
                 }
 
                 this.vx = 0;
@@ -67,8 +1293,8 @@
 
                 const dist = Math.abs(this.x - opponent.x);
                 if (dist < ATTACK_RANGE) {
-                    const dmg = opponent.isDefending ? this.attackDamage * DEFEND_REDUCTION : this.attackDamage;
-                    opponent.takeDamage(dmg);
+                    const damage = opponent.isDefending ? this.attackDamage * DEFEND_REDUCTION : this.attackDamage;
+                    opponent.takeDamage(damage);
                     this.attackHit = true;
                     createHitEffect(opponent.x, opponent.y - 50, this.colors.highlight);
                 }
@@ -178,8 +1404,10 @@
 
             takeDamage(amount) {
                 if (this.invincible || this.dodgeActive) return;
-
-                if (this.shieldActive) amount *= 0.3;
+                
+                if (this.shieldActive) {
+                    amount *= 0.3;
+                }
 
                 this.hp = Math.max(0, this.hp - amount);
                 this.state = 'hit';
@@ -190,6 +1418,7 @@
             }
 
             draw() {
+                const ctx = window.ctx;
                 ctx.save();
                 ctx.translate(this.x, this.y);
 
@@ -200,17 +1429,22 @@
                     ctx.globalAlpha = 0.5;
                 }
 
-                ctx.scale(this.direction, 1);
+                const facing = this.direction;
+                ctx.scale(facing, 1);
 
                 const c = this.colors;
                 const v = this.hero.visual;
                 const legOffset = this.state === 'walk' ? Math.sin(this.animationFrame * Math.PI / 2) * 4 : 0;
+                const armOffset = this.state === 'attack' ? 20 : (this.state === 'defend' ? -10 : 0);
+                const bodyTilt = this.state === 'defend' ? -0.1 : 0;
+
+                ctx.rotate(bodyTilt);
 
                 if (v.cape) {
                     ctx.fillStyle = c.primary;
                     ctx.beginPath();
                     ctx.moveTo(-15, 0);
-                    ctx.quadraticCurveTo(-25 + Math.sin(Date.now() / 100) * 5, 40, -20, 70;
+                    ctx.quadraticCurveTo(-25 + Math.sin(Date.now() / 100) * 5, 40, -20, 70);
                     ctx.lineTo(20, 70);
                     ctx.quadraticCurveTo(25 + Math.sin(Date.now() / 100) * 5, 40, 15, 0);
                     ctx.fill();
@@ -221,8 +1455,8 @@
 
                 this.drawBody(0, 10, c, v);
 
-                this.drawArm(-20, 0, this.state === 'attack' ? 20 : this.state === 'defend' ? -10 : 0, c, v);
-                this.drawArm(20, 0, 0, c, v);
+                this.drawArm(-20, 0, armOffset, c, v);
+                this.drawArm(20, 0, this.state === 'attack' ? -15 : 0, c, v);
 
                 this.drawHead(0, -30, c, v);
 
@@ -242,11 +1476,11 @@
 
                 if (v.fire) {
                     for (let i = 0; i < 5; i++) {
-                        const fy = -45 - i * 8 + Math.sin(Date.now() / 50 + i) * 3;
-                        const fx = (i - 2) * 4;
-                        ctx.fillStyle = `rgba(255, 100, 0, ${0.8 - i * 0.15)`;
+                        const fireY = -45 - i * 8 + Math.sin(Date.now() / 50 + i) * 3;
+                        const fireX = (i - 2) * 4;
+                        ctx.fillStyle = `rgba(255, ${100 + i * 30}, 0, ${0.8 - i * 0.15})`;
                         ctx.beginPath();
-                        ctx.arc(fx, fy, 6 - i, 0, Math.PI * 2);
+                        ctx.arc(fireX, fireY, 6 - i, 0, Math.PI * 2);
                         ctx.fill();
                     }
                 }
@@ -262,36 +1496,42 @@
                     ctx.beginPath();
                     ctx.arc(0, -20, 45, 0, Math.PI * 2);
                     ctx.stroke();
+                    ctx.globalAlpha = 1;
                 }
 
                 if (this.state === 'attack') {
-                    this.drawFist(40, 5, c);
+                    this.drawFist(40 + armOffset, 5, c);
                 }
 
                 if (this.stunned) {
                     ctx.fillStyle = '#ffe762';
-                    ctx.font = '16px Courier New';
-                    ctx.textAlign = 'center';
                     for (let i = 0; i < 3; i++) {
-                        const angle = Date.now() / 500 + i * (2 * Math.PI / 3);
+                        const angle = Date.now() / 500 + i * Math.PI * 2 / 3;
                         ctx.fillText('★', Math.cos(angle) * 25 - 5, -65 + Math.sin(angle) * 5);
                     }
                 }
+
                 ctx.restore();
             }
 
-            drawLeg(x, y, off, c) {
+            drawLeg(x, y, offset, c) {
+                const ctx = window.ctx;
                 ctx.fillStyle = c.secondary;
-                ctx.fillRect(x - 8, y + off, 16, 24);
+                ctx.fillRect(x - 8, y + offset, 16, 24);
                 ctx.fillStyle = c.primary;
-                ctx.fillRect(x - 6, y + 4 + off, 12, 16);
+                ctx.fillRect(x - 6, y + 4 + offset, 12, 16);
                 ctx.fillStyle = c.armor;
-                ctx.fillRect(x - 7, y + off, 14, 8);
+                ctx.fillRect(x - 7, y + offset, 14, 8);
                 ctx.fillStyle = '#333';
-                ctx.fillRect(x - 9, y + 18 + off, 18, 8);
+                ctx.fillRect(x - 9, y + 18 + offset, 18, 8);
             }
 
             drawBody(x, y, c, v) {
+                const ctx = window.ctx;
+                const scale = v.big ? 1.2 : 1;
+                ctx.save();
+                ctx.scale(scale, scale);
+                
                 ctx.fillStyle = c.primary;
                 ctx.fillRect(x - 20, y, 40, 35);
                 ctx.fillStyle = c.armor;
@@ -299,28 +1539,45 @@
                 ctx.fillRect(x - 16, y + 16, 32, 8);
                 ctx.fillStyle = c.highlight;
                 ctx.fillRect(x - 14, y + 5, 8, 4);
-                if (this.hp < this.maxHp * 0.3 && Math.floor(Date.now() / 200) % 2 === 0) {
-                    ctx.fillStyle = '#ff4444';
-                    ctx.fillRect(x - 5, y + 20, 10, 6);
+                ctx.fillStyle = '#ff4444';
+                if (this.hp < this.maxHp * 0.3) {
+                    if (Math.floor(Date.now() / 200) % 2 === 0) {
+                        ctx.fillRect(x - 5, y + 20, 10, 6);
+                    }
                 }
+                ctx.fillStyle = c.secondary;
+                ctx.fillRect(x - 4, y + 22, 8, 4);
+                
+                ctx.restore();
             }
 
             drawArm(x, y, offset, c, v) {
+                const ctx = window.ctx;
                 ctx.fillStyle = c.secondary;
                 ctx.fillRect(x - 6, y + offset, 12, 30);
                 ctx.fillStyle = c.primary;
                 ctx.fillRect(x - 4, y + 2 + offset, 8, 20);
                 ctx.fillStyle = c.armor;
                 ctx.fillRect(x - 5, y + offset, 10, 8);
+                
                 if (v.katana && offset > 0) {
                     ctx.fillStyle = '#ccc';
                     ctx.fillRect(x + 8, y + offset - 20, 4, 40);
-                    ctx.fillStyle = c.primary;
+                    ctx.fillStyle = '#8a2d2d';
                     ctx.fillRect(x + 6, y + offset - 25, 8, 8);
+                }
+                if (v.staff) {
+                    ctx.fillStyle = '#6a4a2a';
+                    ctx.fillRect(x + 8, y + offset - 25, 4, 45);
+                    ctx.fillStyle = c.highlight;
+                    ctx.beginPath();
+                    ctx.arc(x + 10, y + offset - 28, 6, 0, Math.PI * 2);
+                    ctx.fill();
                 }
             }
 
             drawHead(x, y, c, v) {
+                const ctx = window.ctx;
                 ctx.fillStyle = c.armor;
                 ctx.fillRect(x - 16, y, 32, 24);
                 ctx.fillStyle = c.primary;
@@ -331,15 +1588,17 @@
                 ctx.fillStyle = '#fff';
                 ctx.fillRect(x - 10, y + 6, 6, 3);
                 ctx.fillRect(x + 4, y + 6, 6, 3);
-
+                
                 if (v.mask) {
                     ctx.fillStyle = '#222';
                     ctx.fillRect(x - 10, y + 12, 20, 8);
                 } else {
                     ctx.fillStyle = '#333';
                     ctx.fillRect(x - 4, y + 14, 8, 6);
+                    ctx.fillStyle = c.secondary;
+                    ctx.fillRect(x - 2, y + 16, 4, 4);
                 }
-
+                
                 if (v.horns) {
                     ctx.fillStyle = c.armor;
                     ctx.beginPath();
@@ -356,6 +1615,7 @@
             }
 
             drawFist(x, y, c) {
+                const ctx = window.ctx;
                 ctx.fillStyle = c.highlight;
                 ctx.fillRect(x - 8, y - 8, 16, 16);
                 ctx.fillStyle = c.armor;
@@ -365,6 +1625,7 @@
             }
 
             drawShield(x, y, c) {
+                const ctx = window.ctx;
                 ctx.fillStyle = 'rgba(79, 195, 247, 0.4)';
                 ctx.beginPath();
                 ctx.ellipse(x, y, 15, 25, 0, 0, Math.PI * 2);
@@ -372,89 +1633,239 @@
                 ctx.strokeStyle = '#4fc3f7';
                 ctx.lineWidth = 3;
                 ctx.stroke();
+                ctx.fillStyle = 'rgba(79, 195, 247, 0.6)';
+                ctx.beginPath();
+                ctx.ellipse(x, y, 10, 18, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            getState() {
+                return {
+                    x: this.x,
+                    y: this.y,
+                    vx: this.vx,
+                    vy: this.vy,
+                    hp: this.hp,
+                    direction: this.direction,
+                    state: this.state,
+                    isDefending: this.isDefending,
+                    skills: this.skills.map(s => s.currentCd)
+                };
+            }
+
+            setState(state) {
+                if (state.x !== undefined) this.x = state.x;
+                if (state.y !== undefined) this.y = state.y;
+                if (state.vx !== undefined) this.vx = state.vx;
+                if (state.vy !== undefined) this.vy = state.vy;
+                if (state.hp !== undefined) this.hp = state.hp;
+                if (state.direction !== undefined) this.direction = state.direction;
+                if (state.isDefending !== undefined) this.isDefending = state.isDefending;
             }
         }
 
         function createHitEffect(x, y, color) {
             for (let i = 0; i < 8; i++) {
-                particles.push({x, y, vx: (Math.random() - 0.5) * 10, vy: (Math.random() - 0.5) * 10 - 3, life: 300, maxLife: 300, color, size: 4 + Math.random() * 4);
+                particles.push({
+                    x, y,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10 - 3,
+                    life: 300,
+                    maxLife: 300,
+                    color,
+                    size: 4 + Math.random() * 4
+                });
             }
         }
 
         function createDashEffect(x, y, dir, color) {
             for (let i = 0; i < 10; i++) {
-                particles.push({x: x - dir * i * 8, y: y + (Math.random() - 0.5) * 20, vx: -dir * 2, vy: 0, life: 200, maxLife: 200, color, size: 6);
+                particles.push({
+                    x: x - dir * i * 8,
+                    y: y + (Math.random() - 0.5) * 20,
+                    vx: -dir * 2,
+                    vy: 0,
+                    life: 200,
+                    maxLife: 200,
+                    color,
+                    size: 6
+                });
             }
         }
 
         function createFireEffect(x, y) {
             for (let i = 0; i < 15; i++) {
-                particles.push({x: x + (Math.random() - 0.5) * 40, y: y + (Math.random() - 0.5) * 30, vx: (Math.random() - 0.5) * 3, vy: -Math.random() * 5 - 2, life: 400, maxLife: 400, color: `rgb(255, ${100 + Math.random() * 100}, 0)`, size: 5 + Math.random() * 5);
+                particles.push({
+                    x: x + (Math.random() - 0.5) * 40,
+                    y: y + (Math.random() - 0.5) * 30,
+                    vx: (Math.random() - 0.5) * 3,
+                    vy: -Math.random() * 5 - 2,
+                    life: 400,
+                    maxLife: 400,
+                    color: `rgb(255, ${100 + Math.random() * 100}, 0)`,
+                    size: 5 + Math.random() * 5
+                });
             }
         }
 
         function createCriticalEffect(x, y) {
-            effects.push({ type: 'critical', x, y, life: 500, maxLife: 500);
+            effects.push({
+                type: 'critical',
+                x, y,
+                life: 500,
+                maxLife: 500
+            });
             for (let i = 0; i < 12; i++) {
-                particles.push({x, y, vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15, life: 400, maxLife: 400, color: '#ffe762', size: 6);
+                particles.push({
+                    x, y,
+                    vx: (Math.random() - 0.5) * 15,
+                    vy: (Math.random() - 0.5) * 15,
+                    life: 400,
+                    maxLife: 400,
+                    color: '#ffe762',
+                    size: 6
+                });
             }
         }
 
         function createAoeEffect(x, y, range, color) {
-            effects.push({ type: 'aoe', x, y, range, life: 300, maxLife: 300, color);
+            effects.push({
+                type: 'aoe',
+                x, y,
+                range,
+                life: 300,
+                maxLife: 300,
+                color
+            });
         }
 
         function createShieldEffect(x, y, color) {
-            effects.push({ type: 'shield', x, y, life: 400, maxLife: 400, color);
+            effects.push({
+                type: 'shield',
+                x, y,
+                life: 400,
+                maxLife: 400,
+                color
+            });
         }
 
         function createStunEffect(x, y) {
-            effects.push({ type: 'stun', x, y, life: 500, maxLife: 500);
+            effects.push({
+                type: 'stun',
+                x, y,
+                life: 500,
+                maxLife: 500
+            });
         }
 
         function createHealEffect(x, y) {
             for (let i = 0; i < 10; i++) {
-                particles.push({x: x + (Math.random() - 0.5) * 40, y: y + 20, vx: (Math.random() - 0.5) * 2, vy: -3 - Math.random() * 3, life: 600, maxLife: 600, color: '#7aff9a', size: 5);
+                particles.push({
+                    x: x + (Math.random() - 0.5) * 40,
+                    y: y + 20,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: -3 - Math.random() * 3,
+                    life: 600,
+                    maxLife: 600,
+                    color: '#7aff9a',
+                    size: 5
+                });
             }
-            effects.push({ type: 'heal', x, y, life: 500, maxLife: 500);
+            effects.push({
+                type: 'heal',
+                x, y,
+                life: 500,
+                maxLife: 500
+            });
         }
 
         function createMultiHitEffect(x, y) {
             for (let i = 0; i < 20; i++) {
                 setTimeout(() => {
-                    particles.push({x: x + (Math.random() - 0.5) * 60, y: y + (Math.random() - 0.5) * 40, vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8, life: 200, maxLife: 200, color: '#00ffff', size: 4);
+                    particles.push({
+                        x: x + (Math.random() - 0.5) * 60,
+                        y: y + (Math.random() - 0.5) * 40,
+                        vx: (Math.random() - 0.5) * 8,
+                        vy: (Math.random() - 0.5) * 8,
+                        life: 200,
+                        maxLife: 200,
+                        color: '#00ffff',
+                        size: 4
+                    });
                 }, i * 50);
             }
         }
 
         function createSpeedEffect(x, y) {
             for (let i = 0; i < 12; i++) {
-                particles.push({x: x + (Math.random() - 0.5) * 60, y: y + (Math.random() - 0.5) * 40, vx: 0, vy: -1 - Math.random() * 2, life: 500, maxLife: 500, color: '#4fc3f7', size: 5);
+                particles.push({
+                    x: x + (Math.random() - 0.5) * 60,
+                    y: y + (Math.random() - 0.5) * 40,
+                    vx: 0,
+                    vy: -1 - Math.random() * 2,
+                    life: 500,
+                    maxLife: 500,
+                    color: '#4fc3f7',
+                    size: 5
+                });
             }
         }
 
         function createBuffEffect(x, y) {
-            effects.push({ type: 'buff', x, y, life: 600, maxLife: 600);
+            effects.push({
+                type: 'buff',
+                x, y,
+                life: 600,
+                maxLife: 600
+            });
         }
 
         function createDodgeEffect(x, y) {
             for (let i = 0; i < 10; i++) {
-                particles.push({x: x + (Math.random() - 0.5) * 50, y: y + (Math.random() - 0.5) * 40, vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4, life: 400, maxLife: 400, color: '#a855f7', size: 6);
+                particles.push({
+                    x: x + (Math.random() - 0.5) * 50,
+                    y: y + (Math.random() - 0.5) * 40,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4,
+                    life: 400,
+                    maxLife: 400,
+                    color: '#a855f7',
+                    size: 6
+                });
             }
         }
 
         function createReviveEffect(x, y) {
             for (let i = 0; i < 20; i++) {
-                particles.push({x, y: y + 40, vx: (Math.random() - 0.5) * 6, vy: -5 - Math.random() * 5, life: 800, maxLife: 800, color: i % 2 === 0 ? '#ff6a00' : '#ffe762', size: 6);
+                particles.push({
+                    x: x,
+                    y: y + 40,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: -5 - Math.random() * 5,
+                    life: 800,
+                    maxLife: 800,
+                    color: i % 2 === 0 ? '#ff6a00' : '#ffe762',
+                    size: 6
+                });
             }
         }
 
         function updateEffects(dt) {
-            effects = effects.filter(e => { e.life -= dt; return e.life > 0; });
-            particles = particles.filter(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.life -= dt; return p.life > 0; });
+            effects = effects.filter(e => {
+                e.life -= dt;
+                return e.life > 0;
+            });
+            particles = particles.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.1;
+                p.life -= dt;
+                return p.life > 0;
+            });
         }
 
         function drawEffects() {
+            const ctx = window.ctx;
             effects.forEach(e => {
                 const t = e.life / e.maxLife;
                 ctx.globalAlpha = t;
@@ -469,7 +1880,14 @@
                         ctx.strokeStyle = e.color;
                         ctx.lineWidth = 4;
                         ctx.beginPath();
-                        ctx.arc(e.x, e.y, e.range * (1 - t * 0.3), 0, Math.PI * 2);
+                        ctx.arc(e.x, e.y, e.range * (1 - t * 0.5), 0, Math.PI * 2);
+                        ctx.stroke();
+                        break;
+                    case 'shield':
+                        ctx.strokeStyle = e.color;
+                        ctx.lineWidth = 5;
+                        ctx.beginPath();
+                        ctx.arc(e.x, e.y, 50 * (1 - t * 0.3), 0, Math.PI * 2);
                         ctx.stroke();
                         break;
                     case 'heal':
@@ -499,46 +1917,6 @@
             });
         }
 
-        function getCurrentStyle() {
-            if (playerData.featuredHero && HEROES[playerData.featuredHero]) {
-                return HEROES[playerData.featuredHero].style;
-            }
-            return 'tech';
-        }
-
-        function applyStyle(style) {
-            const root = document.getElementById('game-root');
-            root.setAttribute('data-style', style);
-        }
-
-        function setFeaturedHero(heroId) {
-            playerData.featuredHero = heroId;
-            const hero = HEROES[heroId];
-            applyStyle(hero.style);
-            savePlayerData();
-            updateFeaturedDisplay();
-            showNotification(`已设置 ${hero.name} 为登场英雄！风格切换为${STYLES[hero.style].name}！');
-        }
-
-        function cancelFeatured() {
-            playerData.featuredHero = null;
-            applyStyle('tech');
-            savePlayerData();
-            updateFeaturedDisplay();
-        }
-
-        function updateFeaturedDisplay() {
-            const container = document.getElementById('featuredHero');
-            if (playerData.featuredHero && HEROES[playerData.featuredHero]) {
-                const hero = HEROES[playerData.featuredHero];
-                document.getElementById('featuredHeroName').textContent = hero.name;
-                document.getElementById('featuredHeroStyle').textContent = STYLES[hero.style].name;
-                container.classList.remove('hidden');
-            } else {
-                container.classList.add('hidden');
-            }
-        }
-
         function initGame(hero1 = 'blueKnight', hero2 = 'redWarrior') {
             player1 = new Mech(200, GROUND_Y, true, hero1);
             player2 = new Mech(600, GROUND_Y, false, hero2);
@@ -552,74 +1930,58 @@
         function updateHealthBars() {
             document.getElementById('health1').style.width = (player1.hp / player1.maxHp * 100) + '%';
             document.getElementById('health2').style.width = (player2.hp / player2.maxHp * 100) + '%';
+            
             for (let i = 0; i < 2; i++) {
-                const skill1 = player1.skills[i];
-                const skill2 = player2.skills[i];
-                const s1 = (skill1.cooldown - skill1.currentCd) / skill1.cooldown;
-                const s2 = (skill2.cooldown - skill2.currentCd) / skill2.cooldown;
-                document.getElementById(`skill${i+1}-p1').style.width = (s1 * 100) + '%';
-                document.getElementById(`skill${i+1}-p2').style.width = (s2 * 100) + '%';
+                const s1 = player1.skills[i];
+                const s2 = player2.skills[i];
+                document.getElementById(`skill${i+1}-p1`).style.width = ((s1.cooldown - s1.currentCd) / s1.cooldown * 100) + '%';
+                document.getElementById(`skill${i+1}-p2`).style.width = ((s2.cooldown - s2.currentCd) / s2.cooldown * 100) + '%';
             }
         }
 
         function drawBackground() {
+            const ctx = window.ctx;
             const gradient = ctx.createLinearGradient(0, 0, 0, 600);
-            const style = getCurrentStyle();
-            if (style === 'japanese') {
-                gradient.addColorStop(0, '#1a0a0a');
-                gradient.addColorStop(0.5, '#3a1a1a');
-                gradient.addColorStop(1, '#2a0f0f');
-            } else if (style === 'western') {
-                gradient.addColorStop(0, '#0f1a0f');
-                gradient.addColorStop(0.5, '#1a2a1a');
-                gradient.addColorStop(1, '#0f1f0f');
-            } else if (style === 'cyberpunk') {
-                gradient.addColorStop(0, '#0a0a1a');
-                gradient.addColorStop(0.5, '#1a0a2a');
-                gradient.addColorStop(1, '#0f0f2f');
-            } else if (style === 'futuristic') {
-                gradient.addColorStop(0, '#0a1a1a');
-                gradient.addColorStop(0.5, '#0a2a2a');
-                gradient.addColorStop(1, '#0f1f1f');
-            } else {
-                gradient.addColorStop(0, '#0a0a1a');
-                gradient.addColorStop(0.5, '#1a1a3a');
-                gradient.addColorStop(1, '#0f1f3f');
-            }
+            gradient.addColorStop(0, '#0a0a1a');
+            gradient.addColorStop(0.5, '#1a1a3a');
+            gradient.addColorStop(1, '#0f1f3f');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, 800, 600);
 
-            ctx.fillStyle = 'rgba(255,255,255,0.03)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
             for (let i = 0; i < 80; i++) {
                 const x = (i * 37 + Date.now() * 0.01) % 800;
                 const y = (i * 23) % 400;
-                ctx.fillRect(x, y, 1 + (i % 3), 1 + (i % 3));
+                const size = 1 + (i % 3);
+                ctx.fillRect(x, y, size, size);
             }
 
             ctx.fillStyle = '#1a1a3a';
             ctx.fillRect(PLATFORM_X, GROUND_Y + 64, PLATFORM_WIDTH, 86);
 
-            const platGrad = ctx.createLinearGradient(0, GROUND_Y, 0, GROUND_Y + 64);
-            if (style === 'japanese') {
-                platGrad.addColorStop(0, '#8a6f3c');
-                platGrad.addColorStop(0.3, '#5a4a2a');
-                platGrad.addColorStop(1, '#3a2a1a');
-            } else if (style === 'western') {
-                platGrad.addColorStop(0, '#7a5c3c');
-                platGrad.addColorStop(0.3, '#5a3c2c');
-                platGrad.addColorStop(1, '#3a2a1a');
-            } else {
-                platGrad.addColorStop(0, '#7a7aaa');
-                platGrad.addColorStop(0.3, '#5a5a8a');
-                platGrad.addColorStop(1, '#3a3a6a');
-            }
-            ctx.fillStyle = platGrad;
+            const platformGradient = ctx.createLinearGradient(0, GROUND_Y, 0, GROUND_Y + 64);
+            platformGradient.addColorStop(0, '#7a7aaa');
+            platformGradient.addColorStop(0.3, '#5a5a8a');
+            platformGradient.addColorStop(1, '#3a3a6a');
+            ctx.fillStyle = platformGradient;
             ctx.fillRect(PLATFORM_X, GROUND_Y, PLATFORM_WIDTH, 64);
 
-            ctx.fillStyle = style === 'japanese' ? '#d4af37' : style === 'western' ? '#a87c4c' : '#9a9aca';
+            ctx.fillStyle = '#9a9aca';
             for (let i = 0; i < PLATFORM_WIDTH; i += 40) {
                 ctx.fillRect(PLATFORM_X + i, GROUND_Y, 20, 4);
             }
+
+            ctx.fillStyle = '#ffe762';
+            for (let i = 0; i < PLATFORM_WIDTH; i += 80) {
+                ctx.fillRect(PLATFORM_X + i, GROUND_Y, 20, 4);
+            }
+            ctx.fillStyle = '#333';
+            for (let i = 40; i < PLATFORM_WIDTH; i += 80) {
+                ctx.fillRect(PLATFORM_X + i, GROUND_Y, 20, 4);
+            }
+
+            ctx.fillStyle = '#5a5a8a';
+            ctx.fillRect(PLATFORM_X, GROUND_Y + 60, PLATFORM_WIDTH, 8);
         }
 
         function checkKey(player, action) {
@@ -628,6 +1990,8 @@
         }
 
         function handleLocalInput() {
+            if (isNetworkGame && localPlayerId === 1) return;
+
             if (checkKey('p1', 'left')) player1.moveLeft();
             if (checkKey('p1', 'right')) player1.moveRight();
             if (checkKey('p1', 'jump')) player1.jump();
@@ -669,93 +2033,21 @@
             }
         }
 
-        let mobileControlsState = {
-            p1: {},
-            p2: {}
-        };
+        function syncGameState() {
+            if (!isNetworkGame || !conn || conn.open !== true) return;
 
-        function createMobileControls() {
-            const container = document.getElementById('game-container');
-            if (document.getElementById('mobileControls')) return;
-
-            const div = document.createElement('div');
-            div.id = 'mobileControls';
-            div.style.cssText = 'position:absolute;bottom:60px;left:0;right:0;display:flex;justify-content:space-between;padding:0 20px;pointer-events:none;z-index:15;';
-            container.appendChild(div);
-
-            const makePlayerControls = (playerId, side) => {
-                const pdiv = document.createElement('div');
-                pdiv.style.cssText = 'display:grid;grid-template-columns:repeat(3,50px);grid-template-rows:repeat(3,50px);gap:5px;pointer-events:auto;';
-
-                const actions = [
-                    { action: 'skill1', label: '技1', x:0,y:0 },
-                    { action: 'jump', label: '↑', x:0,y:1 },
-                    { action: 'skill2', label: '技2', x:0,y:2 },
-                    { action: 'left', label: '←', x:1,y:0 },
-                    { action: 'attack', label: '⚔', x:1,y:1 },
-                    { action: 'right', label: '→', x:1,y:2 },
-                    { action: 'defend', label: '🛡', x:2,y:1 }
-                ];
-
-                actions.forEach(a => {
-                    const btn = document.createElement('button');
-                    btn.className = 'mobile-btn';
-                    btn.textContent = a.label;
-                    btn.style.gridArea = (a.x+1) + '/' + (a.y+1);
-                    btn.addEventListener('touchstart', (e) => {
-                        e.preventDefault();
-                        mobileControlsState[playerId][a.action] = true;
-                    });
-                    btn.addEventListener('touchend', (e) => {
-                        e.preventDefault();
-                        mobileControlsState[playerId][a.action] = false;
-                    });
-                    btn.addEventListener('touchcancel', (e) => {
-                        e.preventDefault();
-                        mobileControlsState[playerId][a.action] = false;
-                    });
-                    pdiv.appendChild(btn);
+            if (localPlayerId === 1) {
+                conn.send({
+                    type: 'state',
+                    player1: player1.getState(),
+                    player2: player2.getState()
                 });
-                return pdiv;
-            };
-
-            div.appendChild(makePlayerControls('p1', 'left'));
-            div.appendChild(makePlayerControls('p2', 'right'));
-        }
-
-        function handleMobileControls() {
-            if (isNetworkGame && localPlayerId ===1) {
-                if (mobileControlsState.p1.left) player1.moveLeft();
-                if (mobileControlsState.p1.right) player1.moveRight();
-                if (mobileControlsState.p1.jump) player1.jump();
-                if (mobileControlsState.p1.attack) player1.attack(player2);
-                if (mobileControlsState.p1.skill1) player1.useSkill(0, player2);
-                if (mobileControlsState.p1.skill2) player1.useSkill(1, player2);
-                player1.defend(mobileControlsState.p1.defend);
-            } else if (!isNetworkGame) {
-                if (mobileControlsState.p1.left) player1.moveLeft();
-                if (mobileControlsState.p1.right) player1.moveRight();
-                if (mobileControlsState.p1.jump) player1.jump();
-                if (mobileControlsState.p1.attack) player1.attack(player2);
-                if (mobileControlsState.p1.skill1) player1.useSkill(0, player2);
-                if (mobileControlsState.p1.skill2) player1.useSkill(1, player2);
-                player1.defend(mobileControlsState.p1.defend);
-
-                if (mobileControlsState.p2.left) player2.moveLeft();
-                if (mobileControlsState.p2.right) player2.moveRight();
-                if (mobileControlsState.p2.jump) player2.jump();
-                if (mobileControlsState.p2.attack) player2.attack(player1);
-                if (mobileControlsState.p2.skill1) player2.useSkill(0, player1);
-                if (mobileControlsState.p2.skill2) player2.useSkill(1, player1);
-                player2.defend(mobileControlsState.p2.defend);
             } else {
-                if (mobileControlsState.p2.left) player2.moveLeft();
-                if (mobileControlsState.p2.right) player2.moveRight();
-                if (mobileControlsState.p2.jump) player2.jump();
-                if (mobileControlsState.p2.attack) player2.attack(player1);
-                if (mobileControlsState.p2.skill1) player2.useSkill(0, player1);
-                if (mobileControlsState.p2.skill2) player2.useSkill(1, player1);
-                player2.defend(mobileControlsState.p2.defend);
+                conn.send({
+                    type: 'state',
+                    player1: player1.getState(),
+                    player2: player2.getState()
+                });
             }
         }
 
@@ -769,12 +2061,24 @@
                 } else {
                     handleLocalInput();
                 }
+
                 handleMobileControls();
 
                 player1.update(dt, player2);
                 player2.update(dt, player1);
                 updateEffects(dt);
-                updateHealthBars();
+
+                if (!isNetworkGame) {
+                    if (player1.isAttacking && player1.attackHit) {
+                        updateHealthBars();
+                    }
+                    if (player2.isAttacking && player2.attackHit) {
+                        updateHealthBars();
+                    }
+                } else {
+                    updateHealthBars();
+                    syncGameState();
+                }
 
                 if (player1.hp <= 0) {
                     gameState = 'gameover';
@@ -788,10 +2092,12 @@
             }
 
             drawBackground();
+
             if (player1 && player2) {
                 player1.draw();
                 player2.draw();
             }
+
             drawEffects();
 
             requestAnimationFrame(gameLoop);
@@ -801,10 +2107,11 @@
             if (won) {
                 playerData.wins++;
                 playerData.coins += 80;
+                
                 if (!playerData.firstWinClaimed) {
                     playerData.coins += 200;
                     playerData.firstWinClaimed = true;
-                    showNotification('🎉 首胜奖励 +200 金币！');
+                    showNotification('🎉 首胜奖励 +200 金币!');
                 }
             } else {
                 playerData.losses++;
@@ -822,12 +2129,18 @@
         }
 
         function hideAllMenus() {
-            ['mainMenu', 'networkMenu', 'waitingRoom', 'connectingScreen', 'banPickScreen', 'gachaScreen', 'eventsScreen', 'settingsScreen', 'gameOverScreen'].forEach(id => {
-                const el = document.getElementById(id);
-                el.classList.add('hidden');
-            });
+            document.getElementById('mainMenu').classList.add('hidden');
+            document.getElementById('networkMenu').classList.add('hidden');
+            document.getElementById('waitingRoom').classList.add('hidden');
+            document.getElementById('connectingScreen').classList.add('hidden');
+            document.getElementById('banPickScreen').classList.add('hidden');
+            document.getElementById('gachaScreen').classList.add('hidden');
+            document.getElementById('eventsScreen').classList.add('hidden');
+            document.getElementById('settingsScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
             document.getElementById('healthBars').classList.add('hidden');
             document.getElementById('playerInfo').style.display = 'none';
+            document.getElementById('controlsHint').style.display = 'block';
         }
 
         function showMainMenu() {
@@ -836,7 +2149,6 @@
             document.getElementById('mainMenu').classList.remove('hidden');
             document.getElementById('playerInfo').style.display = 'block';
             updatePlayerInfo();
-            updateFeaturedDisplay();
 
             if (peer) {
                 peer.destroy();
@@ -865,15 +2177,18 @@
             document.getElementById('waitingRoom').classList.remove('hidden');
 
             peer = new Peer();
-            peer.on('open', id => {
+
+            peer.on('open', (id) => {
                 document.getElementById('roomIdDisplay').textContent = id;
             });
-            peer.on('connection', (c => {
-                conn = c;
+
+            peer.on('connection', (connection) => {
+                conn = connection;
                 setupConnection();
             });
-            peer.on('error', err => {
-                alert('连接错误：' + err.message);
+
+            peer.on('error', (err) => {
+                alert('连接错误: ' + err.message);
                 showNetworkMenu();
             });
         }
@@ -884,6 +2199,7 @@
                 alert('请输入房间ID');
                 return;
             }
+
             isHost = false;
             isNetworkGame = true;
             localPlayerId = 2;
@@ -893,21 +2209,24 @@
             document.getElementById('connectingScreen').classList.remove('hidden');
 
             peer = new Peer();
+
             peer.on('open', () => {
                 conn = peer.connect(roomId, { reliable: true });
                 setupConnection();
+
                 conn.on('open', () => {
                     startBanPick();
                 });
             });
-            peer.on('error', err => {
-                alert('连接错误：' + err.message);
+
+            peer.on('error', (err) => {
+                alert('连接错误: ' + err.message);
                 showNetworkMenu();
             });
         }
 
         function setupConnection() {
-            conn.on('data', data => {
+            conn.on('data', (data) => {
                 if (data.type === 'state') {
                     if (localPlayerId === 1) {
                         player2.setState(data.player2);
@@ -924,85 +2243,142 @@
                     restartGame();
                 }
             });
+
             conn.on('close', () => {
                 if (gameState === 'playing' || gameState === 'banpick') {
                     alert('连接已断开');
                     showMainMenu();
                 }
             });
+
             if (isHost) {
                 startBanPick();
             }
         }
 
         function leaveRoom() {
-            if (peer) peer.destroy();
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+            conn = null;
             showNetworkMenu();
         }
 
         function copyRoomId() {
-            const id = document.getElementById('roomIdDisplay').textContent;
-            if (id && id !== '---') {
-                navigator.clipboard.writeText(id).then(() => alert('房间ID已复制！')).catch(() => prompt('请复制房间ID', id));
+            const roomId = document.getElementById('roomIdDisplay').textContent;
+            if (roomId && roomId !== '---') {
+                navigator.clipboard.writeText(roomId).then(() => {
+                    alert('房间ID已复制到剪贴板!');
+                }).catch(() => {
+                    prompt('请复制以下房间ID:', roomId);
+                });
             }
         }
 
         function cancelJoin() {
-            if (peer) peer.destroy();
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+            conn = null;
             showNetworkMenu();
+        }
+
+        function showGameOver(player1Won) {
+            const winnerText = document.getElementById('winnerText');
+            const rewardText = document.getElementById('rewardText');
+            if (player1Won) {
+                winnerText.textContent = '玩家1 胜利!';
+                winnerText.className = 'game-over-text blue';
+            } else {
+                winnerText.textContent = '玩家2 胜利!';
+                winnerText.className = 'game-over-text red';
+            }
+            rewardText.textContent = '+80 金币 (参与+25)';
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+        }
+
+        function restartGame() {
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            startBanPick();
+
+            if (isNetworkGame && conn && conn.open) {
+                conn.send({ type: 'restart' });
+            }
+        }
+
+        function returnToMenu() {
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            showMainMenu();
+
+            if (isNetworkGame) {
+                if (conn) conn.close();
+                if (peer) peer.destroy();
+                peer = null;
+                conn = null;
+            }
         }
 
         function startBanPick() {
             gameState = 'banpick';
             banPickState = {
-                phase: 'ban', currentTurn:1, bannedHeroes:[], pickedHeroes: { player1: null, player2: null }
+                phase: 'ban',
+                currentTurn: 1,
+                bannedHeroes: [],
+                pickedHeroes: { player1: null, player2: null }
             };
+            
             hideAllMenus();
             document.getElementById('banPickScreen').classList.remove('hidden');
             renderBanPickScreen();
         }
 
         function renderBanPickScreen() {
-            const title = document.getElementById('banPickTitle');
-            const status = document.getElementById('banPickStatus');
-            const banned = document.getElementById('bannedHeroesDisplay');
-            const grid = document.getElementById('heroGrid');
-            const buttons = document.getElementById('banPickButtons');
+            const titleEl = document.getElementById('banPickTitle');
+            const statusEl = document.getElementById('banPickStatus');
+            const bannedEl = document.getElementById('bannedHeroesDisplay');
+            const gridEl = document.getElementById('heroGrid');
+            const buttonsEl = document.getElementById('banPickButtons');
 
             if (banPickState.phase === 'ban') {
-                title.textContent = '⚔️ 禁用阶段 ⚔️';
-                status.textContent = '玩家' + banPickState.currentTurn + ' 禁用英雄';
+                titleEl.textContent = '⚔️ 禁用阶段 ⚔️';
+                statusEl.textContent = `玩家${banPickState.currentTurn} 禁用英雄`;
             } else if (banPickState.phase === 'pick') {
-                title.textContent = '🎮 选择阶段 🎮';
+                titleEl.textContent = '🎮 选择阶段 🎮';
                 if (banPickState.pickedHeroes.player1 && banPickState.pickedHeroes.player2) {
-                    status.textContent = '双方已选择，准备战斗！';
+                    statusEl.textContent = '双方已选择，准备战斗！';
                 } else {
-                    status.textContent = '玩家' + banPickState.currentTurn + ' 选择英雄';
+                    statusEl.textContent = `玩家${banPickState.currentTurn} 选择英雄`;
                 }
             }
 
             if (banPickState.bannedHeroes.length > 0) {
-                banned.textContent = '已禁用: ' + banPickState.bannedHeroes.map(h => HEROES[h].name).join(', ');
+                bannedEl.textContent = '已禁用: ' + banPickState.bannedHeroes.map(h => HEROES[h].name).join(', ');
             } else {
-                banned.textContent = '';
+                bannedEl.textContent = '';
             }
 
-            grid.innerHTML = '';
+            gridEl.innerHTML = '';
             Object.values(HEROES).forEach(hero => {
                 const card = document.createElement('div');
                 card.className = 'hero-card';
+                card.dataset.heroId = hero.id;
+                
                 const isBanned = banPickState.bannedHeroes.includes(hero.id);
                 const isPicked = banPickState.pickedHeroes.player1 === hero.id || banPickState.pickedHeroes.player2 === hero.id;
                 const isLocked = !playerData.unlockedHeroes.includes(hero.id) && !isNetworkGame;
+
                 if (isBanned) card.classList.add('banned');
                 if (isPicked) card.classList.add('selected');
                 if (isLocked) card.classList.add('locked');
 
                 const icon = document.createElement('div');
                 icon.className = 'hero-icon';
-                icon.style.background = 'linear-gradient(135deg, ' + hero.colors.primary + ',' + hero.colors.secondary + ')';
-                icon.style.border = '4px solid ' + hero.colors.armor;
-                icon.style.borderRadius = '16px';
+                icon.style.background = `linear-gradient(135deg, ${hero.colors.primary}, ${hero.colors.secondary})`;
+                icon.style.border = `4px solid ${hero.colors.armor}`;
+                icon.style.borderRadius = '12px';
+                icon.style.boxShadow = `0 0 15px ${hero.colors.highlight}40`;
                 card.appendChild(icon);
 
                 const name = document.createElement('div');
@@ -1011,33 +2387,33 @@
                 card.appendChild(name);
 
                 const rarity = document.createElement('div');
-                rarity.className = 'hero-rarity rarity-' + hero.rarity;
+                rarity.className = `hero-rarity rarity-${hero.rarity}`;
                 rarity.textContent = getRarityText(hero.rarity);
                 card.appendChild(rarity);
 
                 const stats = document.createElement('div');
                 stats.className = 'hero-stats';
-                stats.textContent = 'HP:' + hero.stats.hp + ' ATK:' + hero.stats.attack + ' SPD:' + hero.stats.speed;
+                stats.textContent = `HP:${hero.stats.hp} ATK:${hero.stats.attack} SPD:${hero.stats.speed}`;
                 card.appendChild(stats);
 
-                const styleTag = document.createElement('div');
-                styleTag.className = 'hero-style';
-                styleTag.textContent = STYLES[hero.style].name;
-                card.appendChild(styleTag);
+                const skills = document.createElement('div');
+                skills.className = 'hero-ability';
+                skills.textContent = `技能: ${hero.skills[0].name}, ${hero.skills[1].name}`;
+                card.appendChild(skills);
 
                 if (!isBanned && !isLocked) {
-                    card.addEventListener('click', () => handleHeroClick(hero.id));
+                    card.onclick = () => handleHeroClick(hero.id);
                 }
-                grid.appendChild(card);
+                gridEl.appendChild(card);
             });
 
-            buttons.innerHTML = '';
+            buttonsEl.innerHTML = '';
             if (banPickState.phase === 'pick' && banPickState.pickedHeroes.player1 && banPickState.pickedHeroes.player2) {
-                const startBtn = document.createElement('button');
-                startBtn.className = 'menu-btn blue';
-                startBtn.textContent = '开始战斗！';
-                startBtn.addEventListener('click', startGameFromBanPick);
-                buttons.appendChild(startBtn);
+                const btn = document.createElement('button');
+                btn.className = 'menu-btn blue';
+                btn.textContent = '开始战斗!';
+                btn.onclick = startGameFromBanPick;
+                buttonsEl.appendChild(btn);
             }
         }
 
@@ -1048,13 +2424,14 @@
 
         function handleHeroClick(heroId) {
             if (isNetworkGame) {
-                const isMyTurn = banPickState.currentTurn === localPlayerId;
+                const isMyTurn = (banPickState.currentTurn === localPlayerId);
                 if (!isMyTurn) return;
             }
 
             if (banPickState.phase === 'ban') {
                 if (banPickState.bannedHeroes.includes(heroId)) return;
                 banPickState.bannedHeroes.push(heroId);
+                
                 if (banPickState.bannedHeroes.length >= 2) {
                     banPickState.phase = 'pick';
                     banPickState.currentTurn = 1;
@@ -1074,6 +2451,7 @@
                     banPickState.currentTurn = 1;
                 }
             }
+
             renderBanPickScreen();
 
             if (isNetworkGame && conn && conn.open) {
@@ -1082,42 +2460,19 @@
         }
 
         function startGameFromBanPick() {
-            const hero1 = banPickState.pickedHeroes.player1 || 'blueKnight';
-            const hero2 = banPickState.pickedHeroes.player2 || 'redWarrior';
+            const h1 = banPickState.pickedHeroes.player1 || 'blueKnight';
+            const h2 = banPickState.pickedHeroes.player2 || 'redWarrior';
+            
             banPickState.phase = 'done';
             hideAllMenus();
             document.getElementById('healthBars').classList.remove('hidden');
-            document.getElementById('playerInfo').style.display = 'block';
-            initGame(hero1, hero2);
+            document.getElementById('controlsHint').style.display = 'block';
+            
+            initGame(h1, h2);
             gameState = 'playing';
+
             if (isNetworkGame && conn && conn.open) {
                 conn.send({ type: 'banPick', state: banPickState, startGame: true });
-            }
-        }
-
-        function showGameOver(player1Won) {
-            document.getElementById('winnerText').textContent = player1Won ? '玩家1 胜利！' : '玩家2 胜利！';
-            document.getElementById('winnerText').className = 'game-over-text ' + (player1Won ? 'blue' : 'red');
-            document.getElementById('rewardText').textContent = '+80 金币 (参与+25)';
-            document.getElementById('gameOverScreen').classList.remove('hidden');
-        }
-
-        function restartGame() {
-            document.getElementById('gameOverScreen').classList.add('hidden');
-            startBanPick();
-            if (isNetworkGame && conn && conn.open) {
-                conn.send({ type: 'restart' });
-            }
-        }
-
-        function returnToMenu() {
-            document.getElementById('gameOverScreen').classList.add('hidden');
-            showMainMenu();
-            if (isNetworkGame) {
-                if (conn) conn.close();
-                if (peer) peer.destroy();
-                peer = null;
-                conn = null;
             }
         }
 
@@ -1135,29 +2490,35 @@
                 playerData.freePullsToday = 0;
             }
             const freeLeft = Math.max(0, 3 - playerData.freePullsToday);
-            document.getElementById('freePullInfo').textContent = freeLeft > 0 ? '🎁 今日剩余免费抽卡: ' + freeLeft + ' 次' : '';
+            document.getElementById('freePullInfo').textContent = freeLeft > 0 ? `🎁 今日剩余免费抽卡: ${freeLeft} 次` : '';
         }
 
         function renderMyHeroes() {
             const grid = document.getElementById('myHeroesGrid');
             grid.innerHTML = '';
+            
             playerData.unlockedHeroes.forEach(heroId => {
                 const hero = HEROES[heroId];
                 const card = document.createElement('div');
                 card.className = 'hero-card';
+                
                 const icon = document.createElement('div');
                 icon.className = 'hero-icon';
-                icon.style.background = 'linear-gradient(135deg, ' + hero.colors.primary + ',' + hero.colors.secondary + ')';
-                icon.style.border = '3px solid ' + hero.colors.armor;
+                icon.style.background = `linear-gradient(135deg, ${hero.colors.primary}, ${hero.colors.secondary})`;
+                icon.style.border = `3px solid ${hero.colors.armor}`;
+                icon.style.borderRadius = '10px';
                 card.appendChild(icon);
+
                 const name = document.createElement('div');
                 name.className = 'hero-name';
                 name.textContent = hero.name;
                 card.appendChild(name);
+
                 const rarity = document.createElement('div');
-                rarity.className = 'hero-rarity rarity-' + hero.rarity;
+                rarity.className = `hero-rarity rarity-${hero.rarity}`;
                 rarity.textContent = getRarityText(hero.rarity);
                 card.appendChild(rarity);
+
                 grid.appendChild(card);
             });
         }
@@ -1165,35 +2526,38 @@
         function doGacha(packType) {
             let cost = GACHA_COSTS[packType];
             const today = new Date().toDateString();
-            let usedFree = false;
-
+            
             if (playerData.freePullsToday < 3) {
                 cost = 0;
                 playerData.freePullsToday++;
-                usedFree = true;
             }
-
+            
             if (playerData.coins < cost) {
-                alert('金币不足！');
+                alert('金币不足!');
                 return;
             }
 
             playerData.coins -= cost;
-
+            
             const rates = GACHA_RATES[packType];
-            const r = Math.random();
+            const rand = Math.random();
             let rarity;
-            if (r < rates.legendary) rarity = 'legendary';
-            else if (r < rates.legendary + rates.epic) rarity = 'epic';
-            else if (r < rates.legendary + rates.epic + rates.rare) rarity = 'rare';
-            else rarity = 'common';
+            if (rand < rates.legendary) {
+                rarity = 'legendary';
+            } else if (rand < rates.legendary + rates.epic) {
+                rarity = 'epic';
+            } else if (rand < rates.legendary + rates.epic + rates.rare) {
+                rarity = 'rare';
+            } else {
+                rarity = 'common';
+            }
 
-            const heroes = Object.values(HEROES).filter(h => h.rarity === rarity);
-            const got = heroes[Math.floor(Math.random() * heroes.length)];
+            const heroesOfRarity = Object.values(HEROES).filter(h => h.rarity === rarity);
+            const selectedHero = heroesOfRarity[Math.floor(Math.random() * heroesOfRarity.length)];
 
             let isNew = false;
-            if (!playerData.unlockedHeroes.includes(got.id)) {
-                playerData.unlockedHeroes.push(got.id);
+            if (!playerData.unlockedHeroes.includes(selectedHero.id)) {
+                playerData.unlockedHeroes.push(selectedHero.id);
                 isNew = true;
             } else {
                 const refund = rarity === 'legendary' ? 200 : rarity === 'epic' ? 100 : rarity === 'rare' ? 50 : 15;
@@ -1201,35 +2565,38 @@
             }
 
             savePlayerData();
-            showGachaResult(got, isNew);
+            showGachaResult(selectedHero, isNew);
             updateFreePullInfo();
         }
 
         function showGachaResult(hero, isNew) {
-            const container = document.getElementById('gachaResult');
-            const card = document.getElementById('gachaResultHero');
-            card.innerHTML = '';
-            card.className = 'hero-card gacha-result rarity-' + hero.rarity;
-
+            const resultDiv = document.getElementById('gachaResult');
+            const heroCard = document.getElementById('gachaResultHero');
+            
+            heroCard.innerHTML = '';
+            heroCard.className = `hero-card gacha-result rarity-${hero.rarity}`;
+            heroCard.style.boxShadow = `0 0 30px ${hero.colors.highlight}`;
+            
             const icon = document.createElement('div');
             icon.className = 'hero-icon';
-            icon.style.background = 'linear-gradient(135deg, ' + hero.colors.primary + ',' + hero.colors.secondary + ')';
-            icon.style.border = '4px solid ' + hero.colors.armor;
-            card.appendChild(icon);
+            icon.style.background = `linear-gradient(135deg, ${hero.colors.primary}, ${hero.colors.secondary})`;
+            icon.style.border = `4px solid ${hero.colors.armor}`;
+            icon.style.borderRadius = '12px';
+            heroCard.appendChild(icon);
 
             const name = document.createElement('div');
             name.className = 'hero-name';
             name.style.fontSize = '18px';
             name.textContent = hero.name;
-            card.appendChild(name);
+            heroCard.appendChild(name);
 
             const rarity = document.createElement('div');
-            rarity.className = 'hero-rarity rarity-' + hero.rarity;
+            rarity.className = `hero-rarity rarity-${hero.rarity}`;
             rarity.style.fontSize = '14px';
-            rarity.textContent = getRarityText(hero.rarity) + (isNew ? ' ✨ 新英雄！✨' : ' (重复，已返还金币)');
-            card.appendChild(rarity);
+            rarity.textContent = getRarityText(hero.rarity) + (isNew ? ' ✨ 新英雄! ✨' : ' (重复，已返还金币)');
+            heroCard.appendChild(rarity);
 
-            container.style.display = 'block';
+            resultDiv.style.display = 'block';
         }
 
         function hideGachaResult() {
@@ -1249,69 +2616,112 @@
             const container = document.getElementById('eventsContainer');
             const today = new Date();
             const todayStr = today.toDateString();
+            const dayOfMonth = today.getDate();
+            
             container.innerHTML = '';
 
-            const checkIn = document.createElement('div');
-            checkIn.className = 'event-card';
-            const canCheckIn = playerData.lastCheckinDay !== todayStr;
-            let checkInContent = '<div class="event-title">📅 每日签到</div><div class="event-desc">每日签到获得奖励，连续签到奖励更丰厚！</div><div class="checkin-grid">';
-
+            const checkinCard = document.createElement('div');
+            checkinCard.className = 'event-card';
+            const canCheckin = playerData.lastCheckinDay !== todayStr;
+            
+            let checkinContent = `
+                <div class="event-title">📅 每日签到</div>
+                <div class="event-desc">每日签到获得奖励，连续签到奖励更丰厚！</div>
+                <div class="checkin-grid">
+            `;
+            
             for (let i = 0; i < 7; i++) {
-                const isChecked = i < (playerData.checkinStreak % 7);
-                const isToday = i === (playerData.checkinStreak % 7);
-                checkInContent += '<div class="checkin-day' + (isChecked ? ' checked' : '') + (isToday ? ' today' : '') + '"><div class="day-num">' + (i + 1) + '</div><div class="day-reward">' + ((i + 1) * 30 + '💰</div></div>';
+                const dayNum = (dayOfMonth - 3 + i + 30) % 30 + 1;
+                const isChecked = i < 3;
+                const isToday = i === 3;
+                let dayClass = 'checkin-day';
+                if (isChecked) dayClass += ' checked';
+                if (isToday) dayClass += ' today';
+                
+                const reward = (i + 1) * 30;
+                checkinContent += `
+                    <div class="${dayClass}">
+                        <div class="day-num">${i + 1}</div>
+                        <div class="day-reward">${reward}💰</div>
+                    </div>
+                `;
             }
-            checkInContent += '</div>';
-            if (canCheckIn) {
-                checkIn.className += ' claimable';
-                checkInContent += '<button class="menu-btn gold" onclick="doCheckIn()">领取签到奖励</button>';
+            checkinContent += `</div>`;
+            
+            if (canCheckin) {
+                checkinCard.className += ' claimable';
+                checkinContent += `<button class="menu-btn gold" onclick="doCheckin()">领取签到奖励</button>`;
             } else {
-                checkIn.className += ' completed';
-                checkInContent += '<div class="event-reward">✅ 今日已签到</div>';
+                checkinCard.className += ' completed';
+                checkinContent += `<div class="event-reward">✅ 今日已签到</div>`;
             }
-            checkIn.innerHTML = checkInContent;
-            container.appendChild(checkIn);
+            checkinCard.innerHTML = checkinContent;
+            container.appendChild(checkinCard);
 
-            const daily = document.createElement('div');
-            daily.className = 'event-card';
-            const doneDaily = playerData.dailyTasksDone.includes(todayStr);
-            daily.innerHTML = '<div class="event-title">🎯 每日任务</div><div class="event-desc">完成一局对战获得奖励！</div><div class="event-progress"><div class="event-progress-bar" style="width:' + (doneDaily ? '100' : Math.min(100, (playerData.wins + playerData.losses) * 20) + '%;"></div></div><div class="event-reward">奖励: +100💰</div>' + (doneDaily ? '<div class="event-reward" style="color:#7aff9a;">✅ 已完成</div>' : '<button class="menu-btn purple" onclick="claimDailyTask()">领取奖励</button>');
-            if (doneDaily) daily.className += ' completed';
-            container.appendChild(daily);
+            const dailyTaskCard = document.createElement('div');
+            dailyTaskCard.className = 'event-card';
+            const tasksDone = playerData.dailyTasksDone.includes(todayStr);
+            dailyTaskCard.innerHTML = `
+                <div class="event-title">🎯 每日任务</div>
+                <div class="event-desc">完成一局对战获得奖励！</div>
+                <div class="event-progress">
+                    <div class="event-progress-bar" style="width: ${tasksDone ? '100' : Math.min(100, (playerData.wins + playerData.losses) * 20)}%"></div>
+                </div>
+                <div class="event-reward">奖励: +100💰</div>
+                ${tasksDone ? '<div class="event-reward" style="color:#7aff9a">✅ 已完成</div>' : 
+                  '<button class="menu-btn purple" onclick="claimDailyTask()">领取奖励</button>'}
+            `;
+            if (tasksDone) dailyTaskCard.className += ' completed';
+            container.appendChild(dailyTaskCard);
 
-            const firstWin = document.createElement('div');
-            firstWin.className = 'event-card';
+            const firstWinCard = document.createElement('div');
+            firstWinCard.className = 'event-card';
             if (playerData.firstWinClaimed) {
-                firstWin.className += ' completed';
-                firstWin.innerHTML = '<div class="event-title">🏆 每日首胜</div><div class="event-desc">每日首胜获得额外奖励！</div><div class="event-reward">✅ 今日已领取首胜奖励</div>';
+                firstWinCard.className += ' completed';
+                firstWinCard.innerHTML = `
+                    <div class="event-title">🏆 每日首胜</div>
+                    <div class="event-desc">每日首胜获得额外奖励！</div>
+                    <div class="event-reward">✅ 今日已领取首胜奖励</div>
+                `;
             } else {
-                firstWin.innerHTML = '<div class="event-title">🏆 每日首胜</div><div class="event-desc">每日首胜获得额外奖励！</div><div class="event-reward">奖励: +200💰</div>';
+                firstWinCard.innerHTML = `
+                    <div class="event-title">🏆 每日首胜</div>
+                    <div class="event-desc">每日首胜获得额外奖励！</div>
+                    <div class="event-reward">奖励: +200💰</div>
+                `;
             }
-            container.appendChild(firstWin);
+            container.appendChild(firstWinCard);
 
             if (playerData.isNewPlayer && playerData.unlockedHeroes.length < 4) {
-                const newbie = document.createElement('div');
-                newbie.className = 'event-card claimable';
-                newbie.innerHTML = '<div class="event-title">🎁 新手礼包</div><div class="event-desc">欢迎游玩！送你500金币和一个稀有英雄！</div><div class="event-reward">奖励: 500💰 + 随机稀有英雄</div><button class="menu-btn gold" onclick="claimNewbieGift()">领取新手礼包</button>';
-                container.appendChild(newbie);
+                const newPlayerCard = document.createElement('div');
+                newPlayerCard.className = 'event-card claimable';
+                newPlayerCard.innerHTML = `
+                    <div class="event-title">🎁 新手礼包</div>
+                    <div class="event-desc">欢迎游玩！送你500金币和一个稀有英雄！</div>
+                    <div class="event-reward">奖励: 500💰 + 随机稀有英雄</div>
+                    <button class="menu-btn gold" onclick="claimNewPlayerGift()">领取新手礼包</button>
+                `;
+                container.appendChild(newPlayerCard);
             }
         }
 
-        function doCheckIn() {
+        function doCheckin() {
             const today = new Date().toDateString();
             if (playerData.lastCheckinDay === today) return;
+            
             playerData.lastCheckinDay = today;
             playerData.checkinStreak++;
             const reward = Math.min(playerData.checkinStreak, 7) * 30;
             playerData.coins += reward;
             savePlayerData();
-            showNotification('🎉 签到成功！获得 ' + reward + ' 金币！');
+            showNotification(`🎉 签到成功！获得 ${reward} 金币！`);
             renderEvents();
         }
 
         function claimDailyTask() {
             const today = new Date().toDateString();
             if (playerData.dailyTasksDone.includes(today)) return;
+            
             playerData.dailyTasksDone.push(today);
             playerData.coins += 100;
             savePlayerData();
@@ -1319,16 +2729,19 @@
             renderEvents();
         }
 
-        function claimNewbieGift() {
+        function claimNewPlayerGift() {
             if (!playerData.isNewPlayer) return;
+            
             playerData.isNewPlayer = false;
             playerData.coins += 500;
-            const rares = Object.values(HEROES).filter(h => h.rarity === 'rare' && !playerData.unlockedHeroes.includes(h.id));
-            if (rares.length > 0) {
-                const g = rares[Math.floor(Math.random() * rares.length)];
-                playerData.unlockedHeroes.push(g.id);
-                showNotification('🎁 获得 ' + g.name + '！');
+            
+            const rareHeroes = Object.values(HEROES).filter(h => h.rarity === 'rare' && !playerData.unlockedHeroes.includes(h.id));
+            if (rareHeroes.length > 0) {
+                const hero = rareHeroes[Math.floor(Math.random() * rareHeroes.length)];
+                playerData.unlockedHeroes.push(hero.id);
+                showNotification(`🎁 获得 ${hero.name}！`);
             }
+            
             savePlayerData();
             renderEvents();
         }
@@ -1336,81 +2749,37 @@
         function showSettings() {
             hideAllMenus();
             document.getElementById('settingsScreen').classList.remove('hidden');
-            document.getElementById('playerInfo').style.display = 'block';
             updateKeybindDisplay();
-            renderFeaturedHeroGrid();
-        }
-
-        function renderFeaturedHeroGrid() {
-            const grid = document.getElementById('featuredHeroGrid');
-            grid.innerHTML = '';
-            Object.values(HEROES).forEach(hero => {
-                const card = document.createElement('div');
-                card.className = 'hero-card';
-                if (!playerData.unlockedHeroes.includes(hero.id)) {
-                    card.classList.add('locked');
-                }
-                if (playerData.featuredHero === hero.id) {
-                    card.classList.add('selected');
-                }
-                const icon = document.createElement('div');
-                icon.className = 'hero-icon';
-                icon.style.background = 'linear-gradient(135deg, ' + hero.colors.primary + ',' + hero.colors.secondary + ')';
-                icon.style.border = '4px solid ' + hero.colors.armor;
-                card.appendChild(icon);
-
-                const name = document.createElement('div');
-                name.className = 'hero-name';
-                name.textContent = hero.name;
-                card.appendChild(name);
-
-                const rarity = document.createElement('div');
-                rarity.className = 'hero-rarity rarity-' + hero.rarity;
-                rarity.textContent = getRarityText(hero.rarity);
-                card.appendChild(rarity);
-
-                const styleTag = document.createElement('div');
-                styleTag.className = 'hero-style';
-                styleTag.textContent = STYLES[hero.style].name;
-                card.appendChild(styleTag);
-
-                if (playerData.unlockedHeroes.includes(hero.id)) {
-                    card.addEventListener('click', () => {
-                        setFeaturedHero(hero.id);
-                        renderFeaturedHeroGrid();
-                    });
-                }
-                grid.appendChild(card);
-            });
         }
 
         function switchSettingsTab(tab) {
-            document.querySelectorAll('.settings-tab').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.settings-content').forEach(c => c.style.display = 'none');
+            
             event.target.classList.add('active');
-            ['Profile', 'Controls', 'Heroes'].forEach(name => {
-                const el = document.getElementById('settings' + name);
-                el.style.display = (name.toLowerCase() === tab ? 'block' : 'none';
-            });
+            document.getElementById('settings' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
         }
 
         function updateKeybindDisplay() {
             Object.keys(playerData.settings.keybinds).forEach(player => {
                 Object.keys(playerData.settings.keybinds[player]).forEach(action => {
                     const key = playerData.settings.keybinds[player][action];
-                    const display = key.replace('Key', '').replace('Arrow', '').replace('Digit', '');
-                    const btn = document.getElementById('kb-' + player + '-' + action);
-                    if (btn) btn.textContent = display;
+                    const displayKey = key.replace('Key', '').replace('Arrow', '').replace('Digit', '');
+                    const btnId = `kb-${player}-${action}`;
+                    const btn = document.getElementById(btnId);
+                    if (btn) btn.textContent = displayKey;
                 });
             });
         }
 
         function startKeybind(player, action) {
             if (recordingKeybind) {
-                const prevBtn = document.getElementById('kb-' + recordingKeybind.player + '-' + recordingKeybind.action);
+                const prevBtn = document.getElementById(`kb-${recordingKeybind.player}-${recordingKeybind.action}`);
                 if (prevBtn) prevBtn.classList.remove('recording');
             }
+            
             recordingKeybind = { player, action };
-            const btn = document.getElementById('kb-' + player + '-' + action);
+            const btn = document.getElementById(`kb-${player}-${action}`);
             btn.classList.add('recording');
             btn.textContent = '...';
         }
@@ -1421,12 +2790,195 @@
             showNotification('✓ 资料已保存！');
         }
 
+        let mobileControls = {
+            p1: {
+                jump: null, left: null, right: null, attack: null, defend: null, skill1: null, skill2: null
+            },
+            p2: {
+                jump: null, left: null, right: null, attack: null, defend: null, skill1: null, skill2: null
+            }
+        };
+        let activeMobileKeys = new Set();
+
+        function createMobileControls() {
+            const container = document.getElementById('mobileControls');
+            if (container) return;
+
+            const controlsDiv = document.createElement('div');
+            controlsDiv.id = 'mobileControls';
+            controlsDiv.style.cssText = `
+                position: absolute;
+                bottom: 60px;
+                left: 0;
+                right: 0;
+                display: flex;
+                justify-content: space-between;
+                padding: 0 20px;
+                pointer-events: none;
+                z-index: 15;
+            `;
+
+            const createPlayerControls = (playerId, side) => {
+                const playerDiv = document.createElement('div');
+                playerDiv.style.cssText = `
+                    display: grid;
+                    grid-template-columns: repeat(3, 50px);
+                    grid-template-rows: repeat(3, 50px);
+                    gap: 5px;
+                    pointer-events: auto;
+                `;
+
+                const actions = [
+                    { action: 'skill1', label: '技1', gridArea: '1 / 1' },
+                    { action: 'jump', label: '↑', gridArea: '1 / 2' },
+                    { action: 'skill2', label: '技2', gridArea: '1 / 3' },
+                    { action: 'left', label: '←', gridArea: '2 / 1' },
+                    { action: 'attack', label: '⚔', gridArea: '2 / 2' },
+                    { action: 'right', label: '→', gridArea: '2 / 3' },
+                    { action: 'defend', label: '🛡', gridArea: '3 / 2' }
+                ];
+
+                actions.forEach(({ action, label, gridArea }) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'mobile-btn';
+                    btn.dataset.player = playerId;
+                    btn.dataset.action = action;
+                    btn.textContent = label;
+                    btn.style.cssText = `
+                        width: 50px;
+                        height: 50px;
+                        border-radius: 50%;
+                        border: 3px solid ${side === 'left' ? '#4fc3f7' : '#ff6b6b'};
+                        background: rgba(42, 42, 74, 0.85);
+                        color: #fff;
+                        font-size: 16px;
+                        cursor: pointer;
+                        touch-action: manipulation;
+                        user-select: none;
+                        -webkit-user-select: none;
+                        transition: all 0.1s;
+                    `;
+
+                    btn.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        btn.style.transform = 'scale(0.9)';
+                        btn.style.background = 'rgba(79, 195, 247, 0.4)';
+                        handleMobileInput(playerId, action, true);
+                    });
+                    btn.addEventListener('touchend', (e) => {
+                        e.preventDefault();
+                        btn.style.transform = '';
+                        btn.style.background = 'rgba(42, 42, 74, 0.85)';
+                        handleMobileInput(playerId, action, false);
+                    });
+                    btn.addEventListener('touchcancel', (e) => {
+                        e.preventDefault();
+                        btn.style.transform = '';
+                        btn.style.background = 'rgba(42, 42, 74, 0.85)';
+                        handleMobileInput(playerId, action, false);
+                    });
+
+                    playerDiv.appendChild(btn);
+                });
+
+                return playerDiv;
+            };
+
+            controlsDiv.appendChild(createPlayerControls('p1', 'left'));
+            controlsDiv.appendChild(createPlayerControls('p2', 'right'));
+            document.getElementById('game-container').appendChild(controlsDiv);
+        }
+
+        function handleMobileInput(player, action, isPressed) {
+            const key = `${player}_${action}`;
+            if (isPressed) {
+                activeMobileKeys.add(key);
+            } else {
+                activeMobileKeys.delete(key);
+            }
+            updateMobileKeysState();
+        }
+
+        function updateMobileKeysState() {
+            mobileControls.p1 = {
+                jump: activeMobileKeys.has('p1_jump'),
+                left: activeMobileKeys.has('p1_left'),
+                right: activeMobileKeys.has('p1_right'),
+                attack: activeMobileKeys.has('p1_attack'),
+                defend: activeMobileKeys.has('p1_defend'),
+                skill1: activeMobileKeys.has('p1_skill1'),
+                skill2: activeMobileKeys.has('p1_skill2')
+            };
+            mobileControls.p2 = {
+                jump: activeMobileKeys.has('p2_jump'),
+                left: activeMobileKeys.has('p2_left'),
+                right: activeMobileKeys.has('p2_right'),
+                attack: activeMobileKeys.has('p2_attack'),
+                defend: activeMobileKeys.has('p2_defend'),
+                skill1: activeMobileKeys.has('p2_skill1'),
+                skill2: activeMobileKeys.has('p2_skill2')
+            };
+        }
+
+        function handleMobileControls() {
+            if (isNetworkGame && localPlayerId === 1) {
+                if (mobileControls.p1.left) player1.moveLeft();
+                if (mobileControls.p1.right) player1.moveRight();
+                if (mobileControls.p1.jump) player1.jump();
+                if (mobileControls.p1.attack) player1.attack(player2);
+                if (mobileControls.p1.skill1) player1.useSkill(0, player2);
+                if (mobileControls.p1.skill2) player1.useSkill(1, player2);
+                player1.defend(mobileControls.p1.defend);
+            } else if (!isNetworkGame) {
+                if (mobileControls.p1.left) player1.moveLeft();
+                if (mobileControls.p1.right) player1.moveRight();
+                if (mobileControls.p1.jump) player1.jump();
+                if (mobileControls.p1.attack) player1.attack(player2);
+                if (mobileControls.p1.skill1) player1.useSkill(0, player2);
+                if (mobileControls.p1.skill2) player1.useSkill(1, player2);
+                player1.defend(mobileControls.p1.defend);
+
+                if (mobileControls.p2.left) player2.moveLeft();
+                if (mobileControls.p2.right) player2.moveRight();
+                if (mobileControls.p2.jump) player2.jump();
+                if (mobileControls.p2.attack) player2.attack(player1);
+                if (mobileControls.p2.skill1) player2.useSkill(0, player1);
+                if (mobileControls.p2.skill2) player2.useSkill(1, player1);
+                player2.defend(mobileControls.p2.defend);
+            } else {
+                if (mobileControls.p2.left) player2.moveLeft();
+                if (mobileControls.p2.right) player2.moveRight();
+                if (mobileControls.p2.jump) player2.jump();
+                if (mobileControls.p2.attack) player2.attack(player1);
+                if (mobileControls.p2.skill1) player2.useSkill(0, player1);
+                if (mobileControls.p2.skill2) player2.useSkill(1, player1);
+                player2.defend(mobileControls.p2.defend);
+            }
+        }
+
+        function detectMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                || window.innerWidth < 768;
+        }
+
+        function showMobileControls() {
+            createMobileControls();
+            document.getElementById('mobileControls').style.display = 'flex';
+        }
+
+        function hideMobileControls() {
+            const controls = document.getElementById('mobileControls');
+            if (controls) {
+                document.getElementById('mobileControls').style.display = 'none';
+            }
+        }
+
         function loadPlayerData() {
             const saved = localStorage.getItem('pixelMechPlayerData');
             if (saved) {
                 playerData = { ...playerData, ...JSON.parse(saved) };
             }
-
+            
             const today = new Date().toDateString();
             if (playerData.lastLogin !== today) {
                 playerData.coins += 100;
@@ -1435,11 +2987,7 @@
                 playerData.freePullsToday = 0;
                 savePlayerData();
             }
-
-            if (playerData.featuredHero) {
-                applyStyle(HEROES[playerData.featuredHero].style);
-            }
-
+            
             updatePlayerInfo();
         }
 
@@ -1451,32 +2999,26 @@
         function updatePlayerInfo() {
             document.getElementById('playerNameDisplay').textContent = playerData.name;
             document.getElementById('coinsDisplay').textContent = '💰 ' + playerData.coins;
-            document.getElementById('statsDisplay').textContent = '胜: ' + playerData.wins + ' | 负: ' + playerData.losses;
+            document.getElementById('statsDisplay').textContent = `胜: ${playerData.wins} | 负: ${playerData.losses}`;
             document.getElementById('gachaCoins').textContent = playerData.coins;
             document.getElementById('playerNameInput').value = playerData.name;
         }
 
-        function initBgParticles() {
-            const container = document.getElementById('bgParticles');
-            for (let i = 0; i < 20; i++) {
-                const p = document.createElement('div');
-                p.className = 'bg-particle';
-                p.style.left = Math.random() * 100 + '%';
-                p.style.animationDelay = Math.random() * 15 + 's';
-                container.appendChild(p);
-            }
-        }
-
-        document.addEventListener('keydown', e => {
+        document.addEventListener('keydown', (e) => {
             keys[e.code] = true;
             keys[e.key] = true;
 
             if (recordingKeybind) {
                 e.preventDefault();
                 const { player, action } = recordingKeybind;
+                
                 playerData.settings.keybinds[player][action] = e.code;
+                
+                const btn = document.getElementById(`kb-${player}-${action}`);
+                btn.classList.remove('recording');
+                btn.textContent = e.code.replace('Key', '').replace('Arrow', '').replace('Digit', '');
+                
                 savePlayerData();
-                updateKeybindDisplay();
                 recordingKeybind = null;
             }
 
@@ -1485,30 +3027,28 @@
             }
         });
 
-        document.addEventListener('keyup', e => {
+        document.addEventListener('keyup', (e) => {
             keys[e.code] = false;
             keys[e.key] = false;
         });
 
+        const canvas = document.getElementById('gameCanvas');
+        window.ctx = canvas.getContext('2d');
         loadPlayerData();
         initGame();
-        initBgParticles();
         showMainMenu();
 
         if (detectMobile()) {
-            createMobileControls();
+            showMobileControls();
         }
 
         window.addEventListener('resize', () => {
             if (detectMobile()) {
-                createMobileControls();
+                showMobileControls();
+            } else {
+                hideMobileControls();
             }
         });
-
-        function detectMobile() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-                || window.innerWidth < 768;
-        }
 
         requestAnimationFrame(gameLoop);
     </script>
