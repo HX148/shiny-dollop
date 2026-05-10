@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>像素机甲对战 - Mech Battle</title>
+    <title>机甲对决 - 终极版</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         * {
@@ -39,7 +39,6 @@
             transition: all 0.5s ease;
         }
 
-        /* Style themes */
         body.theme-tech {
             --bg-primary: #0a0a1a;
             --bg-secondary: #1a1a3a;
@@ -95,9 +94,7 @@
         #gameCanvas {
             border: 4px solid var(--border-color);
             border-radius: 12px;
-            box-shadow: 0 0 40px var(--glow-color), 
-                        0 0 80px var(--glow-color),
-                        inset 0 0 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 40px var(--glow-color), 0 0 80px var(--glow-color), inset 0 0 20px rgba(0, 0, 0, 0.5);
             image-rendering: pixelated;
             image-rendering: crisp-edges;
             transition: all 0.3s ease;
@@ -172,6 +169,10 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 20px var(--glow-color);
             position: relative;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .menu-btn::before {
@@ -212,101 +213,10 @@
             box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4), 0 0 30px rgba(255, 107, 107, 0.2);
         }
 
-        .menu-btn.gold {
-            border-color: var(--accent-secondary);
-            background: linear-gradient(180deg, #caa73f 0%, #8a6f18 100%);
-            box-shadow: 0 4px 20px rgba(255, 231, 98, 0.4), 0 0 30px rgba(255, 231, 98, 0.2);
-        }
-
-        .menu-btn.purple {
-            border-color: var(--accent-purple);
-            background: linear-gradient(180deg, #7c3aed 0%, #5b21b6 100%);
-            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4), 0 0 30px rgba(168, 85, 247, 0.2);
-        }
-
         .menu-btn.small {
             width: auto;
             padding: 10px 20px;
             font-size: 14px;
-        }
-
-        .input-group {
-            margin: 15px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .input-group label {
-            font-size: 14px;
-            margin-bottom: 8px;
-            color: #8a8aaa;
-            letter-spacing: 1px;
-        }
-
-        .input-group input {
-            width: 240px;
-            padding: 12px 16px;
-            font-size: 16px;
-            font-family: 'Courier New', monospace;
-            color: #fff;
-            background: #1a1a3a;
-            border: 2px solid #5a5a8a;
-            border-radius: 8px;
-            text-align: center;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .input-group input:focus {
-            border-color: #4fc3f7;
-            box-shadow: 0 0 15px rgba(79, 195, 247, 0.3);
-        }
-
-        .room-info {
-            margin: 20px 0;
-            padding: 20px 30px;
-            background: rgba(79, 195, 247, 0.15);
-            border: 2px solid #4fc3f7;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 0 20px rgba(79, 195, 247, 0.2);
-        }
-
-        .room-info .label {
-            font-size: 12px;
-            color: #8a8aaa;
-            margin-bottom: 8px;
-        }
-
-        .room-info .room-id {
-            font-size: 24px;
-            font-weight: bold;
-            color: #4fc3f7;
-            letter-spacing: 3px;
-            word-break: break-all;
-        }
-
-        .status-text {
-            margin: 15px 0;
-            font-size: 16px;
-            color: #ffe762;
-            animation: blink 1s ease-in-out infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .controls-hint {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 12px;
-            color: #6a6a9a;
-            text-align: center;
         }
 
         .back-btn {
@@ -398,23 +308,52 @@
 
         .skill-cooldown-container {
             display: flex;
-            gap: 10px;
-            margin-top: 8px;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .skill-cooldown-wrapper {
+            flex: 1;
+            position: relative;
         }
 
         .skill-cooldown {
-            flex: 1;
-            height: 8px;
+            height: 16px;
             background: #1a1a3a;
-            border-radius: 4px;
+            border-radius: 6px;
             overflow: hidden;
+            border: 1px solid #3a3a6a;
+            position: relative;
         }
 
         .skill-cooldown-bar {
             height: 100%;
-            background: #ffe762;
-            border-radius: 4px;
+            background: linear-gradient(90deg, #4fc3f7, #ffe762);
+            border-radius: 6px;
             transition: width 0.1s;
+        }
+
+        .skill-cooldown-bar.ultimate {
+            background: linear-gradient(90deg, #ff00ff, #00ffff);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+        }
+
+        .skill-cooldown-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .skill-name {
+            font-size: 10px;
+            text-align: center;
+            margin-top: 3px;
+            color: #9a9aca;
         }
 
         .game-over-overlay {
@@ -428,7 +367,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 20;
+            z-index: 30;
             border-radius: 12px;
             backdrop-filter: blur(10px);
         }
@@ -463,7 +402,7 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             padding: 20px;
-            max-height: 320px;
+            max-height: 350px;
             overflow-y: auto;
         }
 
@@ -495,9 +434,9 @@
         }
 
         .hero-card:hover {
-            border-color: #4fc3f7;
+            border-color: var(--accent-primary);
             transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 10px 30px rgba(79, 195, 247, 0.4);
+            box-shadow: 0 10px 30px var(--glow-color);
             background: rgba(62, 62, 102, 0.9);
         }
 
@@ -514,32 +453,8 @@
 
         .hero-card.banned {
             opacity: 0.3;
+            filter: grayscale(1);
             pointer-events: none;
-            filter: grayscale(100%);
-            position: relative;
-        }
-
-        .hero-card.banned::after {
-            content: '✕';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 48px;
-            color: #ff4444;
-            text-shadow: 0 0 10px #ff0000;
-        }
-
-        .hero-card.locked {
-            opacity: 0.5;
-        }
-
-        .hero-card.locked::after {
-            content: '🔒';
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            font-size: 16px;
         }
 
         .hero-card .hero-icon {
@@ -549,6 +464,10 @@
             border-radius: 10px;
             border: 3px solid;
             position: relative;
+            font-size: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .hero-card .hero-name {
@@ -560,18 +479,6 @@
         .hero-card .hero-rarity {
             font-size: 11px;
             opacity: 0.9;
-        }
-
-        .hero-card .hero-stats {
-            font-size: 10px;
-            color: #9a9aca;
-            margin-top: 5px;
-        }
-
-        .hero-card .hero-ability {
-            font-size: 9px;
-            color: #ffe762;
-            margin-top: 3px;
         }
 
         .rarity-common { color: #aaa; }
@@ -591,12 +498,6 @@
             text-align: right;
             backdrop-filter: blur(5px);
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-        }
-
-        .player-info-panel .coins {
-            color: #ffe762;
-            font-weight: bold;
-            font-size: 16px;
         }
 
         .settings-container {
@@ -662,32 +563,9 @@
             background: #4a4a2a;
         }
 
-        .gacha-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .gacha-pack {
-            width: 160px;
-            height: 220px;
-            margin: 20px;
-            cursor: pointer;
-            transition: transform 0.3s;
-        }
-
-        .gacha-pack:hover {
-            transform: scale(1.08);
-        }
-
-        .gacha-result {
-            animation: cardReveal 0.8s ease-out;
-        }
-
-        @keyframes cardReveal {
-            0% { transform: scale(0) rotateY(180deg); opacity: 0; }
-            50% { transform: scale(1.2) rotateY(90deg); }
-            100% { transform: scale(1) rotateY(0deg); opacity: 1; }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         ::-webkit-scrollbar {
@@ -708,129 +586,11 @@
             background: #7a7aaa;
         }
 
-        .flex-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
         .section-title {
             font-size: 20px;
             margin: 15px 0;
-            color: #4fc3f7;
+            color: var(--accent-primary);
             font-weight: bold;
-        }
-
-        .events-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding: 20px;
-            max-height: 450px;
-            overflow-y: auto;
-        }
-
-        .event-card {
-            background: rgba(52, 52, 92, 0.8);
-            border: 2px solid #5a5a8a;
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.3s;
-        }
-
-        .event-card:hover {
-            border-color: #4fc3f7;
-            box-shadow: 0 0 20px rgba(79, 195, 247, 0.2);
-        }
-
-        .event-card.completed {
-            opacity: 0.6;
-            border-color: #4a9a4a;
-        }
-
-        .event-card.claimable {
-            border-color: #ffe762;
-            animation: claimablePulse 1.5s infinite;
-        }
-
-        @keyframes claimablePulse {
-            0%, 100% { box-shadow: 0 0 15px rgba(255, 231, 98, 0.3); }
-            50% { box-shadow: 0 0 30px rgba(255, 231, 98, 0.6); }
-        }
-
-        .event-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .event-desc {
-            font-size: 13px;
-            color: #9a9aca;
-            margin-bottom: 15px;
-        }
-
-        .event-reward {
-            font-size: 14px;
-            color: #ffe762;
-            margin-bottom: 10px;
-        }
-
-        .event-progress {
-            height: 8px;
-            background: #1a1a3a;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .event-progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #4fc3f7, #a855f7);
-            border-radius: 4px;
-            transition: width 0.3s;
-        }
-
-        .checkin-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .checkin-day {
-            padding: 15px 10px;
-            background: rgba(52, 52, 92, 0.6);
-            border: 2px solid #5a5a8a;
-            border-radius: 10px;
-            text-align: center;
-            transition: all 0.2s;
-        }
-
-        .checkin-day.checked {
-            background: rgba(79, 195, 247, 0.2);
-            border-color: #4fc3f7;
-        }
-
-        .checkin-day.today {
-            border-color: #ffe762;
-            animation: todayPulse 1s infinite;
-        }
-
-        @keyframes todayPulse {
-            0%, 100% { box-shadow: 0 0 10px rgba(255, 231, 98, 0.3); }
-            50% { box-shadow: 0 0 20px rgba(255, 231, 98, 0.5); }
-        }
-
-        .checkin-day .day-num {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .checkin-day .day-reward {
-            font-size: 12px;
-            color: #ffe762;
         }
 
         .notification {
@@ -854,10 +614,260 @@
             100% { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
 
-        .free-pull-info {
+        .status-text {
+            margin: 15px 0;
+            font-size: 16px;
+            color: #ffe762;
+            animation: blink 1s ease-in-out infinite;
+        }
+
+        .input-group {
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-group label {
             font-size: 14px;
+            margin-bottom: 8px;
+            color: #8a8aaa;
+            letter-spacing: 1px;
+        }
+
+        .input-group input {
+            width: 240px;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            color: #fff;
+            background: #1a1a3a;
+            border: 2px solid #5a5a8a;
+            border-radius: 8px;
+            text-align: center;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: #4fc3f7;
+            box-shadow: 0 0 15px rgba(79, 195, 247, 0.3);
+        }
+
+        .room-info {
+            margin: 20px 0;
+            padding: 20px 30px;
+            background: rgba(79, 195, 247, 0.15);
+            border: 2px solid #4fc3f7;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.2);
+        }
+
+        .room-info .label {
+            font-size: 12px;
+            color: #8a8aaa;
+            margin-bottom: 8px;
+        }
+
+        .room-info .room-id {
+            font-size: 24px;
+            font-weight: bold;
             color: #4fc3f7;
+            letter-spacing: 3px;
+            word-break: break-all;
+        }
+
+        .controls-hint {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #6a6a9a;
+            text-align: center;
+        }
+
+        .hero-detail-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            padding: 20px;
+            background: rgba(10, 10, 26, 0.95);
+            border: 3px solid var(--accent-primary);
+            border-radius: 12px;
+            box-shadow: 0 0 30px var(--glow-color);
+            z-index: 15;
+            display: none;
+        }
+
+        .hero-detail-panel.show {
+            display: block;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(50px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        .hero-detail-header {
+            display: flex;
+            gap: 20px;
             margin-bottom: 15px;
+        }
+
+        .hero-detail-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            border: 3px solid var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .hero-detail-info {
+            flex: 1;
+        }
+
+        .hero-detail-name {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .hero-detail-rarity {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .hero-detail-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+        }
+
+        .hero-detail-desc {
+            font-size: 13px;
+            color: #9a9aca;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .hero-detail-skills {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .skill-detail {
+            padding: 12px;
+            background: rgba(52, 52, 92, 0.6);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .skill-detail.ultimate {
+            border-left-color: #ff00ff;
+            background: rgba(168, 85, 247, 0.2);
+        }
+
+        .skill-detail-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .skill-detail-desc {
+            font-size: 11px;
+            color: #8a8aaa;
+        }
+
+        .ultimate-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        .ultimate-effect.active {
+            animation: ultimateFlash 0.5s ease-out;
+        }
+
+        @keyframes ultimateFlash {
+            0% { background: rgba(255, 255, 255, 0.8); }
+            100% { background: transparent; }
+        }
+
+        .ultimate-art {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 800px;
+            height: 600px;
+            background: linear-gradient(135deg, rgba(10, 10, 26, 0.95), rgba(26, 26, 58, 0.95));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+            animation: artFadeIn 0.5s ease-out;
+        }
+
+        .ultimate-art.hidden {
+            display: none;
+        }
+
+        @keyframes artFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .ultimate-art-hero {
+            font-size: 120px;
+            margin-bottom: 20px;
+            animation: heroFloat 1s ease-in-out infinite;
+        }
+
+        @keyframes heroFloat {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-20px) scale(1.1); }
+        }
+
+        .ultimate-art-name {
+            font-size: 48px;
+            font-weight: bold;
+            background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 0, 255, 0.5);
+            animation: nameGlow 1s ease-in-out infinite;
+        }
+
+        @keyframes nameGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.5); }
+        }
+
+        .ultimate-art-subtitle {
+            font-size: 20px;
+            margin-top: 15px;
+            color: #ffe762;
+        }
+
+        .ultimate-art-char {
+            position: absolute;
+            top: 100px;
+            font-size: 200px;
+            opacity: 0.1;
+            color: var(--accent-primary);
         }
     </style>
 </head>
@@ -867,8 +877,7 @@
 
         <div id="playerInfo" class="player-info-panel" style="display: none;">
             <div id="playerNameDisplay">玩家</div>
-            <div class="coins" id="coinsDisplay">💰 1000</div>
-            <div id="statsDisplay">胜: 0 | 负: 0</div>
+            <div id="statsDisplay" style="color: var(--accent-secondary);">胜: 0 | 负: 0</div>
         </div>
 
         <div id="healthBars" class="hidden">
@@ -878,11 +887,26 @@
                     <div id="health1" class="health-bar blue" style="width: 100%"></div>
                 </div>
                 <div class="skill-cooldown-container">
-                    <div class="skill-cooldown">
-                        <div id="skill1-p1" class="skill-cooldown-bar" style="width: 100%"></div>
+                    <div class="skill-cooldown-wrapper">
+                        <div class="skill-cooldown">
+                            <div id="skill1-p1" class="skill-cooldown-bar" style="width: 100%"></div>
+                            <div class="skill-cooldown-text" id="skill1-p1-text">就绪</div>
+                        </div>
+                        <div class="skill-name" id="skill1-p1-name">技能1</div>
                     </div>
-                    <div class="skill-cooldown">
-                        <div id="skill2-p1" class="skill-cooldown-bar" style="width: 100%"></div>
+                    <div class="skill-cooldown-wrapper">
+                        <div class="skill-cooldown">
+                            <div id="skill2-p1" class="skill-cooldown-bar" style="width: 100%"></div>
+                            <div class="skill-cooldown-text" id="skill2-p1-text">就绪</div>
+                        </div>
+                        <div class="skill-name" id="skill2-p1-name">技能2</div>
+                    </div>
+                    <div class="skill-cooldown-wrapper">
+                        <div class="skill-cooldown">
+                            <div id="ultimate-p1" class="skill-cooldown-bar ultimate" style="width: 100%"></div>
+                            <div class="skill-cooldown-text" id="ultimate-p1-text">就绪</div>
+                        </div>
+                        <div class="skill-name" style="color: #ff00ff;">奥义</div>
                     </div>
                 </div>
             </div>
@@ -892,22 +916,36 @@
                     <div id="health2" class="health-bar red" style="width: 100%"></div>
                 </div>
                 <div class="skill-cooldown-container">
-                    <div class="skill-cooldown">
-                        <div id="skill1-p2" class="skill-cooldown-bar" style="width: 100%"></div>
+                    <div class="skill-cooldown-wrapper">
+                        <div class="skill-cooldown">
+                            <div id="skill1-p2" class="skill-cooldown-bar" style="width: 100%"></div>
+                            <div class="skill-cooldown-text" id="skill1-p2-text">就绪</div>
+                        </div>
+                        <div class="skill-name" id="skill1-p2-name">技能1</div>
                     </div>
-                    <div class="skill-cooldown">
-                        <div id="skill2-p2" class="skill-cooldown-bar" style="width: 100%"></div>
+                    <div class="skill-cooldown-wrapper">
+                        <div class="skill-cooldown">
+                            <div id="skill2-p2" class="skill-cooldown-bar" style="width: 100%"></div>
+                            <div class="skill-cooldown-text" id="skill2-p2-text">就绪</div>
+                        </div>
+                        <div class="skill-name" id="skill2-p2-name">技能2</div>
+                    </div>
+                    <div class="skill-cooldown-wrapper">
+                        <div class="skill-cooldown">
+                            <div id="ultimate-p2" class="skill-cooldown-bar ultimate" style="width: 100%"></div>
+                            <div class="skill-cooldown-text" id="ultimate-p2-text">就绪</div>
+                        </div>
+                        <div class="skill-name" style="color: #ff00ff;">奥义</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div id="mainMenu" class="menu-overlay">
-            <div class="menu-title">⚔ 机甲对决 ⚔</div>
+            <div class="menu-title">机甲对决</div>
             
-            <!-- 登场英雄展示 -->
             <div id="showcaseHero" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.4); border-radius: 10px; border: 2px solid var(--accent-primary); display: none;">
-                <div style="font-size: 14px; margin-bottom: 8px; color: var(--accent-secondary);">🎭 登场英雄</div>
+                <div style="font-size: 14px; margin-bottom: 8px; color: var(--accent-secondary);">登场英雄</div>
                 <div id="showcaseHeroName" style="font-size: 20px; font-weight: bold;"></div>
                 <div id="showcaseHeroStyle" style="font-size: 12px; color: var(--text-secondary);"></div>
                 <button class="menu-btn small" style="margin-top: 10px; width: auto;" onclick="clearShowcaseHero()">取消登场</button>
@@ -915,18 +953,38 @@
             
             <button class="menu-btn blue" onclick="startLocalGame()">本地对战</button>
             <button class="menu-btn red" onclick="showNetworkMenu()">网络对战</button>
-            <button class="menu-btn gold" onclick="showGacha()">🎰 抽卡</button>
-            <button class="menu-btn purple" onclick="showEvents()">🎉 活动</button>
-            <button class="menu-btn" onclick="showHeroShowcase()">🎭 选择登场英雄</button>
-            <button class="menu-btn" onclick="showSettings()">⚙️ 设置</button>
+            <button class="menu-btn" onclick="showHeroShowcase()">选择登场英雄</button>
+            <button class="menu-btn" onclick="showHeroGallery()">英雄图鉴</button>
+            <button class="menu-btn" onclick="showSettings()">设置</button>
         </div>
         
-        <!-- 选择登场英雄界面 -->
         <div id="heroShowcaseScreen" class="menu-overlay hidden">
             <button class="back-btn" onclick="showMainMenu()">← 返回</button>
-            <div class="menu-title" style="font-size: 32px;">🎭 选择登场英雄</div>
+            <div class="menu-title" style="font-size: 32px;">选择登场英雄</div>
             <div class="section-title">选择一个英雄改变界面风格</div>
-            <div class="hero-grid" id="showcaseHeroGrid" style="max-height: 350px;"></div>
+            <div class="hero-grid" id="showcaseHeroGrid"></div>
+        </div>
+
+        <div id="heroGalleryScreen" class="menu-overlay hidden">
+            <button class="back-btn" onclick="showMainMenu()">← 返回</button>
+            <div class="menu-title" style="font-size: 32px;">英雄图鉴</div>
+            <div class="hero-grid" id="galleryHeroGrid"></div>
+            <div class="hero-detail-panel" id="heroDetailPanel">
+                <div class="hero-detail-header">
+                    <div class="hero-detail-icon" id="detailHeroIcon">🤖</div>
+                    <div class="hero-detail-info">
+                        <div class="hero-detail-name" id="detailHeroName">英雄名</div>
+                        <div class="hero-detail-rarity" id="detailHeroRarity">稀有度</div>
+                        <div class="hero-detail-stats" id="detailHeroStats">
+                            <span>❤️ 生命: 100</span>
+                            <span>⚔️ 攻击: 20</span>
+                            <span>💨 速度: 5</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-detail-desc" id="detailHeroDesc">英雄描述...</div>
+                <div class="hero-detail-skills" id="detailHeroSkills"></div>
+            </div>
         </div>
 
         <div id="networkMenu" class="menu-overlay hidden">
@@ -959,56 +1017,16 @@
 
         <div id="banPickScreen" class="menu-overlay hidden">
             <button class="back-btn" onclick="showMainMenu()">← 返回</button>
-            <div class="menu-title" style="font-size: 28px;" id="banPickTitle">⚔️ 禁用阶段 ⚔️</div>
+            <div class="menu-title" style="font-size: 28px;" id="banPickTitle">禁用阶段</div>
             <div class="status-text" id="banPickStatus">玩家1 禁用英雄</div>
             <div id="bannedHeroesDisplay" style="margin-bottom: 10px; font-size: 14px; color: #ff7777;"></div>
             <div class="hero-grid" id="heroGrid"></div>
             <div style="margin-top: 20px;" id="banPickButtons" class="btn-group"></div>
         </div>
 
-        <div id="gachaScreen" class="menu-overlay hidden">
-            <button class="back-btn" onclick="showMainMenu()">← 返回</button>
-            <div class="menu-title" style="font-size: 32px;">🎰 抽卡</div>
-            <div class="coins" style="font-size: 24px; margin-bottom: 10px;">💰 <span id="gachaCoins">1000</span></div>
-            <div class="free-pull-info" id="freePullInfo"></div>
-            
-            <div style="display: flex; gap: 40px; margin: 20px 0;">
-                <div style="text-align: center;">
-                    <div class="menu-btn gold" style="width: 180px; height: 220px; display: flex; flex-direction: column; justify-content: center;" onclick="doGacha('normal')">
-                        <div style="font-size: 48px;">📦</div>
-                        <div style="margin-top: 10px;">普通卡包</div>
-                        <div style="font-size: 14px; color: #ffe762;" id="normalCost">💰 50</div>
-                    </div>
-                </div>
-                <div style="text-align: center;">
-                    <div class="menu-btn purple" style="width: 180px; height: 220px; display: flex; flex-direction: column; justify-content: center;" onclick="doGacha('premium')">
-                        <div style="font-size: 48px;">✨</div>
-                        <div style="margin-top: 10px;">高级卡包</div>
-                        <div style="font-size: 14px; color: #ff9999;" id="premiumCost">💰 150</div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="gachaResult" style="display: none; text-align: center; margin-top: 20px;">
-                <div id="gachaResultHero" class="hero-card gacha-result" style="width: 180px; margin: 0 auto;"></div>
-                <button class="menu-btn" style="margin-top: 20px;" onclick="hideGachaResult()">确定</button>
-            </div>
-
-            <div style="margin-top: 30px;">
-                <div class="section-title">我的英雄</div>
-                <div class="hero-grid" id="myHeroesGrid" style="max-height: 150px;"></div>
-            </div>
-        </div>
-
-        <div id="eventsScreen" class="menu-overlay hidden">
-            <button class="back-btn" onclick="showMainMenu()">← 返回</button>
-            <div class="menu-title" style="font-size: 32px;">🎉 活动</div>
-            <div class="events-container" id="eventsContainer"></div>
-        </div>
-
         <div id="settingsScreen" class="menu-overlay hidden">
             <button class="back-btn" onclick="showMainMenu()">← 返回</button>
-            <div class="menu-title" style="font-size: 32px;">⚙️ 设置</div>
+            <div class="menu-title" style="font-size: 32px;">设置</div>
             
             <div style="display: flex; border-bottom: 3px solid #5a5a8a; margin-bottom: 20px;">
                 <div class="settings-tab active" onclick="switchSettingsTab('profile')">资料</div>
@@ -1032,6 +1050,7 @@
                 <div class="keybind-row"><span>防御</span><button class="keybind-btn" id="kb-p1-defend" onclick="startKeybind('p1', 'defend')">K</button></div>
                 <div class="keybind-row"><span>技能1</span><button class="keybind-btn" id="kb-p1-skill1" onclick="startKeybind('p1', 'skill1')">U</button></div>
                 <div class="keybind-row"><span>技能2</span><button class="keybind-btn" id="kb-p1-skill2" onclick="startKeybind('p1', 'skill2')">I</button></div>
+                <div class="keybind-row"><span>奥义</span><button class="keybind-btn" id="kb-p1-ultimate" onclick="startKeybind('p1', 'ultimate')">O</button></div>
                 
                 <div class="section-title">玩家2 键位</div>
                 <div class="keybind-row"><span>跳跃</span><button class="keybind-btn" id="kb-p2-jump" onclick="startKeybind('p2', 'jump')">↑</button></div>
@@ -1041,6 +1060,7 @@
                 <div class="keybind-row"><span>防御</span><button class="keybind-btn" id="kb-p2-defend" onclick="startKeybind('p2', 'defend')">/</button></div>
                 <div class="keybind-row"><span>技能1</span><button class="keybind-btn" id="kb-p2-skill1" onclick="startKeybind('p2', 'skill1')">7</button></div>
                 <div class="keybind-row"><span>技能2</span><button class="keybind-btn" id="kb-p2-skill2" onclick="startKeybind('p2', 'skill2')">8</button></div>
+                <div class="keybind-row"><span>奥义</span><button class="keybind-btn" id="kb-p2-ultimate" onclick="startKeybind('p2', 'ultimate')">9</button></div>
             </div>
         </div>
 
@@ -1053,13 +1073,20 @@
             </div>
         </div>
 
+        <div class="ultimate-effect" id="ultimateEffect"></div>
+        <div class="ultimate-art hidden" id="ultimateArt">
+            <div class="ultimate-art-char" id="artChar">断</div>
+            <div class="ultimate-art-hero" id="artHero">🤖</div>
+            <div class="ultimate-art-name" id="artName">奥义名称</div>
+            <div class="ultimate-art-subtitle" id="artSubtitle">一击必杀!</div>
+        </div>
+
         <div class="controls-hint" id="controlsHint">
-            P1: W/A/D 移动跳跃, J攻击, K防御, U/I技能 | P2: ↑←→移动跳跃, .攻击, /防御, 7/8技能
+            P1: W/A/D移动跳跃, J攻击, K防御, U/I技能, O奥义 | P2: ↑←→移动跳跃, .攻击, /防御, 7/8技能, 9奥义
         </div>
     </div>
 
     <script>
-        // Style configurations
         const STYLES = {
             tech: { id: 'tech', name: '科技机甲', backgroundColors: ['#0a0a1a', '#1a1a3a', '#0f1f3f'], accent: '#4fc3f7', secondary: '#ffe762' },
             japanese: { id: 'japanese', name: '日式和风', backgroundColors: ['#1a0a0a', '#3a1a1a', '#2a0f1f'], accent: '#ff6b6b', secondary: '#ffd700' },
@@ -1074,13 +1101,17 @@
                 name: '蓝骑士',
                 rarity: 'common',
                 style: 'tech',
+                icon: '🛡️',
+                description: '来自未来科技军团的精英战士，装备着最先进的能量护盾和脉冲武器。坚守正义，守护和平。',
+                skillDescriptions: ['向前冲锋并造成强力斩击', '展开能量护盾，短时间内免疫伤害'],
                 stats: { hp: 120, attack: 18, speed: 5 },
-                colors: { primary: '#1a4f8a', secondary: '#5c7c99', highlight: '#ffe762', armor: '#3d7bc3' },
+                colors: { primary: '#1a4f8a', secondary: '#5c7c9a', highlight: '#ffe762', armor: '#3d7bc3' },
                 abilities: ['普通攻击', '护盾防御'],
                 skills: [
                     { name: '冲锋斩', damage: 30, cooldown: 3000, range: 100, effect: 'dash' },
                     { name: '铁壁', damage: 0, cooldown: 5000, range: 0, effect: 'shield', duration: 2000 }
                 ],
+                ultimate: { name: '骑士审判', description: '召唤神圣能量，造成毁灭性范围伤害', damage: 70, cooldown: 15000, range: 150, effect: 'ultimate' },
                 visual: { type: 'knight', horns: false, cape: true }
             },
             redWarrior: {
@@ -1088,6 +1119,9 @@
                 name: '红战士',
                 rarity: 'common',
                 style: 'western',
+                icon: '⚔️',
+                description: '来自西部荒原的流浪武士，一把烈焰大刀斩尽天下不平事。热血豪情，义薄云天。',
+                skillDescriptions: ['挥出火焰斩击，烧伤敌人', '发出战吼，大幅提升攻击力'],
                 stats: { hp: 120, attack: 18, speed: 5 },
                 colors: { primary: '#8a2d2d', secondary: '#5a5a5a', highlight: '#4fc3f7', armor: '#d95454' },
                 abilities: ['普通攻击', '护盾防御'],
@@ -1095,6 +1129,7 @@
                     { name: '烈焰斩', damage: 28, cooldown: 2800, range: 90, effect: 'fire' },
                     { name: '战吼', damage: 0, cooldown: 6000, range: 0, effect: 'buff', duration: 4000, attackBonus: 10 }
                 ],
+                ultimate: { name: '烈火炼狱', description: '释放狂暴烈焰，焚烧周围一切敌人', damage: 65, cooldown: 15000, range: 140, effect: 'ultimate' },
                 visual: { type: 'warrior', horns: true, cape: false }
             },
             greenNinja: {
@@ -1102,6 +1137,9 @@
                 name: '绿忍者',
                 rarity: 'rare',
                 style: 'japanese',
+                icon: '🥷',
+                description: '暗影忍者村的最强忍者，精通影分身和瞬身术。来无影去无踪，杀人于无形。',
+                skillDescriptions: ['快速影刃斩击，必定暴击', '进入瞬身状态，短暂无敌并加速'],
                 stats: { hp: 90, attack: 25, speed: 8 },
                 colors: { primary: '#1a5f2a', secondary: '#3a8a4a', highlight: '#7aff9a', armor: '#2d7a3d' },
                 abilities: ['快速斩击', '闪避'],
@@ -1109,6 +1147,7 @@
                     { name: '影刃', damage: 40, cooldown: 2500, range: 80, effect: 'critical' },
                     { name: '瞬身', damage: 0, cooldown: 4000, range: 0, effect: 'dodge', duration: 1500 }
                 ],
+                ultimate: { name: '影流·千本樱', description: '创造无数影分身，从四面八方发动致命攻击', damage: 80, cooldown: 14000, range: 160, effect: 'ultimate' },
                 visual: { type: 'ninja', horns: false, cape: false, mask: true }
             },
             purpleMage: {
@@ -1116,6 +1155,9 @@
                 name: '紫法师',
                 rarity: 'rare',
                 style: 'futuristic',
+                icon: '🧙',
+                description: '掌握虚空能量的神秘法师，可以扭曲空间，创造黑洞。来自遥远星系的智慧生命体。',
+                skillDescriptions: ['释放暗能量爆发', '创造能量屏障保护自己'],
                 stats: { hp: 85, attack: 28, speed: 4 },
                 colors: { primary: '#5a1a8a', secondary: '#8a4aaa', highlight: '#d78aff', armor: '#7a2dba' },
                 abilities: ['魔法弹', '护盾'],
@@ -1123,6 +1165,7 @@
                     { name: '暗能爆发', damage: 45, cooldown: 3500, range: 120, effect: 'aoe' },
                     { name: '能量屏障', damage: 0, cooldown: 5500, range: 0, effect: 'shield', duration: 3000 }
                 ],
+                ultimate: { name: '虚空陷落', description: '创造微型黑洞，将敌人吸入并造成毁灭性伤害', damage: 75, cooldown: 16000, range: 170, effect: 'ultimate' },
                 visual: { type: 'mage', horns: false, cape: true, staff: true }
             },
             goldTitan: {
@@ -1130,6 +1173,9 @@
                 name: '黄金泰坦',
                 rarity: 'epic',
                 style: 'western',
+                icon: '🗿',
+                description: '古老文明留下的巨型战斗机器人，坚不可摧的身体蕴含着无穷力量。沉睡万年，终将苏醒。',
+                skillDescriptions: ['捶击地面造成地震，眩晕敌人', '不屈意志，恢复大量生命值'],
                 stats: { hp: 160, attack: 15, speed: 3 },
                 colors: { primary: '#8a6f18', secondary: '#caa73f', highlight: '#fff7a2', armor: '#ba9a2f' },
                 abilities: ['重击', '钢铁防御'],
@@ -1137,6 +1183,7 @@
                     { name: '地震', damage: 35, cooldown: 4000, range: 150, effect: 'stun', stunDuration: 1000 },
                     { name: '不屈', damage: 0, cooldown: 7000, range: 0, effect: 'heal', healAmount: 40 }
                 ],
+                ultimate: { name: '泰坦陨落', description: '跳向高空然后重重砸下，造成毁天灭地的冲击波', damage: 90, cooldown: 18000, range: 200, effect: 'ultimate' },
                 visual: { type: 'titan', horns: false, cape: false, big: true }
             },
             cyberSamurai: {
@@ -1144,6 +1191,9 @@
                 name: '赛博武士',
                 rarity: 'epic',
                 style: 'cyberpunk',
+                icon: '⚔️',
+                description: '融合了传统武士道与未来科技的改造人，用光子太刀斩开一切障碍。',
+                skillDescriptions: ['连续多次斩击', '进入超频状态，大幅提升移动速度'],
                 stats: { hp: 100, attack: 32, speed: 7 },
                 colors: { primary: '#1a1a3a', secondary: '#5a5a8a', highlight: '#00ffff', armor: '#3a3a6a' },
                 abilities: ['居合斩', '相位闪避'],
@@ -1151,6 +1201,7 @@
                     { name: '千本樱', damage: 50, cooldown: 3000, range: 100, effect: 'multihit', hits: 3 },
                     { name: '刹那', damage: 0, cooldown: 4500, range: 0, effect: 'speed', duration: 3000, speedBonus: 3 }
                 ],
+                ultimate: { name: '天魔降伏', description: '以无法看清的速度进行拔刀斩，瞬间击败敌人', damage: 85, cooldown: 15000, range: 180, effect: 'ultimate' },
                 visual: { type: 'samurai', horns: false, cape: false, katana: true }
             },
             dragonLord: {
@@ -1158,6 +1209,9 @@
                 name: '龙王',
                 rarity: 'legendary',
                 style: 'japanese',
+                icon: '🐲',
+                description: '君临天下的龙族之王，可以操控火焰与雷霆，每一击都蕴含着天地之威。',
+                skillDescriptions: ['喷吐龙炎，持续烧伤敌人', '释放龙威压敌，降低敌人速度'],
                 stats: { hp: 140, attack: 30, speed: 6 },
                 colors: { primary: '#8a1a1a', secondary: '#da5a5a', highlight: '#ffc700', armor: '#ba3a3a' },
                 abilities: ['龙息', '龙鳞护盾'],
@@ -1165,6 +1219,7 @@
                     { name: '龙炎吐息', damage: 55, cooldown: 3500, range: 130, effect: 'fire', burn: true },
                     { name: '龙威', damage: 20, cooldown: 5000, range: 200, effect: 'fear', slowDuration: 2000 }
                 ],
+                ultimate: { name: '九天神龙变', description: '化身为真龙，释放毁天灭地的龙息', damage: 95, cooldown: 14000, range: 200, effect: 'ultimate' },
                 visual: { type: 'dragon', horns: true, cape: false, wings: true }
             },
             phoenixKnight: {
@@ -1172,6 +1227,9 @@
                 name: '凤凰骑士',
                 rarity: 'legendary',
                 style: 'futuristic',
+                icon: '🔥',
+                description: '不死鸟的化身，浴火重生，永不言败。传说中被其击败的敌人会在业火中得到净化。',
+                skillDescriptions: ['化作烈焰俯冲', '涅槃重生，恢复生命并获得无敌'],
                 stats: { hp: 110, attack: 26, speed: 7 },
                 colors: { primary: '#ff6a00', secondary: '#ffaa00', highlight: '#ffff00', armor: '#ff8a00' },
                 abilities: ['烈焰斩', '浴火重生'],
@@ -1179,16 +1237,10 @@
                     { name: '凤凰俯冲', damage: 48, cooldown: 3000, range: 110, effect: 'dash' },
                     { name: '涅槃', damage: 0, cooldown: 8000, range: 0, effect: 'revive', healAmount: 60 }
                 ],
+                ultimate: { name: '不死鸟·浴火焚天', description: '化为炽热烈焰，净化战场上的一切邪恶', damage: 100, cooldown: 16000, range: 220, effect: 'ultimate' },
                 visual: { type: 'phoenix', horns: false, cape: true, fire: true }
             }
         };
-
-        const GACHA_RATES = {
-            normal: { common: 0.55, rare: 0.3, epic: 0.12, legendary: 0.03 },
-            premium: { common: 0.3, rare: 0.35, epic: 0.25, legendary: 0.1 }
-        };
-
-        const GACHA_COSTS = { normal: 50, premium: 150 };
 
         let gameState = 'menu';
         let isNetworkGame = false;
@@ -1204,6 +1256,7 @@
         let lastTime = 0;
         let effects = [];
         let particles = [];
+        let backgroundParticles = [];
 
         let banPickState = {
             phase: 'ban',
@@ -1215,30 +1268,20 @@
         let playerData = {
             id: 'player_' + Math.random().toString(36).substr(2, 9),
             name: '玩家',
-            coins: 2000,
             wins: 0,
             losses: 0,
-            unlockedHeroes: ['blueKnight', 'redWarrior'],
-            lastLogin: null,
-            lastCheckinDay: null,
-            checkinStreak: 0,
-            dailyTasksDone: [],
-            firstWinClaimed: false,
-            freePullsToday: 0,
-            isNewPlayer: true,
             showcaseHero: null,
             settings: {
                 keybinds: {
-                    p1: { jump: 'KeyW', left: 'KeyA', right: 'KeyD', attack: 'KeyJ', defend: 'KeyK', skill1: 'KeyU', skill2: 'KeyI' },
-                    p2: { jump: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', attack: 'Period', defend: 'Slash', skill1: 'Digit7', skill2: 'Digit8' }
+                    p1: { jump: 'KeyW', left: 'KeyA', right: 'KeyD', attack: 'KeyJ', defend: 'KeyK', skill1: 'KeyU', skill2: 'KeyI', ultimate: 'KeyO' },
+                    p2: { jump: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', attack: 'Period', defend: 'Slash', skill1: 'Digit7', skill2: 'Digit8', ultimate: 'Digit9' }
                 }
             }
         };
 
-        // Current active style
         let currentStyle = 'tech';
-
         let recordingKeybind = null;
+        let ultimateWinner = null;
 
         const GRAVITY = 0.8;
         const JUMP_SPEED = -15;
@@ -1248,6 +1291,20 @@
         const DEFEND_REDUCTION = 0.5;
         const ATTACK_COOLDOWN = 450;
         const ATTACK_RANGE = 80;
+
+        function initBackgroundParticles() {
+            backgroundParticles = [];
+            for (let i = 0; i < 50; i++) {
+                backgroundParticles.push({
+                    x: Math.random() * 800,
+                    y: Math.random() * 600,
+                    size: Math.random() * 3 + 1,
+                    speedX: (Math.random() - 0.5) * 0.5,
+                    speedY: (Math.random() - 0.5) * 0.5,
+                    opacity: Math.random() * 0.5 + 0.2
+                });
+            }
+        }
 
         class Mech {
             constructor(x, y, isPlayer1, heroId = 'blueKnight') {
@@ -1279,6 +1336,7 @@
                 this.heroName = hero.name;
                 this.hero = hero;
                 this.skills = hero.skills.map(s => ({ ...s, currentCd: 0 }));
+                this.ultimate = { ...hero.ultimate, currentCd: 0 };
                 this.shieldActive = false;
                 this.shieldTimer = 0;
                 this.buffActive = false;
@@ -1301,6 +1359,10 @@
                 this.skills.forEach(s => {
                     if (s.currentCd > 0) s.currentCd = Math.max(0, s.currentCd - dt);
                 });
+
+                if (this.ultimate.currentCd > 0) {
+                    this.ultimate.currentCd = Math.max(0, this.ultimate.currentCd - dt);
+                }
 
                 if (this.shieldTimer > 0) {
                     this.shieldTimer -= dt;
@@ -1414,131 +1476,43 @@
 
             attack(opponent) {
                 const now = Date.now();
-                if (now - this.lastAttackTime < ATTACK_COOLDOWN) return;
-                if (this.state === 'hit' || this.stunned) return;
-
+                if (now - this.lastAttackTime < ATTACK_COOLDOWN || this.isAttacking || this.stunned) return;
+                
                 this.lastAttackTime = now;
                 this.isAttacking = true;
                 this.attackHit = false;
-                this.state = 'attack';
                 this.stateTimer = 300;
-
-                const dist = Math.abs(this.x - opponent.x);
-                if (dist < ATTACK_RANGE) {
-                    const damage = opponent.isDefending ? this.attackDamage * DEFEND_REDUCTION : this.attackDamage;
-                    opponent.takeDamage(damage);
-                    this.attackHit = true;
-                    createHitEffect(opponent.x, opponent.y - 50, this.colors.highlight);
-                }
+                this.state = 'attack';
             }
 
-            defend(isDefending) {
-                this.isDefending = isDefending;
-                if (isDefending && this.state !== 'hit' && this.state !== 'attack' && !this.stunned) {
-                    this.state = 'defend';
-                } else if (!isDefending && this.state === 'defend') {
-                    this.state = 'idle';
-                }
-            }
-
-            useSkill(skillIndex, opponent) {
-                const skill = this.skills[skillIndex];
-                if (!skill || skill.currentCd > 0 || this.stunned) return;
-
-                skill.currentCd = skill.cooldown;
+            useSkill(index, opponent) {
+                if (this.skills[index].currentCd > 0 || this.stunned) return;
                 
-                switch (skill.effect) {
-                    case 'dash':
-                        this.x += this.direction * 80;
-                        if (Math.abs(this.x - opponent.x) < skill.range) {
-                            opponent.takeDamage(skill.damage);
-                            createHitEffect(opponent.x, opponent.y - 50, this.colors.highlight);
-                        }
-                        createDashEffect(this.x, this.y - 30, this.direction, this.colors.armor);
-                        break;
-                    case 'fire':
-                        if (Math.abs(this.x - opponent.x) < skill.range) {
-                            opponent.takeDamage(skill.damage);
-                            createFireEffect(opponent.x, opponent.y - 50);
-                        }
-                        createFireEffect(this.x + this.direction * 50, this.y - 30);
-                        break;
-                    case 'critical':
-                        if (Math.abs(this.x - opponent.x) < skill.range) {
-                            opponent.takeDamage(skill.damage * 1.5);
-                            createCriticalEffect(opponent.x, opponent.y - 50);
-                        }
-                        break;
-                    case 'aoe':
-                        if (Math.abs(this.x - opponent.x) < skill.range) {
-                            opponent.takeDamage(skill.damage);
-                        }
-                        createAoeEffect(this.x, this.y - 30, skill.range, this.colors.highlight);
-                        break;
-                    case 'shield':
-                        this.shieldActive = true;
-                        this.shieldTimer = skill.duration;
-                        createShieldEffect(this.x, this.y - 30, this.colors.highlight);
-                        break;
-                    case 'stun':
-                        if (Math.abs(this.x - opponent.x) < skill.range) {
-                            opponent.takeDamage(skill.damage);
-                            opponent.stunned = true;
-                            opponent.stunTimer = skill.stunDuration;
-                        }
-                        createStunEffect(this.x, this.y - 30);
-                        break;
-                    case 'heal':
-                        this.hp = Math.min(this.maxHp, this.hp + skill.healAmount);
-                        createHealEffect(this.x, this.y - 50);
-                        break;
-                    case 'multihit':
-                        for (let i = 0; i < skill.hits; i++) {
-                            setTimeout(() => {
-                                if (Math.abs(this.x - opponent.x) < skill.range) {
-                                    opponent.takeDamage(skill.damage / skill.hits);
-                                }
-                            }, i * 150);
-                        }
-                        createMultiHitEffect(this.x + this.direction * 50, this.y - 30);
-                        break;
-                    case 'speed':
-                        this.moveSpeed = this.baseSpeed + skill.speedBonus;
-                        this.buffActive = true;
-                        this.buffTimer = skill.duration;
-                        createSpeedEffect(this.x, this.y - 50);
-                        break;
-                    case 'buff':
-                        this.attackDamage = this.baseAttack + skill.attackBonus;
-                        this.buffActive = true;
-                        this.buffTimer = skill.duration;
-                        createBuffEffect(this.x, this.y - 50);
-                        break;
-                    case 'dodge':
-                        this.dodgeActive = true;
-                        this.dodgeTimer = skill.duration;
-                        createDodgeEffect(this.x, this.y - 50);
-                        break;
-                    case 'fear':
-                        if (Math.abs(this.x - opponent.x) < skill.range) {
-                            opponent.takeDamage(skill.damage);
-                            opponent.slowed = true;
-                            opponent.slowTimer = skill.slowDuration;
-                            opponent.moveSpeed = opponent.baseSpeed * 0.5;
-                        }
-                        break;
-                    case 'revive':
-                        this.hp = Math.min(this.maxHp, this.hp + skill.healAmount);
-                        createReviveEffect(this.x, this.y - 50);
-                        break;
-                }
+                this.skills[index].currentCd = this.skills[index].cooldown;
             }
 
-            takeDamage(amount) {
-                if (this.invincible || this.dodgeActive) return;
+            useUltimate(opponent) {
+                if (this.ultimate.currentCd > 0 || this.stunned) return false;
+                
+                this.ultimate.currentCd = this.ultimate.cooldown;
+                return true;
+            }
+
+            defend(active) {
+                this.isDefending = active;
+            }
+
+            takeDamage(amount, fromUltimate = false) {
+                if (this.invincible || this.dodgeActive) return false;
                 
                 if (this.shieldActive) {
-                    amount *= 0.3;
+                    amount = Math.floor(amount * 0.2);
+                } else if (this.isDefending) {
+                    amount = Math.floor(amount * DEFEND_REDUCTION);
+                }
+
+                if (this.buffActive) {
+                    amount = Math.max(1, Math.floor(amount * 0.8));
                 }
 
                 this.hp = Math.max(0, this.hp - amount);
@@ -1546,533 +1520,69 @@
                 this.stateTimer = 200;
                 this.hitTimer = 500;
                 this.invincible = true;
-                this.vx = -this.direction * 3;
+                
+                return true;
             }
 
-            draw() {
-                const ctx = window.ctx;
+            draw(ctx) {
+                const scale = 1;
                 ctx.save();
                 ctx.translate(this.x, this.y);
+                ctx.scale(this.direction * scale, scale);
 
-                const bobOffset = this.state === 'idle' ? Math.sin(Date.now() / 200) * 2 : 0;
-                ctx.translate(0, bobOffset);
-
-                if (this.hitTimer > 0 && Math.floor(this.hitTimer / 50) % 2 === 0) {
-                    ctx.globalAlpha = 0.5;
-                }
-
-                const facing = this.direction;
-                ctx.scale(facing, 1);
-
-                const c = this.colors;
-                const v = this.hero.visual;
-                const legOffset = this.state === 'walk' ? Math.sin(this.animationFrame * Math.PI / 2) * 4 : 0;
-                const armOffset = this.state === 'attack' ? 20 : (this.state === 'defend' ? -10 : 0);
-                const bodyTilt = this.state === 'defend' ? -0.1 : 0;
-
-                ctx.rotate(bodyTilt);
-
-                if (v.cape) {
-                    ctx.fillStyle = c.primary;
-                    ctx.beginPath();
-                    ctx.moveTo(-15, 0);
-                    ctx.quadraticCurveTo(-25 + Math.sin(Date.now() / 100) * 5, 40, -20, 70);
-                    ctx.lineTo(20, 70);
-                    ctx.quadraticCurveTo(25 + Math.sin(Date.now() / 100) * 5, 40, 15, 0);
-                    ctx.fill();
-                }
-
-                this.drawLeg(15, 40, legOffset, c);
-                this.drawLeg(-15, 40, -legOffset, c);
-
-                this.drawBody(0, 10, c, v);
-
-                this.drawArm(-20, 0, armOffset, c, v);
-                this.drawArm(20, 0, this.state === 'attack' ? -15 : 0, c, v);
-
-                this.drawHead(0, -30, c, v);
-
-                if (v.wings) {
-                    ctx.fillStyle = c.primary;
-                    ctx.beginPath();
-                    ctx.moveTo(-20, -10);
-                    ctx.quadraticCurveTo(-45, -30 + Math.sin(Date.now() / 80) * 5, -50, 10);
-                    ctx.lineTo(-20, 10);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.moveTo(20, -10);
-                    ctx.quadraticCurveTo(45, -30 + Math.sin(Date.now() / 80) * 5, 50, 10);
-                    ctx.lineTo(20, 10);
-                    ctx.fill();
-                }
-
-                if (v.fire) {
-                    for (let i = 0; i < 5; i++) {
-                        const fireY = -45 - i * 8 + Math.sin(Date.now() / 50 + i) * 3;
-                        const fireX = (i - 2) * 4;
-                        ctx.fillStyle = `rgba(255, ${100 + i * 30}, 0, ${0.8 - i * 0.15})`;
-                        ctx.beginPath();
-                        ctx.arc(fireX, fireY, 6 - i, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                }
-
-                if (this.state === 'defend') {
-                    this.drawShield(25, -10, c);
-                }
-
+                const bodyColor = this.colors.primary;
+                const accentColor = this.colors.secondary;
+                const highlightColor = this.colors.highlight;
+                
+                ctx.fillStyle = bodyColor;
+                ctx.fillRect(-20, -40, 40, 50);
+                ctx.fillStyle = accentColor;
+                ctx.fillRect(-15, -55, 30, 20);
+                
+                ctx.fillStyle = bodyColor;
+                ctx.fillRect(-30, -35, 15, 35);
+                ctx.fillRect(15, -35, 15, 35);
+                
+                ctx.fillRect(-18, 10, 15, 25);
+                ctx.fillRect(3, 10, 15, 25);
+                
+                ctx.fillStyle = highlightColor;
+                ctx.fillRect(-12, -50, 24, 5);
+                
                 if (this.shieldActive) {
-                    ctx.strokeStyle = c.highlight;
+                    ctx.strokeStyle = this.colors.armor;
                     ctx.lineWidth = 3;
-                    ctx.globalAlpha = 0.5 + Math.sin(Date.now() / 100) * 0.2;
                     ctx.beginPath();
                     ctx.arc(0, -20, 45, 0, Math.PI * 2);
                     ctx.stroke();
-                    ctx.globalAlpha = 1;
                 }
-
-                if (this.state === 'attack') {
-                    this.drawFist(40 + armOffset, 5, c);
+                
+                if (this.buffActive) {
+                    ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+                    ctx.beginPath();
+                    ctx.arc(0, -20, 50, 0, Math.PI * 2);
+                    ctx.fill();
                 }
-
+                
+                if (this.dodgeActive) {
+                    ctx.globalAlpha = 0.5;
+                }
+                
                 if (this.stunned) {
-                    ctx.fillStyle = '#ffe762';
-                    for (let i = 0; i < 3; i++) {
-                        const angle = Date.now() / 500 + i * Math.PI * 2 / 3;
-                        ctx.fillText('★', Math.cos(angle) * 25 - 5, -65 + Math.sin(angle) * 5);
-                    }
+                    ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(0, -70, 15, 0, Math.PI * 2);
+                    ctx.fill();
                 }
-
-                ctx.restore();
-            }
-
-            drawLeg(x, y, offset, c) {
-                const ctx = window.ctx;
-                ctx.fillStyle = c.secondary;
-                ctx.fillRect(x - 8, y + offset, 16, 24);
-                ctx.fillStyle = c.primary;
-                ctx.fillRect(x - 6, y + 4 + offset, 12, 16);
-                ctx.fillStyle = c.armor;
-                ctx.fillRect(x - 7, y + offset, 14, 8);
-                ctx.fillStyle = '#333';
-                ctx.fillRect(x - 9, y + 18 + offset, 18, 8);
-            }
-
-            drawBody(x, y, c, v) {
-                const ctx = window.ctx;
-                const scale = v.big ? 1.2 : 1;
-                ctx.save();
-                ctx.scale(scale, scale);
-                
-                ctx.fillStyle = c.primary;
-                ctx.fillRect(x - 20, y, 40, 35);
-                ctx.fillStyle = c.armor;
-                ctx.fillRect(x - 18, y + 2, 36, 12);
-                ctx.fillRect(x - 16, y + 16, 32, 8);
-                ctx.fillStyle = c.highlight;
-                ctx.fillRect(x - 14, y + 5, 8, 4);
-                ctx.fillStyle = '#ff4444';
-                if (this.hp < this.maxHp * 0.3) {
-                    if (Math.floor(Date.now() / 200) % 2 === 0) {
-                        ctx.fillRect(x - 5, y + 20, 10, 6);
-                    }
-                }
-                ctx.fillStyle = c.secondary;
-                ctx.fillRect(x - 4, y + 22, 8, 4);
                 
                 ctx.restore();
             }
-
-            drawArm(x, y, offset, c, v) {
-                const ctx = window.ctx;
-                ctx.fillStyle = c.secondary;
-                ctx.fillRect(x - 6, y + offset, 12, 30);
-                ctx.fillStyle = c.primary;
-                ctx.fillRect(x - 4, y + 2 + offset, 8, 20);
-                ctx.fillStyle = c.armor;
-                ctx.fillRect(x - 5, y + offset, 10, 8);
-                
-                if (v.katana && offset > 0) {
-                    ctx.fillStyle = '#ccc';
-                    ctx.fillRect(x + 8, y + offset - 20, 4, 40);
-                    ctx.fillStyle = '#8a2d2d';
-                    ctx.fillRect(x + 6, y + offset - 25, 8, 8);
-                }
-                if (v.staff) {
-                    ctx.fillStyle = '#6a4a2a';
-                    ctx.fillRect(x + 8, y + offset - 25, 4, 45);
-                    ctx.fillStyle = c.highlight;
-                    ctx.beginPath();
-                    ctx.arc(x + 10, y + offset - 28, 6, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-
-            drawHead(x, y, c, v) {
-                const ctx = window.ctx;
-                ctx.fillStyle = c.armor;
-                ctx.fillRect(x - 16, y, 32, 24);
-                ctx.fillStyle = c.primary;
-                ctx.fillRect(x - 14, y + 2, 28, 18);
-                ctx.fillStyle = c.highlight;
-                ctx.fillRect(x - 12, y + 4, 10, 6);
-                ctx.fillRect(x + 2, y + 4, 10, 6);
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(x - 10, y + 6, 6, 3);
-                ctx.fillRect(x + 4, y + 6, 6, 3);
-                
-                if (v.mask) {
-                    ctx.fillStyle = '#222';
-                    ctx.fillRect(x - 10, y + 12, 20, 8);
-                } else {
-                    ctx.fillStyle = '#333';
-                    ctx.fillRect(x - 4, y + 14, 8, 6);
-                    ctx.fillStyle = c.secondary;
-                    ctx.fillRect(x - 2, y + 16, 4, 4);
-                }
-                
-                if (v.horns) {
-                    ctx.fillStyle = c.armor;
-                    ctx.beginPath();
-                    ctx.moveTo(x - 12, y);
-                    ctx.lineTo(x - 18, y - 15);
-                    ctx.lineTo(x - 8, y);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.moveTo(x + 12, y);
-                    ctx.lineTo(x + 18, y - 15);
-                    ctx.lineTo(x + 8, y);
-                    ctx.fill();
-                }
-            }
-
-            drawFist(x, y, c) {
-                const ctx = window.ctx;
-                ctx.fillStyle = c.highlight;
-                ctx.fillRect(x - 8, y - 8, 16, 16);
-                ctx.fillStyle = c.armor;
-                ctx.fillRect(x - 6, y - 6, 12, 12);
-                ctx.fillStyle = c.secondary;
-                ctx.fillRect(x - 4, y - 4, 8, 8);
-            }
-
-            drawShield(x, y, c) {
-                const ctx = window.ctx;
-                ctx.fillStyle = 'rgba(79, 195, 247, 0.4)';
-                ctx.beginPath();
-                ctx.ellipse(x, y, 15, 25, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = '#4fc3f7';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-                ctx.fillStyle = 'rgba(79, 195, 247, 0.6)';
-                ctx.beginPath();
-                ctx.ellipse(x, y, 10, 18, 0, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            getState() {
-                return {
-                    x: this.x,
-                    y: this.y,
-                    vx: this.vx,
-                    vy: this.vy,
-                    hp: this.hp,
-                    direction: this.direction,
-                    state: this.state,
-                    isDefending: this.isDefending,
-                    skills: this.skills.map(s => s.currentCd)
-                };
-            }
-
-            setState(state) {
-                if (state.x !== undefined) this.x = state.x;
-                if (state.y !== undefined) this.y = state.y;
-                if (state.vx !== undefined) this.vx = state.vx;
-                if (state.vy !== undefined) this.vy = state.vy;
-                if (state.hp !== undefined) this.hp = state.hp;
-                if (state.direction !== undefined) this.direction = state.direction;
-                if (state.isDefending !== undefined) this.isDefending = state.isDefending;
-            }
         }
 
-        function createHitEffect(x, y, color) {
-            for (let i = 0; i < 8; i++) {
-                particles.push({
-                    x, y,
-                    vx: (Math.random() - 0.5) * 10,
-                    vy: (Math.random() - 0.5) * 10 - 3,
-                    life: 300,
-                    maxLife: 300,
-                    color,
-                    size: 4 + Math.random() * 4
-                });
-            }
-        }
-
-        function createDashEffect(x, y, dir, color) {
-            for (let i = 0; i < 10; i++) {
-                particles.push({
-                    x: x - dir * i * 8,
-                    y: y + (Math.random() - 0.5) * 20,
-                    vx: -dir * 2,
-                    vy: 0,
-                    life: 200,
-                    maxLife: 200,
-                    color,
-                    size: 6
-                });
-            }
-        }
-
-        function createFireEffect(x, y) {
-            for (let i = 0; i < 15; i++) {
-                particles.push({
-                    x: x + (Math.random() - 0.5) * 40,
-                    y: y + (Math.random() - 0.5) * 30,
-                    vx: (Math.random() - 0.5) * 3,
-                    vy: -Math.random() * 5 - 2,
-                    life: 400,
-                    maxLife: 400,
-                    color: `rgb(255, ${100 + Math.random() * 100}, 0)`,
-                    size: 5 + Math.random() * 5
-                });
-            }
-        }
-
-        function createCriticalEffect(x, y) {
-            effects.push({
-                type: 'critical',
-                x, y,
-                life: 500,
-                maxLife: 500
-            });
-            for (let i = 0; i < 12; i++) {
-                particles.push({
-                    x, y,
-                    vx: (Math.random() - 0.5) * 15,
-                    vy: (Math.random() - 0.5) * 15,
-                    life: 400,
-                    maxLife: 400,
-                    color: '#ffe762',
-                    size: 6
-                });
-            }
-        }
-
-        function createAoeEffect(x, y, range, color) {
-            effects.push({
-                type: 'aoe',
-                x, y,
-                range,
-                life: 300,
-                maxLife: 300,
-                color
-            });
-        }
-
-        function createShieldEffect(x, y, color) {
-            effects.push({
-                type: 'shield',
-                x, y,
-                life: 400,
-                maxLife: 400,
-                color
-            });
-        }
-
-        function createStunEffect(x, y) {
-            effects.push({
-                type: 'stun',
-                x, y,
-                life: 500,
-                maxLife: 500
-            });
-        }
-
-        function createHealEffect(x, y) {
-            for (let i = 0; i < 10; i++) {
-                particles.push({
-                    x: x + (Math.random() - 0.5) * 40,
-                    y: y + 20,
-                    vx: (Math.random() - 0.5) * 2,
-                    vy: -3 - Math.random() * 3,
-                    life: 600,
-                    maxLife: 600,
-                    color: '#7aff9a',
-                    size: 5
-                });
-            }
-            effects.push({
-                type: 'heal',
-                x, y,
-                life: 500,
-                maxLife: 500
-            });
-        }
-
-        function createMultiHitEffect(x, y) {
-            for (let i = 0; i < 20; i++) {
-                setTimeout(() => {
-                    particles.push({
-                        x: x + (Math.random() - 0.5) * 60,
-                        y: y + (Math.random() - 0.5) * 40,
-                        vx: (Math.random() - 0.5) * 8,
-                        vy: (Math.random() - 0.5) * 8,
-                        life: 200,
-                        maxLife: 200,
-                        color: '#00ffff',
-                        size: 4
-                    });
-                }, i * 50);
-            }
-        }
-
-        function createSpeedEffect(x, y) {
-            for (let i = 0; i < 12; i++) {
-                particles.push({
-                    x: x + (Math.random() - 0.5) * 60,
-                    y: y + (Math.random() - 0.5) * 40,
-                    vx: 0,
-                    vy: -1 - Math.random() * 2,
-                    life: 500,
-                    maxLife: 500,
-                    color: '#4fc3f7',
-                    size: 5
-                });
-            }
-        }
-
-        function createBuffEffect(x, y) {
-            effects.push({
-                type: 'buff',
-                x, y,
-                life: 600,
-                maxLife: 600
-            });
-        }
-
-        function createDodgeEffect(x, y) {
-            for (let i = 0; i < 10; i++) {
-                particles.push({
-                    x: x + (Math.random() - 0.5) * 50,
-                    y: y + (Math.random() - 0.5) * 40,
-                    vx: (Math.random() - 0.5) * 4,
-                    vy: (Math.random() - 0.5) * 4,
-                    life: 400,
-                    maxLife: 400,
-                    color: '#a855f7',
-                    size: 6
-                });
-            }
-        }
-
-        function createReviveEffect(x, y) {
-            for (let i = 0; i < 20; i++) {
-                particles.push({
-                    x: x,
-                    y: y + 40,
-                    vx: (Math.random() - 0.5) * 6,
-                    vy: -5 - Math.random() * 5,
-                    life: 800,
-                    maxLife: 800,
-                    color: i % 2 === 0 ? '#ff6a00' : '#ffe762',
-                    size: 6
-                });
-            }
-        }
-
-        function updateEffects(dt) {
-            effects = effects.filter(e => {
-                e.life -= dt;
-                return e.life > 0;
-            });
-            particles = particles.filter(p => {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.1;
-                p.life -= dt;
-                return p.life > 0;
-            });
-        }
-
-        function drawEffects() {
-            const ctx = window.ctx;
-            effects.forEach(e => {
-                const t = e.life / e.maxLife;
-                ctx.globalAlpha = t;
-                switch (e.type) {
-                    case 'critical':
-                        ctx.font = 'bold 32px Courier New';
-                        ctx.fillStyle = '#ffe762';
-                        ctx.textAlign = 'center';
-                        ctx.fillText('暴击!', e.x, e.y - 30 * (1 - t));
-                        break;
-                    case 'aoe':
-                        ctx.strokeStyle = e.color;
-                        ctx.lineWidth = 4;
-                        ctx.beginPath();
-                        ctx.arc(e.x, e.y, e.range * (1 - t * 0.5), 0, Math.PI * 2);
-                        ctx.stroke();
-                        break;
-                    case 'shield':
-                        ctx.strokeStyle = e.color;
-                        ctx.lineWidth = 5;
-                        ctx.beginPath();
-                        ctx.arc(e.x, e.y, 50 * (1 - t * 0.3), 0, Math.PI * 2);
-                        ctx.stroke();
-                        break;
-                    case 'heal':
-                        ctx.font = 'bold 24px Courier New';
-                        ctx.fillStyle = '#7aff9a';
-                        ctx.textAlign = 'center';
-                        ctx.fillText('+治愈', e.x, e.y - 40 * (1 - t));
-                        break;
-                    case 'buff':
-                        ctx.font = 'bold 20px Courier New';
-                        ctx.fillStyle = '#ffe762';
-                        ctx.textAlign = 'center';
-                        ctx.fillText('↑攻击↑', e.x, e.y - 30 * (1 - t));
-                        break;
-                }
-                ctx.globalAlpha = 1;
-            });
-
-            particles.forEach(p => {
-                const t = p.life / p.maxLife;
-                ctx.globalAlpha = t;
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size * t, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1;
-            });
-        }
-
-        function initGame(hero1 = 'blueKnight', hero2 = 'redWarrior') {
-            player1 = new Mech(200, GROUND_Y, true, hero1);
-            player2 = new Mech(600, GROUND_Y, false, hero2);
-            document.getElementById('p1HeroName').textContent = player1.heroName;
-            document.getElementById('p2HeroName').textContent = player2.heroName;
-            updateHealthBars();
-            effects = [];
-            particles = [];
-        }
-
-        function updateHealthBars() {
-            document.getElementById('health1').style.width = (player1.hp / player1.maxHp * 100) + '%';
-            document.getElementById('health2').style.width = (player2.hp / player2.maxHp * 100) + '%';
-            
-            for (let i = 0; i < 2; i++) {
-                const s1 = player1.skills[i];
-                const s2 = player2.skills[i];
-                document.getElementById(`skill${i+1}-p1`).style.width = ((s1.cooldown - s1.currentCd) / s1.cooldown * 100) + '%';
-                document.getElementById(`skill${i+1}-p2`).style.width = ((s2.cooldown - s2.currentCd) / s2.cooldown * 100) + '%';
-            }
-        }
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
         function drawBackground() {
-            const ctx = window.ctx;
             const style = STYLES[currentStyle] || STYLES.tech;
             const colors = style.backgroundColors;
             
@@ -2083,93 +1593,37 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, 800, 600);
             
-            // Style-specific background effects
-            if (currentStyle === 'japanese') {
-                // Japanese style - floating petals
+            backgroundParticles.forEach(p => {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                if (p.x < 0) p.x = 800;
+                if (p.x > 800) p.x = 0;
+                if (p.y < 0) p.y = 600;
+                if (p.y > 600) p.y = 0;
+                
                 ctx.fillStyle = style.accent;
-                for (let i = 0; i < 30; i++) {
-                    const x = (i * 47 + Date.now() * 0.02) % 850 - 50;
-                    const y = (i * 31 + Date.now() * 0.03) % 650 - 50;
-                    const t = Date.now() * 0.001 + i;
-                    const size = 3 + (i % 2) * 2;
-                    ctx.save();
-                    ctx.translate(x, y);
-                    ctx.rotate(t);
-                    ctx.beginPath();
-                    ctx.ellipse(0, 0, size, size/2, 0, 0, Math.PI * 2);
-                    ctx.globalAlpha = 0.3;
-                    ctx.fill();
-                    ctx.restore();
-                }
-                ctx.globalAlpha = 1;
-            } else if (currentStyle === 'cyberpunk') {
-                // Cyberpunk style - grid lines
-                ctx.strokeStyle = style.accent;
-                ctx.globalAlpha = 0.15;
-                for (let x = 0; x < 800; x += 40) {
-                    ctx.beginPath();
-                    ctx.moveTo(x, 0);
-                    ctx.lineTo(x, 600);
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                }
-                for (let y = 0; y < 600; y += 40) {
-                    ctx.beginPath();
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(800, y);
-                    ctx.stroke();
-                }
-                ctx.globalAlpha = 1;
-            } else if (currentStyle === 'western') {
-                // Western style - rain drops
-                ctx.strokeStyle = style.secondary;
-                ctx.lineWidth = 2;
-                ctx.globalAlpha = 0.2;
-                for (let i = 0; i < 40; i++) {
-                    const x = (i * 53 + Date.now() * 0.05) % 850 - 50;
-                    const y = (i * 29 + Date.now() * 0.2) % 700 - 100;
-                    ctx.beginPath();
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x - 5, y + 20);
-                    ctx.stroke();
-                }
-                ctx.globalAlpha = 1;
-            } else if (currentStyle === 'futuristic') {
-                // Futuristic style - hexagonal particles
-                ctx.fillStyle = style.secondary;
-                ctx.globalAlpha = 0.2;
-                for (let i = 0; i < 25; i++) {
-                    const x = (i * 61 + Math.sin(Date.now() * 0.001 + i) * 30) % 800;
-                    const y = (i * 41 + Math.cos(Date.now() * 0.001 + i) * 20) % 500;
-                    drawHexagon(ctx, x, y, 6 + (i % 3) * 3);
-                }
-                ctx.globalAlpha = 1;
-            } else {
-                // Tech style - particles
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
-                for (let i = 0; i < 80; i++) {
-                    const x = (i * 37 + Date.now() * 0.01) % 800;
-                    const y = (i * 23) % 400;
-                    const size = 1 + (i % 3);
-                    ctx.fillRect(x, y, size, size);
-                }
-            }
-
+                ctx.globalAlpha = p.opacity;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            
             ctx.fillStyle = colors[1];
             ctx.fillRect(PLATFORM_X, GROUND_Y + 64, PLATFORM_WIDTH, 86);
-
+            
             const platformGradient = ctx.createLinearGradient(0, GROUND_Y, 0, GROUND_Y + 64);
             platformGradient.addColorStop(0, lightenColor(colors[1], 40));
             platformGradient.addColorStop(0.3, colors[1]);
             platformGradient.addColorStop(1, darkenColor(colors[1], 40));
             ctx.fillStyle = platformGradient;
             ctx.fillRect(PLATFORM_X, GROUND_Y, PLATFORM_WIDTH, 64);
-
+            
             ctx.fillStyle = lightenColor(colors[1], 60);
             for (let i = 0; i < PLATFORM_WIDTH; i += 40) {
                 ctx.fillRect(PLATFORM_X + i, GROUND_Y, 20, 4);
             }
-
+            
             ctx.fillStyle = style.secondary;
             for (let i = 0; i < PLATFORM_WIDTH; i += 80) {
                 ctx.fillRect(PLATFORM_X + i, GROUND_Y, 20, 4);
@@ -2178,40 +1632,179 @@
             for (let i = 40; i < PLATFORM_WIDTH; i += 80) {
                 ctx.fillRect(PLATFORM_X + i, GROUND_Y, 20, 4);
             }
-
+            
             ctx.fillStyle = darkenColor(colors[1], 20);
             ctx.fillRect(PLATFORM_X, GROUND_Y + 60, PLATFORM_WIDTH, 8);
         }
-        
-        function drawHexagon(ctx, x, y, size) {
-            ctx.beginPath();
-            for (let i = 0; i < 6; i++) {
-                const angle = (Math.PI / 3) * i;
-                const px = x + Math.cos(angle) * size;
-                const py = y + Math.sin(angle) * size;
-                if (i === 0) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
-            }
-            ctx.closePath();
-            ctx.fill();
-        }
-        
+
         function lightenColor(color, percent) {
             const num = parseInt(color.replace('#', ''), 16);
             const amt = Math.round(2.55 * percent);
             const R = Math.min(255, (num >> 16) + amt);
             const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
             const B = Math.min(255, (num & 0x0000FF) + amt);
-            return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+            return '#' + (0x1000000 + R * 0x10000 + G * 0x1000 + B).toString(16).slice(1);
         }
-        
+
         function darkenColor(color, percent) {
             const num = parseInt(color.replace('#', ''), 16);
             const amt = Math.round(2.55 * percent);
             const R = Math.max(0, (num >> 16) - amt);
             const G = Math.max(0, ((num >> 8) & 0x00FF) - amt);
             const B = Math.max(0, (num & 0x0000FF) - amt);
-            return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+            return '#' + (0x1000000 + R * 0x10000 + G * 0x1000 + B).toString(16).slice(1);
+        }
+
+        function updateUI() {
+            if (!player1 || !player2) return;
+            
+            document.getElementById('health1').style.width = (player1.hp / player1.maxHp * 100) + '%';
+            document.getElementById('health2').style.width = (player2.hp / player2.maxHp * 100) + '%';
+            
+            document.getElementById('p1HeroName').textContent = player1.heroName;
+            document.getElementById('p2HeroName').textContent = player2.heroName;
+            
+            updateSkillBar('skill1-p1', player1.skills[0]);
+            updateSkillBar('skill2-p1', player1.skills[1]);
+            updateSkillBar('skill1-p2', player2.skills[0]);
+            updateSkillBar('skill2-p2', player2.skills[1]);
+            
+            updateUltimateBar('ultimate-p1', player1.ultimate);
+            updateUltimateBar('ultimate-p2', player2.ultimate);
+            
+            document.getElementById('skill1-p1-name').textContent = player1.skills[0].name;
+            document.getElementById('skill2-p1-name').textContent = player1.skills[1].name;
+            document.getElementById('skill1-p2-name').textContent = player2.skills[0].name;
+            document.getElementById('skill2-p2-name').textContent = player2.skills[1].name;
+        }
+
+        function updateSkillBar(id, skill) {
+            const percent = (1 - skill.currentCd / skill.cooldown) * 100;
+            document.getElementById(id).style.width = percent + '%';
+            const textEl = document.getElementById(id + '-text');
+            if (textEl) {
+                if (skill.currentCd > 0) {
+                    textEl.textContent = Math.ceil(skill.currentCd / 1000) + 's';
+                } else {
+                    textEl.textContent = '就绪';
+                }
+            }
+        }
+
+        function updateUltimateBar(id, ultimate) {
+            const percent = (1 - ultimate.currentCd / ultimate.cooldown) * 100;
+            document.getElementById(id).style.width = percent + '%';
+            const textEl = document.getElementById(id + '-text');
+            if (textEl) {
+                if (ultimate.currentCd > 0) {
+                    textEl.textContent = Math.ceil(ultimate.currentCd / 1000) + 's';
+                } else {
+                    textEl.textContent = '就绪';
+                }
+            }
+        }
+
+        function gameLoop(timestamp) {
+            const dt = lastTime ? timestamp - lastTime : 16;
+            lastTime = timestamp;
+            
+            if (gameState === 'playing') {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawBackground();
+                
+                if (player1 && player2) {
+                    player1.update(dt, player2);
+                    player2.update(dt, player1);
+                    
+                    handleLocalInput();
+                    handleCombat();
+                    
+                    player1.draw(ctx);
+                    player2.draw(ctx);
+                }
+                
+                updateUI();
+                checkGameOver();
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        function handleLocalInput() {
+            if (isNetworkGame && localPlayerId === 1) return;
+            
+            if (checkKey('p1', 'jump')) player1.jump();
+            if (checkKey('p1', 'left')) player1.moveLeft();
+            if (checkKey('p1', 'right')) player1.moveRight();
+            if (checkKey('p1', 'attack')) player1.attack(player2);
+            player1.defend(checkKey('p1', 'defend'));
+            if (checkKey('p1', 'skill1')) player1.useSkill(0, player2);
+            if (checkKey('p1', 'skill2')) player1.useSkill(1, player2);
+            if (checkKey('p1', 'ultimate')) {
+                if (player1.useUltimate(player2)) {
+                    executeUltimate(player1, player2);
+                }
+            }
+            
+            if (!isNetworkGame) {
+                if (checkKey('p2', 'jump')) player2.jump();
+                if (checkKey('p2', 'left')) player2.moveLeft();
+                if (checkKey('p2', 'right')) player2.moveRight();
+                if (checkKey('p2', 'attack')) player2.attack(player1);
+                player2.defend(checkKey('p2', 'defend'));
+                if (checkKey('p2', 'skill1')) player2.useSkill(0, player1);
+                if (checkKey('p2', 'skill2')) player2.useSkill(1, player1);
+                if (checkKey('p2', 'ultimate')) {
+                    if (player2.useUltimate(player1)) {
+                        executeUltimate(player2, player1);
+                    }
+                }
+            }
+        }
+
+        function executeUltimate(attacker, defender) {
+            const dist = Math.abs(attacker.x - defender.x);
+            if (dist <= attacker.ultimate.range) {
+                const killed = defender.hp <= attacker.ultimate.damage;
+                defender.takeDamage(attacker.ultimate.damage, true);
+                
+                if (killed) {
+                    ultimateWinner = attacker.isPlayer1 ? 1 : 2;
+                    showUltimateArt(attacker);
+                }
+            }
+        }
+
+        function showUltimateArt(player) {
+            const art = document.getElementById('ultimateArt');
+            document.getElementById('artHero').textContent = player.hero.icon;
+            document.getElementById('artName').textContent = player.hero.ultimate.name;
+            document.getElementById('artChar').textContent = player.hero.ultimate.name.charAt(0);
+            
+            art.classList.remove('hidden');
+            
+            setTimeout(() => {
+                art.classList.add('hidden');
+                checkGameOver();
+            }, 2500);
+        }
+
+        function handleCombat() {
+            if (player1.isAttacking && !player1.attackHit) {
+                const dist = Math.abs(player1.x - player2.x);
+                if (dist <= ATTACK_RANGE) {
+                    player2.takeDamage(player1.attackDamage);
+                    player1.attackHit = true;
+                }
+            }
+            
+            if (player2.isAttacking && !player2.attackHit) {
+                const dist = Math.abs(player2.x - player1.x);
+                if (dist <= ATTACK_RANGE) {
+                    player1.takeDamage(player2.attackDamage);
+                    player2.attackHit = true;
+                }
+            }
         }
 
         function checkKey(player, action) {
@@ -2219,143 +1812,31 @@
             return keys[binds[action]];
         }
 
-        function handleLocalInput() {
-            if (isNetworkGame && localPlayerId === 1) return;
-
-            if (checkKey('p1', 'left')) player1.moveLeft();
-            if (checkKey('p1', 'right')) player1.moveRight();
-            if (checkKey('p1', 'jump')) player1.jump();
-            if (checkKey('p1', 'attack')) player1.attack(player2);
-            if (checkKey('p1', 'skill1')) player1.useSkill(0, player2);
-            if (checkKey('p1', 'skill2')) player1.useSkill(1, player2);
-            player1.defend(checkKey('p1', 'defend'));
-
-            if (!isNetworkGame) {
-                if (checkKey('p2', 'left')) player2.moveLeft();
-                if (checkKey('p2', 'right')) player2.moveRight();
-                if (checkKey('p2', 'jump')) player2.jump();
-                if (checkKey('p2', 'attack')) player2.attack(player1);
-                if (checkKey('p2', 'skill1')) player2.useSkill(0, player1);
-                if (checkKey('p2', 'skill2')) player2.useSkill(1, player1);
-                player2.defend(checkKey('p2', 'defend'));
+        function checkGameOver() {
+            if (gameState !== 'playing') return;
+            
+            if (player1.hp <= 0) {
+                endGame(2);
+            } else if (player2.hp <= 0) {
+                endGame(1);
             }
         }
 
-        function handleNetworkInput() {
-            if (!isNetworkGame) return;
-
-            if (localPlayerId === 1) {
-                if (checkKey('p1', 'left')) player1.moveLeft();
-                if (checkKey('p1', 'right')) player1.moveRight();
-                if (checkKey('p1', 'jump')) player1.jump();
-                if (checkKey('p1', 'attack')) player1.attack(player2);
-                if (checkKey('p1', 'skill1')) player1.useSkill(0, player2);
-                if (checkKey('p1', 'skill2')) player1.useSkill(1, player2);
-                player1.defend(checkKey('p1', 'defend'));
-            } else {
-                if (checkKey('p2', 'left')) player2.moveLeft();
-                if (checkKey('p2', 'right')) player2.moveRight();
-                if (checkKey('p2', 'jump')) player2.jump();
-                if (checkKey('p2', 'attack')) player2.attack(player1);
-                if (checkKey('p2', 'skill1')) player2.useSkill(0, player1);
-                if (checkKey('p2', 'skill2')) player2.useSkill(1, player1);
-                player2.defend(checkKey('p2', 'defend'));
-            }
-        }
-
-        function syncGameState() {
-            if (!isNetworkGame || !conn || conn.open !== true) return;
-
-            if (localPlayerId === 1) {
-                conn.send({
-                    type: 'state',
-                    player1: player1.getState(),
-                    player2: player2.getState()
-                });
-            } else {
-                conn.send({
-                    type: 'state',
-                    player1: player1.getState(),
-                    player2: player2.getState()
-                });
-            }
-        }
-
-        function gameLoop(timestamp) {
-            const dt = timestamp - lastTime;
-            lastTime = timestamp;
-
-            if (gameState === 'playing') {
-                if (isNetworkGame) {
-                    handleNetworkInput();
-                } else {
-                    handleLocalInput();
-                }
-
-                handleMobileControls();
-
-                player1.update(dt, player2);
-                player2.update(dt, player1);
-                updateEffects(dt);
-
-                if (!isNetworkGame) {
-                    if (player1.isAttacking && player1.attackHit) {
-                        updateHealthBars();
-                    }
-                    if (player2.isAttacking && player2.attackHit) {
-                        updateHealthBars();
-                    }
-                } else {
-                    updateHealthBars();
-                    syncGameState();
-                }
-
-                if (player1.hp <= 0) {
-                    gameState = 'gameover';
-                    showGameOver(false);
-                    updatePlayerStats(false);
-                } else if (player2.hp <= 0) {
-                    gameState = 'gameover';
-                    showGameOver(true);
-                    updatePlayerStats(true);
-                }
-            }
-
-            drawBackground();
-
-            if (player1 && player2) {
-                player1.draw();
-                player2.draw();
-            }
-
-            drawEffects();
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        function updatePlayerStats(won) {
-            if (won) {
+        function endGame(winner) {
+            gameState = 'gameover';
+            document.getElementById('healthBars').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+            
+            const winnerText = document.getElementById('winnerText');
+            winnerText.textContent = '玩家' + winner + ' 胜利!';
+            winnerText.className = 'game-over-text ' + (winner === 1 ? 'blue' : 'red');
+            
+            if (winner === 1) {
                 playerData.wins++;
-                playerData.coins += 80;
-                
-                if (!playerData.firstWinClaimed) {
-                    playerData.coins += 200;
-                    playerData.firstWinClaimed = true;
-                    showNotification('🎉 首胜奖励 +200 金币!');
-                }
             } else {
                 playerData.losses++;
-                playerData.coins += 25;
             }
             savePlayerData();
-        }
-
-        function showNotification(text) {
-            const notif = document.createElement('div');
-            notif.className = 'notification';
-            notif.textContent = text;
-            document.body.appendChild(notif);
-            setTimeout(() => notif.remove(), 3000);
         }
 
         function hideAllMenus() {
@@ -2364,17 +1845,300 @@
             document.getElementById('waitingRoom').classList.add('hidden');
             document.getElementById('connectingScreen').classList.add('hidden');
             document.getElementById('banPickScreen').classList.add('hidden');
-            document.getElementById('gachaScreen').classList.add('hidden');
-            document.getElementById('eventsScreen').classList.add('hidden');
             document.getElementById('settingsScreen').classList.add('hidden');
-            document.getElementById('gameOverScreen').classList.add('hidden');
             document.getElementById('healthBars').classList.add('hidden');
             document.getElementById('playerInfo').style.display = 'none';
-            document.getElementById('controlsHint').style.display = 'block';
             document.getElementById('heroShowcaseScreen').classList.add('hidden');
+            document.getElementById('heroGalleryScreen').classList.add('hidden');
         }
 
-        // Style and showcase functions
+        function showMainMenu() {
+            gameState = 'menu';
+            hideAllMenus();
+            document.getElementById('mainMenu').classList.remove('hidden');
+            document.getElementById('playerInfo').style.display = 'block';
+            updatePlayerInfo();
+            updateShowcaseDisplay();
+            
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+            conn = null;
+        }
+
+        function startLocalGame() {
+            isNetworkGame = false;
+            startBanPick();
+        }
+
+        function showNetworkMenu() {
+            hideAllMenus();
+            document.getElementById('networkMenu').classList.remove('hidden');
+        }
+
+        function createRoom() {
+            isHost = true;
+            isNetworkGame = true;
+            localPlayerId = 1;
+            remotePlayerId = 2;
+            
+            hideAllMenus();
+            document.getElementById('waitingRoom').classList.remove('hidden');
+            
+            peer = new Peer();
+            
+            peer.on('open', (id) => {
+                document.getElementById('roomIdDisplay').textContent = id;
+            });
+            
+            peer.on('connection', (connection) => {
+                conn = connection;
+                setupConnection();
+            });
+            
+            peer.on('error', (err) => {
+                alert('连接错误: ' + err.message);
+                showNetworkMenu();
+            });
+        }
+
+        function joinRoom() {
+            const roomId = document.getElementById('roomInput').value.trim();
+            if (!roomId) {
+                alert('请输入房间ID');
+                return;
+            }
+            
+            isHost = false;
+            isNetworkGame = true;
+            localPlayerId = 2;
+            remotePlayerId = 1;
+            
+            hideAllMenus();
+            document.getElementById('connectingScreen').classList.remove('hidden');
+            
+            peer = new Peer();
+            
+            peer.on('open', () => {
+                conn = peer.connect(roomId, { reliable: true });
+                setupConnection();
+                
+                conn.on('open', () => {
+                    startBanPick();
+                });
+            });
+            
+            peer.on('error', (err) => {
+                alert('连接错误: ' + err.message);
+                showNetworkMenu();
+            });
+        }
+
+        function setupConnection() {
+            conn.on('data', (data) => {
+                if (data.type === 'state') {
+                    if (localPlayerId === 1) {
+                        player2.setState(data.player2);
+                    } else {
+                        player1.setState(data.player1);
+                    }
+                } else if (data.type === 'banPick') {
+                    banPickState = data.state;
+                    renderBanPickScreen();
+                }
+            });
+            
+            conn.on('open', () => {
+                if (isHost) {
+                    startBanPick();
+                }
+            });
+        }
+
+        function leaveRoom() {
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+            conn = null;
+            showNetworkMenu();
+        }
+
+        function cancelJoin() {
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+            conn = null;
+            showNetworkMenu();
+        }
+
+        function copyRoomId() {
+            const id = document.getElementById('roomIdDisplay').textContent;
+            navigator.clipboard.writeText(id).then(() => {
+                showNotification('房间ID已复制!');
+            });
+        }
+
+        function startBanPick() {
+            banPickState = {
+                phase: 'ban',
+                currentTurn: 1,
+                bannedHeroes: [],
+                pickedHeroes: { player1: null, player2: null }
+            };
+            hideAllMenus();
+            document.getElementById('banPickScreen').classList.remove('hidden');
+            renderBanPickScreen();
+        }
+
+        function renderBanPickScreen() {
+            const title = document.getElementById('banPickTitle');
+            const status = document.getElementById('banPickStatus');
+            const bannedDisplay = document.getElementById('bannedHeroesDisplay');
+            const grid = document.getElementById('heroGrid');
+            const buttons = document.getElementById('banPickButtons');
+            
+            if (banPickState.phase === 'ban') {
+                title.textContent = '禁用阶段';
+                status.textContent = '玩家' + banPickState.currentTurn + ' 禁用英雄';
+            } else if (banPickState.phase === 'pick') {
+                title.textContent = '选择阶段';
+                status.textContent = '玩家' + banPickState.currentTurn + ' 选择英雄';
+            } else if (banPickState.phase === 'done') {
+                title.textContent = '准备战斗!';
+                status.textContent = '';
+            }
+            
+            bannedDisplay.textContent = '已禁用: ' + banPickState.bannedHeroes.map(id => HEROES[id].name).join(', ');
+            
+            grid.innerHTML = '';
+            Object.values(HEROES).forEach(hero => {
+                const isBanned = banPickState.bannedHeroes.includes(hero.id);
+                const isPicked = Object.values(banPickState.pickedHeroes).includes(hero.id);
+                const canSelect = !isBanned && !isPicked && banPickState.phase !== 'done';
+                
+                const card = document.createElement('div');
+                card.className = 'hero-card ' + hero.rarity;
+                if (isBanned) card.classList.add('banned');
+                if (isPicked) card.classList.add('selected');
+                
+                card.innerHTML = `
+                    <div class="hero-icon">${hero.icon}</div>
+                    <div class="hero-name">${hero.name}</div>
+                    <div class="hero-rarity">${getRarityName(hero.rarity)}</div>
+                `;
+                
+                if (canSelect) {
+                    card.onclick = () => handleBanPickSelection(hero.id);
+                }
+                
+                grid.appendChild(card);
+            });
+            
+            buttons.innerHTML = '';
+            if (banPickState.phase === 'done') {
+                const startBtn = document.createElement('button');
+                startBtn.className = 'menu-btn blue';
+                startBtn.textContent = '开始战斗!';
+                startBtn.onclick = startGame;
+                buttons.appendChild(startBtn);
+            }
+        }
+
+        function handleBanPickSelection(heroId) {
+            if (banPickState.phase === 'ban') {
+                banPickState.bannedHeroes.push(heroId);
+            } else if (banPickState.phase === 'pick') {
+                if (banPickState.currentTurn === 1) {
+                    banPickState.pickedHeroes.player1 = heroId;
+                } else {
+                    banPickState.pickedHeroes.player2 = heroId;
+                }
+            }
+            
+            if (banPickState.phase === 'ban' && banPickState.bannedHeroes.length >= 2) {
+                banPickState.phase = 'pick';
+                banPickState.currentTurn = 1;
+            } else if (banPickState.phase === 'pick' && banPickState.pickedHeroes.player1 && banPickState.pickedHeroes.player2) {
+                banPickState.phase = 'done';
+            } else {
+                banPickState.currentTurn = banPickState.currentTurn === 1 ? 2 : 1;
+            }
+            
+            if (isNetworkGame) {
+                conn.send({ type: 'banPick', state: banPickState });
+            }
+            
+            renderBanPickScreen();
+        }
+
+        function startGame() {
+            hideAllMenus();
+            document.getElementById('healthBars').classList.remove('hidden');
+            document.getElementById('controlsHint').style.display = 'none';
+            
+            gameState = 'playing';
+            
+            const h1 = banPickState.pickedHeroes.player1 || 'blueKnight';
+            const h2 = banPickState.pickedHeroes.player2 || 'redWarrior';
+            player1 = new Mech(200, GROUND_Y, true, h1);
+            player2 = new Mech(600, GROUND_Y, false, h2);
+        }
+
+        function restartGame() {
+            startBanPick();
+        }
+
+        function returnToMenu() {
+            showMainMenu();
+        }
+
+        function showSettings() {
+            hideAllMenus();
+            document.getElementById('settingsScreen').classList.remove('hidden');
+            updateKeybindDisplay();
+        }
+
+        function switchSettingsTab(tab) {
+            document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.settings-content').forEach(c => c.style.display = 'none');
+            
+            event.target.classList.add('active');
+            document.getElementById('settings' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
+        }
+
+        function updateKeybindDisplay() {
+            Object.keys(playerData.settings.keybinds).forEach(player => {
+                Object.keys(playerData.settings.keybinds[player]).forEach(action => {
+                    const key = playerData.settings.keybinds[player][action];
+                    const displayKey = key.replace('Key', '').replace('Arrow', '').replace('Digit', '');
+                    const btnId = 'kb-' + player + '-' + action;
+                    const btn = document.getElementById(btnId);
+                    if (btn) btn.textContent = displayKey;
+                });
+            });
+        }
+
+        function startKeybind(player, action) {
+            if (recordingKeybind) {
+                const prevBtn = document.getElementById('kb-' + recordingKeybind.player + '-' + recordingKeybind.action);
+                if (prevBtn) prevBtn.classList.remove('recording');
+            }
+            
+            recordingKeybind = { player, action };
+            const btn = document.getElementById('kb-' + player + '-' + action);
+            btn.classList.add('recording');
+            btn.textContent = '...';
+        }
+
+        function saveProfile() {
+            playerData.name = document.getElementById('playerNameInput').value;
+            savePlayerData();
+            showNotification('✓ 资料已保存!');
+        }
+
         function applyStyle(styleId) {
             document.body.classList.remove('theme-tech', 'theme-japanese', 'theme-western', 'theme-cyberpunk', 'theme-futuristic');
             document.body.classList.add('theme-' + styleId);
@@ -2430,855 +2194,104 @@
             grid.innerHTML = '';
             
             Object.values(HEROES).forEach(hero => {
-                const owned = playerData.unlockedHeroes.includes(hero.id);
                 const isCurrent = playerData.showcaseHero === hero.id;
                 
                 const card = document.createElement('div');
-                card.className = `hero-card ${hero.rarity} ${!owned ? 'locked' : ''} ${isCurrent ? 'selected' : ''}`;
+                card.className = 'hero-card ' + hero.rarity;
+                if (isCurrent) card.classList.add('selected');
+                
                 card.innerHTML = `
-                    <div class="hero-icon">${getHeroIcon(hero)}</div>
+                    <div class="hero-icon">${hero.icon}</div>
                     <div class="hero-name">${hero.name}</div>
                     <div class="hero-rarity">${getRarityName(hero.rarity)}</div>
-                    <div style="font-size: 10px; margin-top: 4px; color: ${STYLES[hero.style]?.accent || '#888'};">${STYLES[hero.style]?.name || '默认'}</div>
+                    <div style="font-size: 10px; margin-top: 4px; color: ${STYLES[hero.style]?.accent || '#888'}">${STYLES[hero.style]?.name || '默认'}</div>
                 `;
                 
-                if (owned) {
-                    card.onclick = () => setShowcaseHero(hero.id);
-                }
-                
+                card.onclick = () => setShowcaseHero(hero.id);
                 grid.appendChild(card);
             });
         }
 
-        function showMainMenu() {
-            gameState = 'menu';
+        function showHeroGallery() {
             hideAllMenus();
-            document.getElementById('mainMenu').classList.remove('hidden');
-            document.getElementById('playerInfo').style.display = 'block';
-            updatePlayerInfo();
-            updateShowcaseDisplay();
-
-            if (peer) {
-                peer.destroy();
-                peer = null;
-            }
-            conn = null;
+            document.getElementById('heroGalleryScreen').classList.remove('hidden');
+            renderGalleryHeroes();
         }
 
-        function startLocalGame() {
-            isNetworkGame = false;
-            startBanPick();
-        }
-
-        function showNetworkMenu() {
-            hideAllMenus();
-            document.getElementById('networkMenu').classList.remove('hidden');
-        }
-
-        function createRoom() {
-            isHost = true;
-            isNetworkGame = true;
-            localPlayerId = 1;
-            remotePlayerId = 2;
-
-            hideAllMenus();
-            document.getElementById('waitingRoom').classList.remove('hidden');
-
-            peer = new Peer();
-
-            peer.on('open', (id) => {
-                document.getElementById('roomIdDisplay').textContent = id;
-            });
-
-            peer.on('connection', (connection) => {
-                conn = connection;
-                setupConnection();
-            });
-
-            peer.on('error', (err) => {
-                alert('连接错误: ' + err.message);
-                showNetworkMenu();
-            });
-        }
-
-        function joinRoom() {
-            const roomId = document.getElementById('roomInput').value.trim();
-            if (!roomId) {
-                alert('请输入房间ID');
-                return;
-            }
-
-            isHost = false;
-            isNetworkGame = true;
-            localPlayerId = 2;
-            remotePlayerId = 1;
-
-            hideAllMenus();
-            document.getElementById('connectingScreen').classList.remove('hidden');
-
-            peer = new Peer();
-
-            peer.on('open', () => {
-                conn = peer.connect(roomId, { reliable: true });
-                setupConnection();
-
-                conn.on('open', () => {
-                    startBanPick();
-                });
-            });
-
-            peer.on('error', (err) => {
-                alert('连接错误: ' + err.message);
-                showNetworkMenu();
-            });
-        }
-
-        function setupConnection() {
-            conn.on('data', (data) => {
-                if (data.type === 'state') {
-                    if (localPlayerId === 1) {
-                        player2.setState(data.player2);
-                    } else {
-                        player1.setState(data.player1);
-                    }
-                } else if (data.type === 'banPick') {
-                    banPickState = data.state;
-                    renderBanPickScreen();
-                    if (banPickState.phase === 'done' && data.startGame) {
-                        startGameFromBanPick();
-                    }
-                } else if (data.type === 'restart') {
-                    restartGame();
-                }
-            });
-
-            conn.on('close', () => {
-                if (gameState === 'playing' || gameState === 'banpick') {
-                    alert('连接已断开');
-                    showMainMenu();
-                }
-            });
-
-            if (isHost) {
-                startBanPick();
-            }
-        }
-
-        function leaveRoom() {
-            if (peer) {
-                peer.destroy();
-                peer = null;
-            }
-            conn = null;
-            showNetworkMenu();
-        }
-
-        function copyRoomId() {
-            const roomId = document.getElementById('roomIdDisplay').textContent;
-            if (roomId && roomId !== '---') {
-                navigator.clipboard.writeText(roomId).then(() => {
-                    alert('房间ID已复制到剪贴板!');
-                }).catch(() => {
-                    prompt('请复制以下房间ID:', roomId);
-                });
-            }
-        }
-
-        function cancelJoin() {
-            if (peer) {
-                peer.destroy();
-                peer = null;
-            }
-            conn = null;
-            showNetworkMenu();
-        }
-
-        function showGameOver(player1Won) {
-            const winnerText = document.getElementById('winnerText');
-            const rewardText = document.getElementById('rewardText');
-            if (player1Won) {
-                winnerText.textContent = '玩家1 胜利!';
-                winnerText.className = 'game-over-text blue';
-            } else {
-                winnerText.textContent = '玩家2 胜利!';
-                winnerText.className = 'game-over-text red';
-            }
-            rewardText.textContent = '+80 金币 (参与+25)';
-            document.getElementById('gameOverScreen').classList.remove('hidden');
-        }
-
-        function restartGame() {
-            document.getElementById('gameOverScreen').classList.add('hidden');
-            startBanPick();
-
-            if (isNetworkGame && conn && conn.open) {
-                conn.send({ type: 'restart' });
-            }
-        }
-
-        function returnToMenu() {
-            document.getElementById('gameOverScreen').classList.add('hidden');
-            showMainMenu();
-
-            if (isNetworkGame) {
-                if (conn) conn.close();
-                if (peer) peer.destroy();
-                peer = null;
-                conn = null;
-            }
-        }
-
-        function startBanPick() {
-            gameState = 'banpick';
-            banPickState = {
-                phase: 'ban',
-                currentTurn: 1,
-                bannedHeroes: [],
-                pickedHeroes: { player1: null, player2: null }
-            };
-            
-            hideAllMenus();
-            document.getElementById('banPickScreen').classList.remove('hidden');
-            renderBanPickScreen();
-        }
-
-        function renderBanPickScreen() {
-            const titleEl = document.getElementById('banPickTitle');
-            const statusEl = document.getElementById('banPickStatus');
-            const bannedEl = document.getElementById('bannedHeroesDisplay');
-            const gridEl = document.getElementById('heroGrid');
-            const buttonsEl = document.getElementById('banPickButtons');
-
-            if (banPickState.phase === 'ban') {
-                titleEl.textContent = '⚔️ 禁用阶段 ⚔️';
-                statusEl.textContent = `玩家${banPickState.currentTurn} 禁用英雄`;
-            } else if (banPickState.phase === 'pick') {
-                titleEl.textContent = '🎮 选择阶段 🎮';
-                if (banPickState.pickedHeroes.player1 && banPickState.pickedHeroes.player2) {
-                    statusEl.textContent = '双方已选择，准备战斗！';
-                } else {
-                    statusEl.textContent = `玩家${banPickState.currentTurn} 选择英雄`;
-                }
-            }
-
-            if (banPickState.bannedHeroes.length > 0) {
-                bannedEl.textContent = '已禁用: ' + banPickState.bannedHeroes.map(h => HEROES[h].name).join(', ');
-            } else {
-                bannedEl.textContent = '';
-            }
-
-            gridEl.innerHTML = '';
-            Object.values(HEROES).forEach(hero => {
-                const card = document.createElement('div');
-                card.className = 'hero-card';
-                card.dataset.heroId = hero.id;
-                
-                const isBanned = banPickState.bannedHeroes.includes(hero.id);
-                const isPicked = banPickState.pickedHeroes.player1 === hero.id || banPickState.pickedHeroes.player2 === hero.id;
-                const isLocked = !playerData.unlockedHeroes.includes(hero.id) && !isNetworkGame;
-
-                if (isBanned) card.classList.add('banned');
-                if (isPicked) card.classList.add('selected');
-                if (isLocked) card.classList.add('locked');
-
-                const icon = document.createElement('div');
-                icon.className = 'hero-icon';
-                icon.style.background = `linear-gradient(135deg, ${hero.colors.primary}, ${hero.colors.secondary})`;
-                icon.style.border = `4px solid ${hero.colors.armor}`;
-                icon.style.borderRadius = '12px';
-                icon.style.boxShadow = `0 0 15px ${hero.colors.highlight}40`;
-                card.appendChild(icon);
-
-                const name = document.createElement('div');
-                name.className = 'hero-name';
-                name.textContent = hero.name;
-                card.appendChild(name);
-
-                const rarity = document.createElement('div');
-                rarity.className = `hero-rarity rarity-${hero.rarity}`;
-                rarity.textContent = getRarityText(hero.rarity);
-                card.appendChild(rarity);
-
-                const stats = document.createElement('div');
-                stats.className = 'hero-stats';
-                stats.textContent = `HP:${hero.stats.hp} ATK:${hero.stats.attack} SPD:${hero.stats.speed}`;
-                card.appendChild(stats);
-
-                const skills = document.createElement('div');
-                skills.className = 'hero-ability';
-                skills.textContent = `技能: ${hero.skills[0].name}, ${hero.skills[1].name}`;
-                card.appendChild(skills);
-
-                if (!isBanned && !isLocked) {
-                    card.onclick = () => handleHeroClick(hero.id);
-                }
-                gridEl.appendChild(card);
-            });
-
-            buttonsEl.innerHTML = '';
-            if (banPickState.phase === 'pick' && banPickState.pickedHeroes.player1 && banPickState.pickedHeroes.player2) {
-                const btn = document.createElement('button');
-                btn.className = 'menu-btn blue';
-                btn.textContent = '开始战斗!';
-                btn.onclick = startGameFromBanPick;
-                buttonsEl.appendChild(btn);
-            }
-        }
-
-        function getRarityText(rarity) {
-            const map = { common: '普通', rare: '稀有', epic: '史诗', legendary: '传说' };
-            return map[rarity];
-        }
-
-        function handleHeroClick(heroId) {
-            if (isNetworkGame) {
-                const isMyTurn = (banPickState.currentTurn === localPlayerId);
-                if (!isMyTurn) return;
-            }
-
-            if (banPickState.phase === 'ban') {
-                if (banPickState.bannedHeroes.includes(heroId)) return;
-                banPickState.bannedHeroes.push(heroId);
-                
-                if (banPickState.bannedHeroes.length >= 2) {
-                    banPickState.phase = 'pick';
-                    banPickState.currentTurn = 1;
-                } else {
-                    banPickState.currentTurn = banPickState.currentTurn === 1 ? 2 : 1;
-                }
-            } else if (banPickState.phase === 'pick') {
-                if (banPickState.bannedHeroes.includes(heroId)) return;
-                if (banPickState.pickedHeroes.player1 === heroId || banPickState.pickedHeroes.player2 === heroId) return;
-                if (!playerData.unlockedHeroes.includes(heroId) && !isNetworkGame) return;
-
-                if (banPickState.currentTurn === 1 && !banPickState.pickedHeroes.player1) {
-                    banPickState.pickedHeroes.player1 = heroId;
-                    banPickState.currentTurn = 2;
-                } else if (banPickState.currentTurn === 2 && !banPickState.pickedHeroes.player2) {
-                    banPickState.pickedHeroes.player2 = heroId;
-                    banPickState.currentTurn = 1;
-                }
-            }
-
-            renderBanPickScreen();
-
-            if (isNetworkGame && conn && conn.open) {
-                conn.send({ type: 'banPick', state: banPickState });
-            }
-        }
-
-        function startGameFromBanPick() {
-            const h1 = banPickState.pickedHeroes.player1 || 'blueKnight';
-            const h2 = banPickState.pickedHeroes.player2 || 'redWarrior';
-            
-            banPickState.phase = 'done';
-            hideAllMenus();
-            document.getElementById('healthBars').classList.remove('hidden');
-            document.getElementById('controlsHint').style.display = 'block';
-            
-            initGame(h1, h2);
-            gameState = 'playing';
-
-            if (isNetworkGame && conn && conn.open) {
-                conn.send({ type: 'banPick', state: banPickState, startGame: true });
-            }
-        }
-
-        function showGacha() {
-            hideAllMenus();
-            document.getElementById('gachaScreen').classList.remove('hidden');
-            document.getElementById('playerInfo').style.display = 'block';
-            renderMyHeroes();
-            updateFreePullInfo();
-        }
-
-        function updateFreePullInfo() {
-            const today = new Date().toDateString();
-            if (playerData.lastLogin !== today) {
-                playerData.freePullsToday = 0;
-            }
-            const freeLeft = Math.max(0, 3 - playerData.freePullsToday);
-            document.getElementById('freePullInfo').textContent = freeLeft > 0 ? `🎁 今日剩余免费抽卡: ${freeLeft} 次` : '';
-        }
-
-        function renderMyHeroes() {
-            const grid = document.getElementById('myHeroesGrid');
+        function renderGalleryHeroes() {
+            const grid = document.getElementById('galleryHeroGrid');
             grid.innerHTML = '';
             
-            playerData.unlockedHeroes.forEach(heroId => {
-                const hero = HEROES[heroId];
+            Object.values(HEROES).forEach(hero => {
                 const card = document.createElement('div');
-                card.className = 'hero-card';
+                card.className = 'hero-card ' + hero.rarity;
                 
-                const icon = document.createElement('div');
-                icon.className = 'hero-icon';
-                icon.style.background = `linear-gradient(135deg, ${hero.colors.primary}, ${hero.colors.secondary})`;
-                icon.style.border = `3px solid ${hero.colors.armor}`;
-                icon.style.borderRadius = '10px';
-                card.appendChild(icon);
-
-                const name = document.createElement('div');
-                name.className = 'hero-name';
-                name.textContent = hero.name;
-                card.appendChild(name);
-
-                const rarity = document.createElement('div');
-                rarity.className = `hero-rarity rarity-${hero.rarity}`;
-                rarity.textContent = getRarityText(hero.rarity);
-                card.appendChild(rarity);
-
+                card.innerHTML = `
+                    <div class="hero-icon">${hero.icon}</div>
+                    <div class="hero-name">${hero.name}</div>
+                    <div class="hero-rarity">${getRarityName(hero.rarity)}</div>
+                `;
+                
+                card.onclick = () => showHeroDetail(hero);
                 grid.appendChild(card);
             });
         }
 
-        function doGacha(packType) {
-            let cost = GACHA_COSTS[packType];
-            const today = new Date().toDateString();
+        function showHeroDetail(hero) {
+            const panel = document.getElementById('heroDetailPanel');
+            panel.classList.add('show');
             
-            if (playerData.freePullsToday < 3) {
-                cost = 0;
-                playerData.freePullsToday++;
-            }
-            
-            if (playerData.coins < cost) {
-                alert('金币不足!');
-                return;
-            }
-
-            playerData.coins -= cost;
-            
-            const rates = GACHA_RATES[packType];
-            const rand = Math.random();
-            let rarity;
-            if (rand < rates.legendary) {
-                rarity = 'legendary';
-            } else if (rand < rates.legendary + rates.epic) {
-                rarity = 'epic';
-            } else if (rand < rates.legendary + rates.epic + rates.rare) {
-                rarity = 'rare';
-            } else {
-                rarity = 'common';
-            }
-
-            const heroesOfRarity = Object.values(HEROES).filter(h => h.rarity === rarity);
-            const selectedHero = heroesOfRarity[Math.floor(Math.random() * heroesOfRarity.length)];
-
-            let isNew = false;
-            if (!playerData.unlockedHeroes.includes(selectedHero.id)) {
-                playerData.unlockedHeroes.push(selectedHero.id);
-                isNew = true;
-            } else {
-                const refund = rarity === 'legendary' ? 200 : rarity === 'epic' ? 100 : rarity === 'rare' ? 50 : 15;
-                playerData.coins += refund;
-            }
-
-            savePlayerData();
-            showGachaResult(selectedHero, isNew);
-            updateFreePullInfo();
-        }
-
-        function showGachaResult(hero, isNew) {
-            const resultDiv = document.getElementById('gachaResult');
-            const heroCard = document.getElementById('gachaResultHero');
-            
-            heroCard.innerHTML = '';
-            heroCard.className = `hero-card gacha-result rarity-${hero.rarity}`;
-            heroCard.style.boxShadow = `0 0 30px ${hero.colors.highlight}`;
-            
-            const icon = document.createElement('div');
-            icon.className = 'hero-icon';
-            icon.style.background = `linear-gradient(135deg, ${hero.colors.primary}, ${hero.colors.secondary})`;
-            icon.style.border = `4px solid ${hero.colors.armor}`;
-            icon.style.borderRadius = '12px';
-            heroCard.appendChild(icon);
-
-            const name = document.createElement('div');
-            name.className = 'hero-name';
-            name.style.fontSize = '18px';
-            name.textContent = hero.name;
-            heroCard.appendChild(name);
-
-            const rarity = document.createElement('div');
-            rarity.className = `hero-rarity rarity-${hero.rarity}`;
-            rarity.style.fontSize = '14px';
-            rarity.textContent = getRarityText(hero.rarity) + (isNew ? ' ✨ 新英雄! ✨' : ' (重复，已返还金币)');
-            heroCard.appendChild(rarity);
-
-            resultDiv.style.display = 'block';
-        }
-
-        function hideGachaResult() {
-            document.getElementById('gachaResult').style.display = 'none';
-            renderMyHeroes();
-            updatePlayerInfo();
-        }
-
-        function showEvents() {
-            hideAllMenus();
-            document.getElementById('eventsScreen').classList.remove('hidden');
-            document.getElementById('playerInfo').style.display = 'block';
-            renderEvents();
-        }
-
-        function renderEvents() {
-            const container = document.getElementById('eventsContainer');
-            const today = new Date();
-            const todayStr = today.toDateString();
-            const dayOfMonth = today.getDate();
-            
-            container.innerHTML = '';
-
-            const checkinCard = document.createElement('div');
-            checkinCard.className = 'event-card';
-            const canCheckin = playerData.lastCheckinDay !== todayStr;
-            
-            let checkinContent = `
-                <div class="event-title">📅 每日签到</div>
-                <div class="event-desc">每日签到获得奖励，连续签到奖励更丰厚！</div>
-                <div class="checkin-grid">
+            document.getElementById('detailHeroIcon').textContent = hero.icon;
+            document.getElementById('detailHeroName').textContent = hero.name;
+            document.getElementById('detailHeroRarity').textContent = getRarityName(hero.rarity);
+            document.getElementById('detailHeroRarity').style.color = getRarityColor(hero.rarity);
+            document.getElementById('detailHeroStats').innerHTML = `
+                <span>❤️ 生命: ${hero.stats.hp}</span>
+                <span>⚔️ 攻击: ${hero.stats.attack}</span>
+                <span>💨 速度: ${hero.stats.speed}</span>
             `;
             
-            for (let i = 0; i < 7; i++) {
-                const dayNum = (dayOfMonth - 3 + i + 30) % 30 + 1;
-                const isChecked = i < 3;
-                const isToday = i === 3;
-                let dayClass = 'checkin-day';
-                if (isChecked) dayClass += ' checked';
-                if (isToday) dayClass += ' today';
-                
-                const reward = (i + 1) * 30;
-                checkinContent += `
-                    <div class="${dayClass}">
-                        <div class="day-num">${i + 1}</div>
-                        <div class="day-reward">${reward}💰</div>
-                    </div>
-                `;
-            }
-            checkinContent += `</div>`;
-            
-            if (canCheckin) {
-                checkinCard.className += ' claimable';
-                checkinContent += `<button class="menu-btn gold" onclick="doCheckin()">领取签到奖励</button>`;
-            } else {
-                checkinCard.className += ' completed';
-                checkinContent += `<div class="event-reward">✅ 今日已签到</div>`;
-            }
-            checkinCard.innerHTML = checkinContent;
-            container.appendChild(checkinCard);
-
-            const dailyTaskCard = document.createElement('div');
-            dailyTaskCard.className = 'event-card';
-            const tasksDone = playerData.dailyTasksDone.includes(todayStr);
-            dailyTaskCard.innerHTML = `
-                <div class="event-title">🎯 每日任务</div>
-                <div class="event-desc">完成一局对战获得奖励！</div>
-                <div class="event-progress">
-                    <div class="event-progress-bar" style="width: ${tasksDone ? '100' : Math.min(100, (playerData.wins + playerData.losses) * 20)}%"></div>
+            document.getElementById('detailHeroDesc').textContent = hero.description;
+            document.getElementById('detailHeroSkills').innerHTML = `
+                <div class="skill-detail">
+                    <div class="skill-detail-name">${hero.skills[0].name}</div>
+                    <div class="skill-detail-desc">${hero.skillDescriptions[0]}</div>
                 </div>
-                <div class="event-reward">奖励: +100💰</div>
-                ${tasksDone ? '<div class="event-reward" style="color:#7aff9a">✅ 已完成</div>' : 
-                  '<button class="menu-btn purple" onclick="claimDailyTask()">领取奖励</button>'}
+                <div class="skill-detail">
+                    <div class="skill-detail-name">${hero.skills[1].name}</div>
+                    <div class="skill-detail-desc">${hero.skillDescriptions[1]}</div>
+                </div>
+                <div class="skill-detail ultimate">
+                    <div class="skill-detail-name">✨ ${hero.ultimate.name}</div>
+                    <div class="skill-detail-desc">${hero.ultimate.description}</div>
+                </div>
             `;
-            if (tasksDone) dailyTaskCard.className += ' completed';
-            container.appendChild(dailyTaskCard);
+        }
 
-            const firstWinCard = document.createElement('div');
-            firstWinCard.className = 'event-card';
-            if (playerData.firstWinClaimed) {
-                firstWinCard.className += ' completed';
-                firstWinCard.innerHTML = `
-                    <div class="event-title">🏆 每日首胜</div>
-                    <div class="event-desc">每日首胜获得额外奖励！</div>
-                    <div class="event-reward">✅ 今日已领取首胜奖励</div>
-                `;
-            } else {
-                firstWinCard.innerHTML = `
-                    <div class="event-title">🏆 每日首胜</div>
-                    <div class="event-desc">每日首胜获得额外奖励！</div>
-                    <div class="event-reward">奖励: +200💰</div>
-                `;
-            }
-            container.appendChild(firstWinCard);
-
-            if (playerData.isNewPlayer && playerData.unlockedHeroes.length < 4) {
-                const newPlayerCard = document.createElement('div');
-                newPlayerCard.className = 'event-card claimable';
-                newPlayerCard.innerHTML = `
-                    <div class="event-title">🎁 新手礼包</div>
-                    <div class="event-desc">欢迎游玩！送你500金币和一个稀有英雄！</div>
-                    <div class="event-reward">奖励: 500💰 + 随机稀有英雄</div>
-                    <button class="menu-btn gold" onclick="claimNewPlayerGift()">领取新手礼包</button>
-                `;
-                container.appendChild(newPlayerCard);
+        function getRarityName(rarity) {
+            switch (rarity) {
+                case 'common': return '普通';
+                case 'rare': return '稀有';
+                case 'epic': return '史诗';
+                case 'legendary': return '传说';
             }
         }
 
-        function doCheckin() {
-            const today = new Date().toDateString();
-            if (playerData.lastCheckinDay === today) return;
-            
-            playerData.lastCheckinDay = today;
-            playerData.checkinStreak++;
-            const reward = Math.min(playerData.checkinStreak, 7) * 30;
-            playerData.coins += reward;
-            savePlayerData();
-            showNotification(`🎉 签到成功！获得 ${reward} 金币！`);
-            renderEvents();
-        }
-
-        function claimDailyTask() {
-            const today = new Date().toDateString();
-            if (playerData.dailyTasksDone.includes(today)) return;
-            
-            playerData.dailyTasksDone.push(today);
-            playerData.coins += 100;
-            savePlayerData();
-            showNotification('🎯 每日任务奖励 +100 金币！');
-            renderEvents();
-        }
-
-        function claimNewPlayerGift() {
-            if (!playerData.isNewPlayer) return;
-            
-            playerData.isNewPlayer = false;
-            playerData.coins += 500;
-            
-            const rareHeroes = Object.values(HEROES).filter(h => h.rarity === 'rare' && !playerData.unlockedHeroes.includes(h.id));
-            if (rareHeroes.length > 0) {
-                const hero = rareHeroes[Math.floor(Math.random() * rareHeroes.length)];
-                playerData.unlockedHeroes.push(hero.id);
-                showNotification(`🎁 获得 ${hero.name}！`);
-            }
-            
-            savePlayerData();
-            renderEvents();
-        }
-
-        function showSettings() {
-            hideAllMenus();
-            document.getElementById('settingsScreen').classList.remove('hidden');
-            updateKeybindDisplay();
-        }
-
-        function switchSettingsTab(tab) {
-            document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.settings-content').forEach(c => c.style.display = 'none');
-            
-            event.target.classList.add('active');
-            document.getElementById('settings' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
-        }
-
-        function updateKeybindDisplay() {
-            Object.keys(playerData.settings.keybinds).forEach(player => {
-                Object.keys(playerData.settings.keybinds[player]).forEach(action => {
-                    const key = playerData.settings.keybinds[player][action];
-                    const displayKey = key.replace('Key', '').replace('Arrow', '').replace('Digit', '');
-                    const btnId = `kb-${player}-${action}`;
-                    const btn = document.getElementById(btnId);
-                    if (btn) btn.textContent = displayKey;
-                });
-            });
-        }
-
-        function startKeybind(player, action) {
-            if (recordingKeybind) {
-                const prevBtn = document.getElementById(`kb-${recordingKeybind.player}-${recordingKeybind.action}`);
-                if (prevBtn) prevBtn.classList.remove('recording');
-            }
-            
-            recordingKeybind = { player, action };
-            const btn = document.getElementById(`kb-${player}-${action}`);
-            btn.classList.add('recording');
-            btn.textContent = '...';
-        }
-
-        function saveProfile() {
-            playerData.name = document.getElementById('playerNameInput').value;
-            savePlayerData();
-            showNotification('✓ 资料已保存！');
-        }
-
-        let mobileControls = {
-            p1: {
-                jump: null, left: null, right: null, attack: null, defend: null, skill1: null, skill2: null
-            },
-            p2: {
-                jump: null, left: null, right: null, attack: null, defend: null, skill1: null, skill2: null
-            }
-        };
-        let activeMobileKeys = new Set();
-
-        function createMobileControls() {
-            const container = document.getElementById('mobileControls');
-            if (container) return;
-
-            const controlsDiv = document.createElement('div');
-            controlsDiv.id = 'mobileControls';
-            controlsDiv.style.cssText = `
-                position: absolute;
-                bottom: 60px;
-                left: 0;
-                right: 0;
-                display: flex;
-                justify-content: space-between;
-                padding: 0 20px;
-                pointer-events: none;
-                z-index: 15;
-            `;
-
-            const createPlayerControls = (playerId, side) => {
-                const playerDiv = document.createElement('div');
-                playerDiv.style.cssText = `
-                    display: grid;
-                    grid-template-columns: repeat(3, 50px);
-                    grid-template-rows: repeat(3, 50px);
-                    gap: 5px;
-                    pointer-events: auto;
-                `;
-
-                const actions = [
-                    { action: 'skill1', label: '技1', gridArea: '1 / 1' },
-                    { action: 'jump', label: '↑', gridArea: '1 / 2' },
-                    { action: 'skill2', label: '技2', gridArea: '1 / 3' },
-                    { action: 'left', label: '←', gridArea: '2 / 1' },
-                    { action: 'attack', label: '⚔', gridArea: '2 / 2' },
-                    { action: 'right', label: '→', gridArea: '2 / 3' },
-                    { action: 'defend', label: '🛡', gridArea: '3 / 2' }
-                ];
-
-                actions.forEach(({ action, label, gridArea }) => {
-                    const btn = document.createElement('button');
-                    btn.className = 'mobile-btn';
-                    btn.dataset.player = playerId;
-                    btn.dataset.action = action;
-                    btn.textContent = label;
-                    btn.style.cssText = `
-                        width: 50px;
-                        height: 50px;
-                        border-radius: 50%;
-                        border: 3px solid ${side === 'left' ? '#4fc3f7' : '#ff6b6b'};
-                        background: rgba(42, 42, 74, 0.85);
-                        color: #fff;
-                        font-size: 16px;
-                        cursor: pointer;
-                        touch-action: manipulation;
-                        user-select: none;
-                        -webkit-user-select: none;
-                        transition: all 0.1s;
-                    `;
-
-                    btn.addEventListener('touchstart', (e) => {
-                        e.preventDefault();
-                        btn.style.transform = 'scale(0.9)';
-                        btn.style.background = 'rgba(79, 195, 247, 0.4)';
-                        handleMobileInput(playerId, action, true);
-                    });
-                    btn.addEventListener('touchend', (e) => {
-                        e.preventDefault();
-                        btn.style.transform = '';
-                        btn.style.background = 'rgba(42, 42, 74, 0.85)';
-                        handleMobileInput(playerId, action, false);
-                    });
-                    btn.addEventListener('touchcancel', (e) => {
-                        e.preventDefault();
-                        btn.style.transform = '';
-                        btn.style.background = 'rgba(42, 42, 74, 0.85)';
-                        handleMobileInput(playerId, action, false);
-                    });
-
-                    playerDiv.appendChild(btn);
-                });
-
-                return playerDiv;
-            };
-
-            controlsDiv.appendChild(createPlayerControls('p1', 'left'));
-            controlsDiv.appendChild(createPlayerControls('p2', 'right'));
-            document.getElementById('game-container').appendChild(controlsDiv);
-        }
-
-        function handleMobileInput(player, action, isPressed) {
-            const key = `${player}_${action}`;
-            if (isPressed) {
-                activeMobileKeys.add(key);
-            } else {
-                activeMobileKeys.delete(key);
-            }
-            updateMobileKeysState();
-        }
-
-        function updateMobileKeysState() {
-            mobileControls.p1 = {
-                jump: activeMobileKeys.has('p1_jump'),
-                left: activeMobileKeys.has('p1_left'),
-                right: activeMobileKeys.has('p1_right'),
-                attack: activeMobileKeys.has('p1_attack'),
-                defend: activeMobileKeys.has('p1_defend'),
-                skill1: activeMobileKeys.has('p1_skill1'),
-                skill2: activeMobileKeys.has('p1_skill2')
-            };
-            mobileControls.p2 = {
-                jump: activeMobileKeys.has('p2_jump'),
-                left: activeMobileKeys.has('p2_left'),
-                right: activeMobileKeys.has('p2_right'),
-                attack: activeMobileKeys.has('p2_attack'),
-                defend: activeMobileKeys.has('p2_defend'),
-                skill1: activeMobileKeys.has('p2_skill1'),
-                skill2: activeMobileKeys.has('p2_skill2')
-            };
-        }
-
-        function handleMobileControls() {
-            if (isNetworkGame && localPlayerId === 1) {
-                if (mobileControls.p1.left) player1.moveLeft();
-                if (mobileControls.p1.right) player1.moveRight();
-                if (mobileControls.p1.jump) player1.jump();
-                if (mobileControls.p1.attack) player1.attack(player2);
-                if (mobileControls.p1.skill1) player1.useSkill(0, player2);
-                if (mobileControls.p1.skill2) player1.useSkill(1, player2);
-                player1.defend(mobileControls.p1.defend);
-            } else if (!isNetworkGame) {
-                if (mobileControls.p1.left) player1.moveLeft();
-                if (mobileControls.p1.right) player1.moveRight();
-                if (mobileControls.p1.jump) player1.jump();
-                if (mobileControls.p1.attack) player1.attack(player2);
-                if (mobileControls.p1.skill1) player1.useSkill(0, player2);
-                if (mobileControls.p1.skill2) player1.useSkill(1, player2);
-                player1.defend(mobileControls.p1.defend);
-
-                if (mobileControls.p2.left) player2.moveLeft();
-                if (mobileControls.p2.right) player2.moveRight();
-                if (mobileControls.p2.jump) player2.jump();
-                if (mobileControls.p2.attack) player2.attack(player1);
-                if (mobileControls.p2.skill1) player2.useSkill(0, player1);
-                if (mobileControls.p2.skill2) player2.useSkill(1, player1);
-                player2.defend(mobileControls.p2.defend);
-            } else {
-                if (mobileControls.p2.left) player2.moveLeft();
-                if (mobileControls.p2.right) player2.moveRight();
-                if (mobileControls.p2.jump) player2.jump();
-                if (mobileControls.p2.attack) player2.attack(player1);
-                if (mobileControls.p2.skill1) player2.useSkill(0, player1);
-                if (mobileControls.p2.skill2) player2.useSkill(1, player1);
-                player2.defend(mobileControls.p2.defend);
+        function getRarityColor(rarity) {
+            switch (rarity) {
+                case 'common': return '#aaa';
+                case 'rare': return '#4fc3f7';
+                case 'epic': return '#a855f7';
+                case 'legendary': return '#ffe762';
             }
         }
 
-        function detectMobile() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
-                || window.innerWidth < 768;
-        }
-
-        function showMobileControls() {
-            createMobileControls();
-            document.getElementById('mobileControls').style.display = 'flex';
-        }
-
-        function hideMobileControls() {
-            const controls = document.getElementById('mobileControls');
-            if (controls) {
-                document.getElementById('mobileControls').style.display = 'none';
-            }
+        function showNotification(text) {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.textContent = text;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 3000);
         }
 
         function loadPlayerData() {
@@ -3287,21 +2300,11 @@
                 playerData = { ...playerData, ...JSON.parse(saved) };
             }
             
-            // Restore style from showcase hero
             if (playerData.showcaseHero && HEROES[playerData.showcaseHero]) {
                 const hero = HEROES[playerData.showcaseHero];
                 if (hero.style) {
                     applyStyle(hero.style);
                 }
-            }
-            
-            const today = new Date().toDateString();
-            if (playerData.lastLogin !== today) {
-                playerData.coins += 100;
-                playerData.lastLogin = today;
-                playerData.firstWinClaimed = false;
-                playerData.freePullsToday = 0;
-                savePlayerData();
             }
             
             updatePlayerInfo();
@@ -3315,59 +2318,42 @@
 
         function updatePlayerInfo() {
             document.getElementById('playerNameDisplay').textContent = playerData.name;
-            document.getElementById('coinsDisplay').textContent = '💰 ' + playerData.coins;
-            document.getElementById('statsDisplay').textContent = `胜: ${playerData.wins} | 负: ${playerData.losses}`;
-            document.getElementById('gachaCoins').textContent = playerData.coins;
+            document.getElementById('statsDisplay').textContent = '胜: ' + playerData.wins + ' | 负: ' + playerData.losses;
             document.getElementById('playerNameInput').value = playerData.name;
         }
 
         document.addEventListener('keydown', (e) => {
             keys[e.code] = true;
             keys[e.key] = true;
-
+            
             if (recordingKeybind) {
                 e.preventDefault();
                 const { player, action } = recordingKeybind;
                 
                 playerData.settings.keybinds[player][action] = e.code;
                 
-                const btn = document.getElementById(`kb-${player}-${action}`);
+                const btn = document.getElementById('kb-' + player + '-' + action);
                 btn.classList.remove('recording');
                 btn.textContent = e.code.replace('Key', '').replace('Arrow', '').replace('Digit', '');
                 
                 savePlayerData();
                 recordingKeybind = null;
             }
-
+            
             if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
                 e.preventDefault();
             }
         });
-
+        
         document.addEventListener('keyup', (e) => {
             keys[e.code] = false;
             keys[e.key] = false;
         });
-
-        const canvas = document.getElementById('gameCanvas');
-        window.ctx = canvas.getContext('2d');
+        
         loadPlayerData();
-        initGame();
-        showMainMenu();
-
-        if (detectMobile()) {
-            showMobileControls();
-        }
-
-        window.addEventListener('resize', () => {
-            if (detectMobile()) {
-                showMobileControls();
-            } else {
-                hideMobileControls();
-            }
-        });
-
+        initBackgroundParticles();
         requestAnimationFrame(gameLoop);
     </script>
 </body>
 </html>
+
