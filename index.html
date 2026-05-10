@@ -59,6 +59,12 @@
         gridHelper.position.y = -1.5;
         scene.add(gridHelper);
 
+        // 弹跳物理参数
+        let velocity = 0;
+        const gravity = -0.015;
+        const bounceFactor = 0.85;
+        const groundLevel = -0.5;
+
         // 动画循环
         function animate() {
             requestAnimationFrame(animate);
@@ -66,6 +72,15 @@
             // 球体旋转
             sphere.rotation.x += 0.005;
             sphere.rotation.y += 0.01;
+            
+            // 弹跳物理
+            velocity += gravity;
+            sphere.position.y += velocity;
+            
+            if (sphere.position.y <= groundLevel) {
+                sphere.position.y = groundLevel;
+                velocity = -velocity * bounceFactor;
+            }
             
             renderer.render(scene, camera);
         }
