@@ -44,42 +44,6 @@
         const sphere = new THREE.Mesh(geometry, material);
         scene.add(sphere);
 
-        // 添加环形轨道
-        const torusGeometry = new THREE.TorusGeometry(3, 0.05, 16, 100);
-        const torusMaterial = new THREE.MeshBasicMaterial({ 
-            color: 0x4488ff,
-            transparent: true,
-            opacity: 0.6
-        });
-        const torus = new THREE.Mesh(torusGeometry, torusMaterial);
-        torus.rotation.x = Math.PI / 2;
-        torus.position.y = 1.5;
-        scene.add(torus);
-
-        // 添加第二条轨道
-        const torus2Geometry = new THREE.TorusGeometry(4, 0.03, 16, 100);
-        const torus2Material = new THREE.MeshBasicMaterial({ 
-            color: 0xff4488,
-            transparent: true,
-            opacity: 0.4
-        });
-        const torus2 = new THREE.Mesh(torus2Geometry, torus2Material);
-        torus2.rotation.x = Math.PI / 3;
-        torus2.position.y = 2;
-        scene.add(torus2);
-
-        // 添加第三条轨道
-        const torus3Geometry = new THREE.TorusGeometry(3.5, 0.02, 16, 100);
-        const torus3Material = new THREE.MeshBasicMaterial({ 
-            color: 0xffff00,
-            transparent: true,
-            opacity: 0.3
-        });
-        const torus3 = new THREE.Mesh(torus3Geometry, torus3Material);
-        torus3.rotation.z = Math.PI / 4;
-        torus3.position.y = 1;
-        scene.add(torus3);
-
         // 增强光照
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
@@ -117,11 +81,24 @@
         gridHelper.position.y = -1.5;
         scene.add(gridHelper);
 
-        // 弹跳物理参数 - 恒定高度
+        // 弹跳物理参数
+        const groundLevel = -0.5;
+
+        // 添加球体正下方的直线轨道
+        const trackMaterial = new THREE.MeshBasicMaterial({ color: 0x4488ff });
+        const track1Geometry = new THREE.BoxGeometry(6, 0.05, 0.3);
+        const track1 = new THREE.Mesh(track1Geometry, trackMaterial);
+        track1.position.y = groundLevel - 0.1;
+        scene.add(track1);
+
+        const track2Geometry = new THREE.BoxGeometry(0.3, 0.05, 6);
+        const track2 = new THREE.Mesh(track2Geometry, trackMaterial);
+        track2.position.y = groundLevel - 0.1;
+        scene.add(track2);
+
         let velocity = 0;
         const gravity = -0.015;
         const targetHeight = 3;
-        const groundLevel = -0.5;
         
         // 计算达到目标高度所需的速度
         const heightDiff = targetHeight - groundLevel;
@@ -144,11 +121,6 @@
                 sphere.position.y = groundLevel;
                 velocity = requiredVelocity;
             }
-            
-            // 轨道旋转动画
-            torus.rotation.z += 0.002;
-            torus2.rotation.z -= 0.001;
-            torus3.rotation.y += 0.003;
             
             renderer.render(scene, camera);
         }
