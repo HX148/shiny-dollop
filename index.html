@@ -62,7 +62,7 @@
         // 弹跳物理参数
         let velocity = 0;
         const gravity = -0.015;
-        const bounceFactor = 0.85;
+        const initialVelocity = 0.4;
         const groundLevel = -0.5;
 
         // 动画循环
@@ -79,7 +79,10 @@
             
             if (sphere.position.y <= groundLevel) {
                 sphere.position.y = groundLevel;
-                velocity = -velocity * bounceFactor;
+                velocity = -velocity;
+                if (Math.abs(velocity) < 0.2) {
+                    velocity = initialVelocity;
+                }
             }
             
             renderer.render(scene, camera);
