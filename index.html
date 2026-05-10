@@ -190,7 +190,7 @@
         let zVelocity = -(trackPieceSize + trackGap) / bounceTime;
 
         // 追踪球体状态
-        let lastVelocity = velocity;
+        let wasOnGround = true; // 追踪球是否在地面上
         let bounceCount = 0; // 记录弹跳次数，用于调试
         let xOffset = 0; // X方向偏移
         
@@ -294,23 +294,25 @@
             sphere.position.x = xOffset;
             
             // 弹跳物理 - 保持恒定高度
-            const oldVelocity = velocity;
             velocity += gravity;
             sphere.position.y += velocity;
             
-            // 检测落地 - 通过速度方向变化判断
-            const isLanding = oldVelocity < 0 && velocity >= 0;
+            // 检测是否刚从空中落地
+            const isOnGround = sphere.position.y <= groundLevel;
+            const justLanded = !wasOnGround && isOnGround;
             
-            if (sphere.position.y <= groundLevel) {
+            if (isOnGround) {
                 sphere.position.y = groundLevel;
                 velocity = requiredVelocity;
                 
-                // 如果速度方向发生变化，创建特效
-                if (isLanding || velocity > 0) {
-                    createImpactEffect(xOffset, 0); // 特效位置跟随球的X位置
+                // 只在刚落地时创建特效
+                if (justLanded) {
+                    createImpactEffect(xOffset, 0);
                     bounceCount++;
                 }
             }
+            
+            wasOnGround = isOnGround;
 
             // 轨道向后移动（向Z正方向）
             for (const track of trackSegments) {
