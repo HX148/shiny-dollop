@@ -1,18 +1,24 @@
-import { Router, Request, Response } from 'express';
-import { mockNews } from '../data/seedData';
-import { NewsListResponse } from '../types';
+import { Router, Request, Response } from "express";
+import NewsStorage from "../data/newsStorage";
+import NewsCrawlerService from "../services/newsCrawler";
+import { NewsListResponse } from "../types";
 
 const router = Router();
+const storage = NewsStorage.getInstance();
+const crawler = new NewsCrawlerService();
 
-router.get('/', (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
+    // 自动刷新缓存
+    await crawler.refreshIfNeeded();
+
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const category = req.query.category as string;
 
-    let filteredNews = [...mockNews];
+    let filteredNews = storage.getNews();
 
-    if (category && category !== '全部') {
+    if (category && category !== "全部") {
       filteredNews = filteredNews.filter(news => news.category === category);
     }
 
@@ -31,24 +37,24 @@ router.get('/', (req: Request, res: Response) => {
 
     res.json(response);
   } catch (error) {
-    console.error('Error fetching news:', error);
-    res.status(500).json({ error: 'Failed to fetch news' });
+    console.error("Error fetching news:", error);
+    res.status(500).json({ error: "Failed to fetch news" });
   }
 });
 
-router.get('/:id', (req: Request, res: Response) => {
+router.get("/:id", (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const news = mockNews.find(n => n.id === id);
+    const news = storage.getNewsById(id);
 
     if (!news) {
-      return res.status(404).json({ error: 'News not found' });
+      return res.status(404).json({ error: "News not found" });
     }
 
     res.json(news);
   } catch (error) {
-    console.error('Error fetching news detail:', error);
-    res.status(500).json({ error: 'Failed to fetch news detail' });
+    console.error("Error fetching news detail:", error);
+    res.status(500).json({ error: "Failed to fetch news detail" });
   }
 });
 

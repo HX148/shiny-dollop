@@ -23,20 +23,34 @@
 4. `api/utils/pythonBridge.ts` - Python 脚本桥接工具
 5. `api/routes/crawler.ts` - 爬虫管理 API 路由
 6. `scripts/crawl_ai_news.py` - AI 专用新闻爬虫
+7. `scripts/crawl_arxiv_papers.py` - arXiv 论文爬虫
+8. `scripts/crawl_research_papers.py` - 研究论文综合爬虫
 
 ### 修改文件
 1. `api/app.ts` - 添加爬虫路由
 2. `api/routes/news.ts` - 集成实时新闻数据
 3. `package.json` - 添加新的依赖和脚本
-4. `README.md` - 更新功能说明
+4. `requirements.txt` - 添加论文解析依赖
+5. `README.md` - 更新功能说明
 
 ## 3. 实现步骤
 
 ### 步骤 1: 创建 AI 专用新闻爬虫 (Python)
-- 分析 AI 领域专业新闻源（TechCrunch、VentureBeat、MIT Tech Review 等）
-- 实现针对 AI 新闻的专门爬虫
-- 支持新闻分类（LLM、计算机视觉、机器人等）
+- **国外 AI 新闻源**: TechCrunch AI、VentureBeat AI、MIT Tech Review AI、Wired AI、The Verge AI、Nature Machine Intelligence
+- **国外论文源**: 
+  - arXiv (cs.AI、cs.LG、cs.CV 等分类) 
+  - Hugging Face Papers 
+  - OpenAI Research Blog 
+  - DeepMind Blog 
+  - Google Research Blog 
+  - Meta AI Research
+  - Papers with Code
+  - arXiv Sanity
+- **国内新闻源**: 机器之心、36Kr AI、量子位
+- 实现针对 AI 新闻和论文的专门爬虫
+- 支持新闻分类（LLM、计算机视觉、机器人、生成式 AI、AI 研究等）
 - 生成符合项目 News 类型的数据结构
+- arXiv 论文特别处理：标题、摘要、作者、PDF链接、分类标签
 
 ### 步骤 2: 创建 Express 后端爬虫服务
 - 创建 Python 桥接模块，从 Node.js 调用 Python 爬虫
@@ -48,21 +62,27 @@
 - 修改 `/api/news` 路由以支持实时抓取数据
 - 保留静态数据作为后备方案
 - 实现缓存策略（避免频繁抓取）
+- 添加论文分类过滤选项
 
 ### 步骤 4: 添加定时任务
 - 使用 node-cron 实现定时新闻更新
-- 配置每小时/每日自动刷新新闻
+- 配置每日更新新闻和论文的定时任务
 - 添加健康检查和错误处理
 
 ### 步骤 5: 更新项目配置
 - 添加必要的 npm 依赖
 - 更新 package.json 脚本
 - 创建环境变量配置示例
+- 更新 requirements.txt 添加论文解析库
 
 ## 4. 潜在依赖和注意事项
 
 ### 技术依赖
 - **Python**: 已有依赖 (requests, beautifulsoup4, python-dateutil)
+- **Python 新增依赖**: 
+  - `feedparser`: RSS/Atom feed 解析（用于 arXiv）
+  - `arxiv`: arXiv API 客户端
+  - `PyPDF2` 或 `pdfplumber`: PDF 处理（可选）
 - **Node.js 新增依赖**: 
   - `node-cron`: 定时任务
   - `node-python` 或类似: Python 桥接
@@ -74,6 +94,7 @@
 - **错误处理**: 爬虫失败时优雅降级到静态数据
 - **性能优化**: 实现有效的缓存策略
 - **安全性**: 防止外部资源攻击，验证抓取的内容
+- **arXiv API 限制**: 遵守 arXiv API 使用政策，合理使用官方 API
 
 ## 5. 风险处理
 
@@ -83,4 +104,5 @@
 | 爬虫被网站封禁 | 中 | 设置合理的请求头和延迟，轮换 User-Agent |
 | 性能问题（抓取耗时过长） | 中 | 实现异步抓取和缓存，后台更新数据 |
 | 数据格式不一致 | 中 | 严格的数据验证和转换层 |
+| arXiv API 限制 | 中 | 使用官方 API，合理设置请求频率 |
 | 依赖冲突 | 低 | 版本锁定，充分测试 |
