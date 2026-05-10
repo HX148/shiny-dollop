@@ -95,6 +95,7 @@
         let velocity = 0;
         const gravity = -0.015;
         const targetHeight = 3;
+        let zVelocity = -0.03;
         
         // 计算达到目标高度所需的速度
         const heightDiff = targetHeight - groundLevel;
@@ -117,6 +118,9 @@
                 sphere.position.y = groundLevel;
                 velocity = requiredVelocity;
             }
+
+            // 沿轨道向深处移动
+            sphere.position.z += zVelocity;
             
             renderer.render(scene, camera);
         }
