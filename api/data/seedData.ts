@@ -10,7 +10,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://techcrunch.com',
     category: '大语言模型',
     publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '2',
@@ -21,7 +21,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://nature.com',
     category: '计算机视觉',
     publishedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '3',
@@ -32,7 +32,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://spectrum.ieee.org',
     category: '机器人',
     publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '4',
@@ -43,7 +43,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://billboard.com',
     category: '生成式 AI',
     publishedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '5',
@@ -54,7 +54,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://science.sciencemag.org',
     category: 'AI 研究',
     publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '6',
@@ -65,7 +65,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://bloomberg.com',
     category: '初创企业',
     publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '7',
@@ -76,7 +76,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://ai.meta.com',
     category: '大语言模型',
     publishedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '8',
@@ -87,7 +87,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://cell.com',
     category: 'AI 医疗',
     publishedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1579154204601-01588f450a7b?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '9',
@@ -98,7 +98,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://stability.ai',
     category: '生成式 AI',
     publishedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '10',
@@ -109,7 +109,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://tesla.com',
     category: 'AI 自动驾驶',
     publishedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '11',
@@ -120,7 +120,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://deepmind.com',
     category: 'AI 研究',
     publishedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '12',
@@ -131,7 +131,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://forbes.com',
     category: '初创企业',
     publishedAt: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '13',
@@ -142,7 +142,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://edtechreview.com',
     category: 'AI 教育',
     publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '14',
@@ -153,7 +153,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://ft.com',
     category: 'AI 金融',
     publishedAt: new Date(Date.now() - 11 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '15',
@@ -164,7 +164,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://thelancet.com',
     category: 'AI 医疗',
     publishedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1559757175-5700dde675bc?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '16',
@@ -175,7 +175,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://36kr.com',
     category: 'AI 教育',
     publishedAt: new Date(Date.now() - 13 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '17',
@@ -186,7 +186,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://waymo.com',
     category: 'AI 自动驾驶',
     publishedAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '18',
@@ -197,7 +197,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://cnbc.com',
     category: 'AI 金融',
     publishedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '19',
@@ -208,7 +208,7 @@ export const mockNews: News[] = [
     sourceUrl: 'https://roboticsurgery.com',
     category: '机器人',
     publishedAt: new Date(Date.now() - 16 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&h=300&fit=crop'
+    imageUrl: undefined
   },
   {
     id: '20',
@@ -219,6 +219,6 @@ export const mockNews: News[] = [
     sourceUrl: 'https://tusimple.com',
     category: 'AI 自动驾驶',
     publishedAt: new Date(Date.now() - 17 * 24 * 60 * 60 * 1000).toISOString(),
-    imageUrl: 'https://images.unsplash.com/photo-1498575536846-1bf695547dcb?w=400&h=300&fit=crop'
+    imageUrl: undefined
   }
 ];

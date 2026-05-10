@@ -7,12 +7,46 @@ import { News } from '../types';
 import { Calendar, ExternalLink, ArrowLeft, AlertCircle } from 'lucide-react';
 import { formatDate } from '../lib/utils';
 
+// 生成 SVG 占位符的函数
+const getCategoryGradient = (category: string) => {
+  const gradients: Record<string, string> = {
+    '大语言模型': 'from-blue-500 to-indigo-600',
+    '计算机视觉': 'from-green-500 to-teal-600',
+    '机器人': 'from-orange-500 to-red-600',
+    '生成式 AI': 'from-purple-500 to-pink-600',
+    'AI 研究': 'from-cyan-500 to-blue-600',
+    '初创企业': 'from-yellow-500 to-orange-600',
+    'AI 医疗': 'from-emerald-500 to-green-600',
+    'AI 金融': 'from-amber-500 to-yellow-600',
+    'AI 教育': 'from-violet-500 to-purple-600',
+    'AI 自动驾驶': 'from-rose-500 to-red-600',
+  };
+  return gradients[category] || 'from-slate-500 to-gray-600';
+};
+
+const getCategoryIcon = (category: string) => {
+  const icons: Record<string, string> = {
+    '大语言模型': '💬',
+    '计算机视觉': '👁️',
+    '机器人': '🤖',
+    '生成式 AI': '🎨',
+    'AI 研究': '🔬',
+    '初创企业': '🚀',
+    'AI 医疗': '🏥',
+    'AI 金融': '💰',
+    'AI 教育': '📚',
+    'AI 自动驾驶': '🚗',
+  };
+  return icons[category] || '📰';
+};
+
 export default function NewsDetail() {
   const { id } = useParams<{ id: string }>();
   const [news, setNews] = useState<News | null>(null);
   const [relatedNews, setRelatedNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -20,6 +54,7 @@ export default function NewsDetail() {
       try {
         setLoading(true);
         setError(null);
+        setImageError(false);
         const [newsData, allNews] = await Promise.all([
           getNewsById(id),
           getNews(1, 6)
@@ -94,6 +129,9 @@ export default function NewsDetail() {
     );
   }
 
+  const gradientClass = getCategoryGradient(news.category);
+  const categoryIcon = getCategoryIcon(news.category);
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
@@ -110,12 +148,19 @@ export default function NewsDetail() {
 
           <article className="bg-white rounded-2xl overflow-hidden shadow-sm">
             <div className="relative h-96">
-              <img
-                src={news.imageUrl || 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=600&fit=crop'}
-                alt={news.title}
-                loading="lazy"
-                className="w-full h-full object-cover"
-              />
+              {!imageError && news.imageUrl ? (
+                <img
+                  src={news.imageUrl}
+                  alt={news.title}
+                  loading="lazy"
+                  onError={() => setImageError(true)}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className={`w-full h-full bg-gradient-to-br ${gradientClass} flex items-center justify-center`}>
+                  <div className="text-9xl">{categoryIcon}</div>
+                </div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
                 <span className="inline-block px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full mb-3">
