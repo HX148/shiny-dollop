@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">动态壁纸</string>
+    <string name="wallpaper_service_name">视频壁纸服务</string>
+</resources>
