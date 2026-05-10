@@ -2,13 +2,14 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Three.js 3D 球体</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
             font-family: Arial, sans-serif;
+            touch-action: none;
         }
         canvas {
             display: block;
@@ -193,12 +194,14 @@
         let bounceCount = 0; // 记录弹跳次数，用于调试
         let xOffset = 0; // X方向偏移
         
-        // 鼠标移动监听 - 视觉上的一比一，球跟随鼠标
+        // 鼠标和触摸控制
         let targetX = 0;
         const maxX = (trackWidth / 2) - 0.5; // 限制在轨道内，留一点余量
-        window.addEventListener('mousemove', (event) => {
-            // 将鼠标坐标归一化到[-1, 1]范围
-            const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+        
+        // 通用函数：更新球的位置
+        function updateTargetX(clientX) {
+            // 将坐标归一化到[-1, 1]范围
+            const normalizedX = (clientX / window.innerWidth) * 2 - 1;
             
             // 计算相机视野
             const fov = 75; // 视角
@@ -209,9 +212,29 @@
             const viewHeight = 2 * Math.tan((fov * Math.PI / 180) / 2) * distance;
             const viewWidth = viewHeight * aspect;
             
-            // 鼠标位置直接对应球的世界坐标，并限制在轨道范围内
-            let calculatedX = mouseX * viewWidth / 2;
+            // 位置直接对应球的世界坐标，并限制在轨道范围内
+            let calculatedX = normalizedX * viewWidth / 2;
             targetX = Math.max(-maxX, Math.min(maxX, calculatedX));
+        }
+        
+        // 鼠标移动
+        window.addEventListener('mousemove', (event) => {
+            updateTargetX(event.clientX);
+        });
+        
+        // 触摸移动
+        window.addEventListener('touchmove', (event) => {
+            event.preventDefault();
+            if (event.touches.length > 0) {
+                updateTargetX(event.touches[0].clientX);
+            }
+        }, { passive: false });
+        
+        // 触摸开始
+        window.addEventListener('touchstart', (event) => {
+            if (event.touches.length > 0) {
+                updateTargetX(event.touches[0].clientX);
+            }
         });
 
         // 创建落点特效
