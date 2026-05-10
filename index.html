@@ -83,20 +83,24 @@
         scene.add(gridHelper);
 
         // 轨道管理
-        const trackMaterial = new THREE.MeshBasicMaterial({ color: 0x4488ff });
+        const trackMaterial1 = new THREE.MeshBasicMaterial({ color: 0x4488ff });
+        const trackMaterial2 = new THREE.MeshBasicMaterial({ color: 0x88ff44 });
         const trackPieceSize = 1.5; // 每片轨道的长度（Z轴方向）
         const trackGap = 0.1; // 轨道片之间的间隙
         const trackWidth = 6; // 轨道总宽度
         const trackSegments = []; // 存储当前轨道段
         let lastGeneratedTrackZ = 0; // 最后生成的轨道的Z位置
+        let trackColorIndex = 0; // 用于切换轨道颜色
 
         // 创建单个轨道片（宽度方向连续）
         function createTrackPiece(zCenter) {
             const trackGeometry = new THREE.BoxGeometry(trackWidth, 0.1, trackPieceSize);
+            const trackMaterial = trackColorIndex % 2 === 0 ? trackMaterial1 : trackMaterial2;
             const track = new THREE.Mesh(trackGeometry, trackMaterial);
             track.position.set(0, 0, zCenter);
             scene.add(track);
             trackSegments.push(track);
+            trackColorIndex++;
         }
 
         // 初始化轨道 - 创建初始轨道片
