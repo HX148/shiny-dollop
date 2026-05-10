@@ -12,7 +12,7 @@ router.get('/', (req: Request, res: Response) => {
 
     let filteredNews = [...mockNews];
 
-    if (category && category !== 'All') {
+    if (category && category !== '全部') {
       filteredNews = filteredNews.filter(news => news.category === category);
     }
 

@@ -8,7 +8,7 @@ import { Sparkles } from 'lucide-react';
 export default function Home() {
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState('全部');
 
   useEffect(() => {
     async function fetchNews() {
@@ -35,16 +35,16 @@ export default function Home() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
               <Sparkles className="h-4 w-4" />
-              Daily AI News
+              每日 AI 新闻
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-4">
-              Stay Ahead of the
+              领先一步，掌握
               <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                {' '}AI Revolution
+                {' '}AI 革命
               </span>
             </h1>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Your trusted source for the latest breakthroughs, research, and innovations in artificial intelligence.
+              您值得信赖的人工智能领域最新突破、研究和创新新闻来源。
             </p>
           </div>
 
@@ -87,7 +87,7 @@ export default function Home() {
 
           {!loading && news.length === 0 && (
             <div className="text-center py-20">
-              <p className="text-slate-500 text-lg">No news found for this category.</p>
+              <p className="text-slate-500 text-lg">该分类暂无新闻。</p>
             </div>
           )}
         </div>
@@ -96,7 +96,7 @@ export default function Home() {
       <footer className="bg-slate-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-slate-400">
-            © 2024 Daily AI News. Stay informed, stay ahead.
+            © 2024 每日 AI 新闻。保持关注，保持领先。
           </p>
         </div>
       </footer>

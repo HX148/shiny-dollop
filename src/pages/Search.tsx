@@ -43,19 +43,19 @@ export default function Search() {
             className="inline-flex items-center gap-2 text-slate-600 hover:text-blue-600 mb-8 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to home
+            返回首页
           </Link>
 
           <div className="mb-10">
             <div className="flex items-center gap-3 mb-4">
               <SearchIcon className="h-6 w-6 text-slate-400" />
               <h1 className="text-3xl font-bold text-slate-900">
-                Search Results
+                搜索结果
               </h1>
             </div>
             {query && (
               <p className="text-lg text-slate-600">
-                Showing results for: <span className="font-semibold text-slate-900">"{query}"</span>
+                显示结果：<span className="font-semibold text-slate-900">"{query}"</span>
               </p>
             )}
           </div>
@@ -82,9 +82,9 @@ export default function Search() {
           ) : (
             <div className="text-center py-20">
               <SearchIcon className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-slate-700 mb-2">No results found</h2>
+              <h2 className="text-xl font-semibold text-slate-700 mb-2">未找到结果</h2>
               <p className="text-slate-500">
-                {query ? 'Try a different search term' : 'Enter a search term to find news'}
+                {query ? '尝试不同的搜索词' : '输入搜索词来查找新闻'}
               </p>
             </div>
           )}
@@ -94,7 +94,7 @@ export default function Search() {
       <footer className="bg-slate-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-slate-400">
-            © 2024 Daily AI News. Stay informed, stay ahead.
+            © 2024 每日 AI 新闻。保持关注，保持领先。
           </p>
         </div>
       </footer>

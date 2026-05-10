@@ -35,7 +35,7 @@ export default function NewsDetail() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('zh-CN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -69,9 +69,9 @@ export default function NewsDetail() {
       <div className="min-h-screen bg-slate-50">
         <Navbar />
         <div className="pt-24 pb-16 text-center">
-          <p className="text-slate-500 text-lg">News not found.</p>
+          <p className="text-slate-500 text-lg">新闻未找到。</p>
           <Link to="/" className="text-blue-600 hover:underline mt-4 inline-block">
-            Back to home
+            返回首页
           </Link>
         </div>
       </div>
@@ -89,7 +89,7 @@ export default function NewsDetail() {
             className="inline-flex items-center gap-2 text-slate-600 hover:text-blue-600 mb-8 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to news
+            返回新闻列表
           </Link>
 
           <article className="bg-white rounded-2xl overflow-hidden shadow-sm">
@@ -136,7 +136,7 @@ export default function NewsDetail() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors"
                 >
-                  Read original article
+                  阅读原文
                   <ExternalLink className="h-4 w-4" />
                 </a>
               </div>
@@ -145,7 +145,7 @@ export default function NewsDetail() {
 
           {relatedNews.length > 0 && (
             <div className="mt-16">
-              <h2 className="text-2xl font-bold text-slate-900 mb-8">Related News</h2>
+              <h2 className="text-2xl font-bold text-slate-900 mb-8">相关新闻</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {relatedNews.map((item) => (
                   <NewsCard key={item.id} news={item} />
@@ -159,7 +159,7 @@ export default function NewsDetail() {
       <footer className="bg-slate-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-slate-400">
-            © 2024 Daily AI News. Stay informed, stay ahead.
+            © 2024 每日 AI 新闻。保持关注，保持领先。
           </p>
         </div>
       </footer>

@@ -4,7 +4,7 @@ const API_BASE = '/api';
 
 export async function getNews(page = 1, limit = 10, category?: string): Promise<NewsListResponse> {
   const params = new URLSearchParams({ page: String(page), limit: String(limit) });
-  if (category && category !== 'All') {
+  if (category && category !== '全部') {
     params.append('category', category);
   }
   

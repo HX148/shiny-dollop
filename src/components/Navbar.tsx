@@ -21,7 +21,7 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-2">
             <BrainCircuit className="h-8 w-8 text-blue-600" />
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Daily AI News
+              每日 AI 新闻
             </span>
           </Link>
 
@@ -29,7 +29,7 @@ export default function Navbar() {
             <form onSubmit={handleSearch} className="w-full relative">
               <input
                 type="text"
-                placeholder="Search AI news..."
+                placeholder="搜索 AI 新闻..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-slate-100 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -40,7 +40,7 @@ export default function Navbar() {
 
           <div className="hidden md:flex items-center gap-6">
             <Link to="/" className="text-slate-700 hover:text-blue-600 font-medium transition-colors">
-              Home
+              首页
             </Link>
           </div>
 
@@ -58,7 +58,7 @@ export default function Navbar() {
           <form onSubmit={handleSearch} className="relative">
             <input
               type="text"
-              placeholder="Search AI news..."
+              placeholder="搜索 AI 新闻..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-slate-100 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -70,7 +70,7 @@ export default function Navbar() {
             onClick={() => setMobileMenuOpen(false)}
             className="block text-slate-700 hover:text-blue-600 font-medium"
           >
-            Home
+            首页
           </Link>
         </div>
       )}

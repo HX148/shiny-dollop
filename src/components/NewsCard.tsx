@@ -9,7 +9,7 @@ interface NewsCardProps {
 export default function NewsCard({ news }: NewsCardProps) {
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('zh-CN', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -55,7 +55,7 @@ export default function NewsCard({ news }: NewsCardProps) {
         </p>
 
         <div className="mt-4 flex items-center text-blue-600 text-sm font-medium gap-1">
-          Read more
+          阅读更多
           <ExternalLink className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
         </div>
       </div>

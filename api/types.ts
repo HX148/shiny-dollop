@@ -18,11 +18,15 @@ export interface NewsListResponse {
 }
 
 export const CATEGORIES = [
-  'All',
-  'LLM',
-  'Computer Vision',
-  'Robotics',
-  'Generative AI',
-  'AI Research',
-  'Startups'
+  '全部',
+  '大语言模型',
+  '计算机视觉',
+  '机器人',
+  '生成式 AI',
+  'AI 研究',
+  '初创企业',
+  'AI 医疗',
+  'AI 金融',
+  'AI 教育',
+  'AI 自动驾驶'
 ];
