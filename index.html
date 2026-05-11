@@ -3,23 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>音乐节奏游戏</title>
+    <title>NEON BEAT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --neon-pink: #ff2d95;
+            --neon-yellow: #ffed4a;
+            --neon-cyan: #00f0ff;
+            --neon-purple: #b829dd;
+            --bg-dark: #0a0a12;
+            --bg-darker: #050508;
+            --text-primary: #ffffff;
+            --text-secondary: #8a8a9a;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0f;
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg-darker);
             user-select: none;
             -webkit-user-select: none;
         }
+
         canvas {
             display: block;
         }
+
         #ui-layer {
             position: fixed;
             top: 0;
@@ -29,250 +46,545 @@
             pointer-events: none;
             z-index: 10;
         }
+
+        #scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0.3;
+        }
+
         #score-display {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            color: #fff;
-            font-size: 24px;
-            text-shadow: 0 0 10px rgba(0, 255, 200, 0.5);
+            top: 30px;
+            left: 30px;
         }
-        #combo-display {
+
+        .score-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            color: var(--text-secondary);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .score-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--text-primary);
+            text-shadow: 
+                0 0 10px var(--neon-cyan),
+                0 0 20px var(--neon-cyan),
+                0 0 40px var(--neon-cyan);
+            line-height: 1;
+        }
+
+        .combo-container {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            color: #ff69b4;
-            font-size: 32px;
-            font-weight: bold;
-            text-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
-            transition: transform 0.1s;
+            top: 30px;
+            right: 30px;
+            text-align: right;
         }
-        #combo-display.pulse {
-            transform: scale(1.2);
+
+        .combo-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 64px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px var(--neon-pink));
+            line-height: 1;
+            transition: transform 0.1s ease-out;
         }
+
+        .combo-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            letter-spacing: 8px;
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        .combo-container.pulse .combo-value {
+            transform: scale(1.15);
+        }
+
         #judgment {
             position: absolute;
-            top: 50%;
+            top: 40%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 48px;
-            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 56px;
+            font-weight: 900;
             opacity: 0;
             pointer-events: none;
+            letter-spacing: 4px;
         }
+
         #judgment.perfect {
-            color: #00ff88;
-            text-shadow: 0 0 30px #00ff88, 0 0 60px #00ff88;
+            color: var(--neon-cyan);
+            text-shadow: 
+                0 0 20px var(--neon-cyan),
+                0 0 40px var(--neon-cyan),
+                0 0 80px var(--neon-cyan);
+            animation: perfectPop 0.5s ease-out forwards;
         }
+
         #judgment.good {
-            color: #ffcc00;
-            text-shadow: 0 0 30px #ffcc00, 0 0 60px #ffcc00;
+            color: var(--neon-yellow);
+            text-shadow: 
+                0 0 20px var(--neon-yellow),
+                0 0 40px var(--neon-yellow);
+            animation: goodPop 0.4s ease-out forwards;
         }
+
         #judgment.miss {
-            color: #ff4466;
-            text-shadow: 0 0 30px #ff4466, 0 0 60px #ff4466;
+            color: #ff3333;
+            text-shadow: 
+                0 0 20px #ff3333,
+                0 0 40px #ff3333;
+            animation: missPop 0.3s ease-out forwards;
         }
-        #judgment.show {
-            animation: judgmentPop 0.4s ease-out forwards;
+
+        @keyframes perfectPop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(2); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(0.9); }
+            40% { transform: translate(-50%, -50%) scale(1.1); }
+            60% { transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -70%) scale(1); }
         }
-        @keyframes judgmentPop {
-            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-            100% { opacity: 0; transform: translate(-50%, -80%) scale(1); }
+
+        @keyframes goodPop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+            30% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -60%) scale(0.9); }
         }
+
+        @keyframes missPop {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(0.9); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+
         #lane-buttons {
             position: absolute;
-            bottom: 80px;
+            bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 20px;
+            gap: 30px;
             pointer-events: auto;
         }
+
         .lane-btn {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
             border: 3px solid;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
             cursor: pointer;
-            transition: all 0.1s;
-            font-size: 14px;
-            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
             color: #fff;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.15s ease;
         }
+
+        .lane-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: currentColor;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+            opacity: 0.3;
+        }
+
+        .lane-btn:active::before {
+            width: 200%;
+            height: 200%;
+        }
+
         .lane-btn:active {
-            transform: scale(0.9);
-            box-shadow: 0 0 30px currentColor;
+            transform: scale(0.92);
         }
+
         .lane-btn:nth-child(1) {
-            border-color: #ff68fd;
-            color: #ff68fd;
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+            box-shadow: 
+                0 0 20px rgba(255, 45, 149, 0.3),
+                inset 0 0 20px rgba(255, 45, 149, 0.1);
         }
+
         .lane-btn:nth-child(2) {
-            border-color: #ffe528;
-            color: #ffe528;
+            border-color: var(--neon-yellow);
+            color: var(--neon-yellow);
+            box-shadow: 
+                0 0 20px rgba(255, 237, 74, 0.3),
+                inset 0 0 20px rgba(255, 237, 74, 0.1);
         }
+
         .lane-btn:nth-child(3) {
-            border-color: #15befc;
-            color: #15befc;
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 
+                0 0 20px rgba(0, 240, 255, 0.3),
+                inset 0 0 20px rgba(0, 240, 255, 0.1);
         }
+
+        .lane-btn:hover {
+            transform: scale(1.05);
+        }
+
+        #progress-container {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            text-align: center;
+        }
+
+        #progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple), var(--neon-cyan));
+            width: 0%;
+            transition: width 0.1s;
+            box-shadow: 0 0 20px var(--neon-pink);
+        }
+
+        #progress-time {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            letter-spacing: 2px;
+        }
+
         #start-screen, #end-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(10, 10, 15, 0.95);
+            background: linear-gradient(180deg, rgba(5, 5, 8, 0.98) 0%, rgba(10, 10, 18, 0.95) 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             pointer-events: auto;
         }
+
         #end-screen {
             display: none;
         }
-        .title {
-            font-size: 64px;
-            font-weight: bold;
-            background: linear-gradient(135deg, #ff68fd, #ffe528, #15befc);
+
+        .title-container {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .game-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 80px;
+            font-weight: 900;
+            letter-spacing: 12px;
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple), var(--neon-cyan));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 20px;
-            text-shadow: none;
+            filter: drop-shadow(0 0 30px var(--neon-pink));
+            animation: titleGlow 3s ease-in-out infinite;
         }
-        .subtitle {
-            color: #888;
-            font-size: 18px;
-            margin-bottom: 40px;
+
+        @keyframes titleGlow {
+            0%, 100% { filter: drop-shadow(0 0 30px var(--neon-pink)); }
+            50% { filter: drop-shadow(0 0 50px var(--neon-cyan)); }
         }
+
+        .game-subtitle {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 20px;
+            font-weight: 300;
+            color: var(--text-secondary);
+            letter-spacing: 15px;
+            margin-top: 15px;
+        }
+
         .start-btn, .restart-btn {
-            padding: 20px 60px;
-            font-size: 24px;
+            padding: 25px 80px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
             border: none;
-            border-radius: 50px;
-            background: linear-gradient(135deg, #ff68fd, #15befc);
+            border-radius: 60px;
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
             color: #fff;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+            letter-spacing: 4px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 30px rgba(255, 45, 149, 0.5),
+                0 0 60px rgba(184, 41, 221, 0.3);
         }
+
+        .start-btn::before, .restart-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .start-btn:hover::before, .restart-btn:hover::before {
+            left: 100%;
+        }
+
         .start-btn:hover, .restart-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 50px rgba(255, 105, 180, 0.8);
+            box-shadow: 
+                0 0 50px rgba(255, 45, 149, 0.7),
+                0 0 100px rgba(184, 41, 221, 0.5);
         }
+
         .instructions {
-            color: #666;
-            font-size: 14px;
-            margin-top: 30px;
+            margin-top: 50px;
+            text-align: center;
         }
+
+        .key-row {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
         .key-hint {
-            display: inline-block;
-            padding: 5px 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            margin: 0 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
             color: #fff;
         }
+
+        .key-hint.pink { border-color: var(--neon-pink); color: var(--neon-pink); }
+        .key-hint.yellow { border-color: var(--neon-yellow); color: var(--neon-yellow); }
+        .key-hint.cyan { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+
+        .instruction-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+
+        .final-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+        }
+
+        .grade {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 150px;
+            font-weight: 900;
+            margin: 20px 0;
+            filter: drop-shadow(0 0 40px currentColor);
+        }
+
+        .grade.s { 
+            color: var(--neon-yellow);
+            animation: gradePulse 1s ease-in-out infinite;
+        }
+        .grade.a { color: var(--neon-cyan); }
+        .grade.b { color: #00ff88; }
+        .grade.c { color: var(--neon-purple); }
+        .grade.d { color: var(--text-secondary); }
+
+        @keyframes gradePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
         .final-score {
+            font-family: 'Orbitron', sans-serif;
             font-size: 72px;
-            color: #00ff88;
-            text-shadow: 0 0 40px #00ff88;
+            font-weight: 900;
+            color: var(--text-primary);
+            text-shadow: 
+                0 0 20px var(--neon-cyan),
+                0 0 40px var(--neon-cyan);
             margin: 20px 0;
         }
-        .stat {
-            color: #fff;
-            font-size: 24px;
-            margin: 10px 0;
-        }
-        .grade {
-            font-size: 120px;
-            font-weight: bold;
+
+        .stats-container {
+            display: flex;
+            gap: 40px;
             margin: 30px 0;
-            text-shadow: 0 0 50px currentColor;
         }
-        .grade.s { color: #ffd700; }
-        .grade.a { color: #00ff88; }
-        .grade.b { color: #15befc; }
-        .grade.c { color: #ff68fd; }
-        .grade.d { color: #888; }
-        #progress-bar {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 2px;
-            overflow: hidden;
+
+        .stat-item {
+            text-align: center;
         }
-        #progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff68fd, #ffe528, #15befc);
-            width: 0%;
-            transition: width 0.1s;
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
         }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+        .stat-item.perfect .stat-value { color: var(--neon-cyan); }
+        .stat-item.good .stat-value { color: var(--neon-yellow); }
+        .stat-item.miss .stat-value { color: #ff3333; }
+
+        .max-combo-display {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px var(--neon-pink);
+            margin: 20px 0;
+        }
+
         @media (max-width: 600px) {
-            .title { font-size: 36px; }
-            .lane-btn { width: 60px; height: 60px; font-size: 12px; }
-            #score-display { font-size: 18px; }
-            #combo-display { font-size: 24px; }
-            #judgment { font-size: 36px; }
+            .game-title { font-size: 40px; letter-spacing: 6px; }
+            .game-subtitle { font-size: 12px; letter-spacing: 8px; }
+            .lane-btn { width: 70px; height: 70px; font-size: 14px; }
+            #lane-buttons { gap: 15px; bottom: 80px; }
+            .score-value { font-size: 32px; }
+            .combo-value { font-size: 48px; }
+            #judgment { font-size: 40px; }
+            .final-score { font-size: 48px; }
+            .grade { font-size: 100px; }
+            .stats-container { gap: 20px; }
+            .stat-value { font-size: 28px; }
+            .start-btn, .restart-btn { padding: 20px 50px; font-size: 16px; }
         }
     </style>
 </head>
 <body>
+    <div id="scanlines"></div>
+    
     <div id="ui-layer">
         <div id="score-display">
-            <div>分数: <span id="score">0</span></div>
-            <div style="font-size: 16px; color: #888;">最高连击: <span id="max-combo">0</span></div>
+            <div class="score-label">SCORE</div>
+            <div class="score-value" id="score">0</div>
         </div>
-        <div id="combo-display">
-            <span id="combo">0</span> COMBO
+        
+        <div class="combo-container" id="combo-container">
+            <div class="combo-value" id="combo">0</div>
+            <div class="combo-label">COMBO</div>
         </div>
+        
         <div id="judgment"></div>
+        
         <div id="lane-buttons">
             <button class="lane-btn" id="btn-0">D</button>
             <button class="lane-btn" id="btn-1">F</button>
             <button class="lane-btn" id="btn-2">J</button>
         </div>
-        <div id="progress-bar">
-            <div id="progress-fill"></div>
+        
+        <div id="progress-container">
+            <div id="progress-bar">
+                <div id="progress-fill"></div>
+            </div>
+            <div id="progress-time">0:00</div>
         </div>
         
         <div id="start-screen">
-            <div class="title">节拍冲击</div>
-            <div class="subtitle">音乐节奏游戏</div>
-            <button class="start-btn" id="start-btn">开始游戏</button>
+            <div class="title-container">
+                <div class="game-title">NEON BEAT</div>
+                <div class="game-subtitle">RHYTHM GAME</div>
+            </div>
+            <button class="start-btn" id="start-btn">START</button>
             <div class="instructions">
-                按键: <span class="key-hint">D</span><span class="key-hint">F</span><span class="key-hint">J</span> 
-                或 <span class="key-hint">空格</span><br><br>
-                鼠标点击按钮或触屏
+                <div class="key-row">
+                    <span class="key-hint pink">D</span>
+                    <span class="key-hint yellow">F</span>
+                    <span class="key-hint cyan">J</span>
+                </div>
+                <div class="instruction-text">或点击下方按钮 / 空格键自动匹配</div>
             </div>
         </div>
         
         <div id="end-screen">
-            <div class="title">游戏结束</div>
+            <div class="final-title">RESULT</div>
             <div class="grade" id="grade">A</div>
             <div class="final-score" id="final-score">0</div>
-            <div class="stat">最大连击: <span id="final-max-combo">0</span></div>
-            <div class="stat" style="color: #888;">
-                Perfect: <span id="perfect-count">0</span> | 
-                Good: <span id="good-count">0</span> | 
-                Miss: <span id="miss-count">0</span>
+            <div class="max-combo-display">MAX COMBO: <span id="final-max-combo">0</span></div>
+            <div class="stats-container">
+                <div class="stat-item perfect">
+                    <div class="stat-value" id="perfect-count">0</div>
+                    <div class="stat-label">PERFECT</div>
+                </div>
+                <div class="stat-item good">
+                    <div class="stat-value" id="good-count">0</div>
+                    <div class="stat-label">GOOD</div>
+                </div>
+                <div class="stat-item miss">
+                    <div class="stat-value" id="miss-count">0</div>
+                    <div class="stat-label">MISS</div>
+                </div>
             </div>
-            <button class="restart-btn" id="restart-btn" style="margin-top: 30px;">再来一次</button>
+            <button class="restart-btn" id="restart-btn">RETRY</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script>
-        const LANE_COLORS = [0xff68fd, 0xffe528, 0x15befc];
-        const LANE_COLORS_HEX = ['#ff68fd', '#ffe528', '#15befc'];
-        const COLOR_NAMES = ['pink', 'yellow', 'blue'];
+        const LANE_COLORS = [0xff2d95, 0xffed4a, 0x00f0ff];
         const LANE_POSITIONS = [-2.5, 0, 2.5];
         const NOTE_SPEED = 0.15;
         const SPAWN_DISTANCE = 25;
@@ -295,29 +607,28 @@
         let gameDuration = 60000;
         let lastSpawnTime = 0;
         let spawnInterval = 500;
-        let activeLanes = [true, true, true];
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x1a1a2e);
-            scene.fog = new THREE.Fog(0x1a1a2e, 20, 40);
+            scene.background = new THREE.Color(0x050508);
+            scene.fog = new THREE.Fog(0x050508, 15, 35);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
             camera.position.set(0, 8, 12);
             camera.lookAt(0, 0, 2);
 
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.body.insertBefore(renderer.domElement, document.getElementById('ui-layer'));
 
-            const ambientLight = new THREE.AmbientLight(0x404060, 0.5);
+            const ambientLight = new THREE.AmbientLight(0x111122, 0.8);
             scene.add(ambientLight);
 
-            const spotLight = new THREE.SpotLight(0xffffff, 2);
-            spotLight.position.set(0, 15, 5);
+            const spotLight = new THREE.SpotLight(0xffffff, 3);
+            spotLight.position.set(0, 20, 5);
             spotLight.angle = Math.PI / 4;
-            spotLight.penumbra = 0.5;
+            spotLight.penumbra = 0.6;
             spotLight.target.position.set(0, 0, JUDGE_LINE_Z);
             scene.add(spotLight);
             scene.add(spotLight.target);
@@ -325,6 +636,7 @@
             createLanes();
             createJudgeLine();
             createBackgroundParticles();
+            createAmbientLights();
 
             document.getElementById('start-btn').addEventListener('click', startGame);
             document.getElementById('restart-btn').addEventListener('click', restartGame);
@@ -352,11 +664,11 @@
 
         function createLanes() {
             for (let i = 0; i < 3; i++) {
-                const laneGeo = new THREE.PlaneGeometry(2, 30);
+                const laneGeo = new THREE.PlaneGeometry(2.2, 35);
                 const laneMat = new THREE.MeshBasicMaterial({
                     color: LANE_COLORS[i],
                     transparent: true,
-                    opacity: 0.1,
+                    opacity: 0.08,
                     side: THREE.DoubleSide
                 });
                 const lane = new THREE.Mesh(laneGeo, laneMat);
@@ -364,37 +676,37 @@
                 lane.position.set(LANE_POSITIONS[i], -0.01, 5);
                 scene.add(lane);
 
-                const glowGeo = new THREE.PlaneGeometry(2.1, 30);
+                const glowGeo = new THREE.PlaneGeometry(2.4, 35);
                 const glowMat = new THREE.MeshBasicMaterial({
                     color: LANE_COLORS[i],
                     transparent: true,
-                    opacity: 0.05,
+                    opacity: 0.03,
                     side: THREE.DoubleSide
                 });
                 const glow = new THREE.Mesh(glowGeo, glowMat);
                 glow.rotation.x = -Math.PI / 2;
-                glow.position.set(LANE_POSITIONS[i], 0, 5);
+                glow.position.set(LANE_POSITIONS[i], 0.01, 5);
                 scene.add(glow);
             }
         }
 
         function createJudgeLine() {
-            const lineGeo = new THREE.BoxGeometry(8, 0.2, 0.3);
+            const lineGeo = new THREE.BoxGeometry(10, 0.15, 0.2);
             const lineMat = new THREE.MeshBasicMaterial({
                 color: 0xffffff,
                 transparent: true,
-                opacity: 0.8
+                opacity: 0.9
             });
             const judgeLine = new THREE.Mesh(lineGeo, lineMat);
             judgeLine.position.set(0, 0.1, JUDGE_LINE_Z);
             scene.add(judgeLine);
 
             for (let i = 0; i < 3; i++) {
-                const ringGeo = new THREE.TorusGeometry(0.5, 0.05, 8, 32);
+                const ringGeo = new THREE.TorusGeometry(0.55, 0.06, 8, 32);
                 const ringMat = new THREE.MeshBasicMaterial({
                     color: LANE_COLORS[i],
                     transparent: true,
-                    opacity: 0.6
+                    opacity: 0.8
                 });
                 const ring = new THREE.Mesh(ringGeo, ringMat);
                 ring.rotation.x = -Math.PI / 2;
@@ -402,29 +714,29 @@
                 scene.add(ring);
             }
 
-            const pillarGeo = new THREE.CylinderGeometry(0.1, 0.1, 10, 8);
-            const pillarMat = new THREE.MeshBasicMaterial({
-                color: 0x333355,
-                transparent: true,
-                opacity: 0.5
-            });
             for (let x = -4; x <= 4; x += 2) {
+                const pillarGeo = new THREE.CylinderGeometry(0.08, 0.08, 12, 8);
+                const pillarMat = new THREE.MeshBasicMaterial({
+                    color: 0x222233,
+                    transparent: true,
+                    opacity: 0.6
+                });
                 const pillar = new THREE.Mesh(pillarGeo, pillarMat);
-                pillar.position.set(x, 5, 0);
+                pillar.position.set(x, 6, 0);
                 scene.add(pillar);
             }
         }
 
         function createBackgroundParticles() {
-            const particleCount = 200;
+            const particleCount = 300;
             const geometry = new THREE.BufferGeometry();
             const positions = new Float32Array(particleCount * 3);
             const colors = new Float32Array(particleCount * 3);
 
             for (let i = 0; i < particleCount; i++) {
-                positions[i * 3] = (Math.random() - 0.5) * 30;
-                positions[i * 3 + 1] = Math.random() * 15;
-                positions[i * 3 + 2] = Math.random() * 40 - 10;
+                positions[i * 3] = (Math.random() - 0.5) * 40;
+                positions[i * 3 + 1] = Math.random() * 20;
+                positions[i * 3 + 2] = Math.random() * 50 - 15;
 
                 const color = new THREE.Color(LANE_COLORS[Math.floor(Math.random() * 3)]);
                 colors[i * 3] = color.r;
@@ -436,15 +748,29 @@
             geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
             const material = new THREE.PointsMaterial({
-                size: 0.1,
+                size: 0.15,
                 vertexColors: true,
                 transparent: true,
-                opacity: 0.6,
+                opacity: 0.8,
                 blending: THREE.AdditiveBlending
             });
 
             const particles = new THREE.Points(geometry, material);
             scene.add(particles);
+        }
+
+        function createAmbientLights() {
+            const light1 = new THREE.PointLight(0xff2d95, 1, 30);
+            light1.position.set(-8, 5, -5);
+            scene.add(light1);
+
+            const light2 = new THREE.PointLight(0x00f0ff, 1, 30);
+            light2.position.set(8, 5, -5);
+            scene.add(light2);
+
+            const light3 = new THREE.PointLight(0xffed4a, 0.5, 20);
+            light3.position.set(0, 10, 10);
+            scene.add(light3);
         }
 
         function initAudio() {
@@ -462,26 +788,26 @@
             if (type === 'perfect') {
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(baseFreq * 2, audioCtx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq * 2, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
             } else if (type === 'good') {
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(baseFreq * 0.8, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
             } else {
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.15);
+                osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + 0.2);
                 gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
             }
 
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.3);
+            osc.stop(audioCtx.currentTime + 0.4);
         }
 
         function playBeat() {
@@ -491,24 +817,24 @@
             const gain = audioCtx.createGain();
 
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(60, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(55, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
 
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
+            osc.stop(audioCtx.currentTime + 0.12);
         }
 
         function createNote(lane) {
-            const geometry = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 16);
+            const geometry = new THREE.CylinderGeometry(0.45, 0.45, 0.35, 16);
             const material = new THREE.MeshStandardMaterial({
                 color: LANE_COLORS[lane],
                 emissive: LANE_COLORS[lane],
-                emissiveIntensity: 0.5,
-                metalness: 0.8,
-                roughness: 0.2
+                emissiveIntensity: 0.8,
+                metalness: 0.9,
+                roughness: 0.1
             });
 
             const note = new THREE.Mesh(geometry, material);
@@ -516,11 +842,11 @@
             note.position.set(LANE_POSITIONS[lane], 0.5, -SPAWN_DISTANCE);
             note.userData = { lane, active: true };
 
-            const glowGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.3, 16);
+            const glowGeo = new THREE.CylinderGeometry(0.6, 0.6, 0.35, 16);
             const glowMat = new THREE.MeshBasicMaterial({
                 color: LANE_COLORS[lane],
                 transparent: true,
-                opacity: 0.3
+                opacity: 0.25
             });
             const glow = new THREE.Mesh(glowGeo, glowMat);
             glow.rotation.x = Math.PI / 2;
@@ -541,15 +867,14 @@
             const pattern = Math.random();
 
             if (pattern < 0.3) {
-                const lane = Math.floor(Math.random() * 3);
-                createNote(lane);
+                createNote(Math.floor(Math.random() * 3));
             } else if (pattern < 0.6) {
                 const startLane = Math.floor(Math.random() * 2);
                 createNote(startLane);
                 createNote(startLane + 1);
             } else if (pattern < 0.8) {
                 for (let i = 0; i < 3; i++) {
-                    if (activeLanes[i]) createNote(i);
+                    createNote(i);
                 }
             } else {
                 const lane = Math.floor(Math.random() * 3);
@@ -566,11 +891,11 @@
 
         function createHitEffect(lane, type) {
             const color = LANE_COLORS[lane];
-            const count = type === 'perfect' ? 20 : 12;
-            const speed = type === 'perfect' ? 0.3 : 0.2;
+            const count = type === 'perfect' ? 25 : 15;
+            const speed = type === 'perfect' ? 0.35 : 0.25;
 
             for (let i = 0; i < count; i++) {
-                const geometry = new THREE.SphereGeometry(0.1, 8, 8);
+                const geometry = new THREE.SphereGeometry(0.12, 8, 8);
                 const material = new THREE.MeshBasicMaterial({
                     color: color,
                     transparent: true,
@@ -584,7 +909,7 @@
                 particle.userData = {
                     velocity: new THREE.Vector3(
                         Math.cos(angle) * speedVar,
-                        Math.random() * speedVar,
+                        Math.random() * speedVar + 0.1,
                         Math.sin(angle) * speedVar
                     ),
                     life: 1
@@ -594,7 +919,7 @@
                 effects.push(particle);
             }
 
-            const ringGeo = new THREE.TorusGeometry(0.6, 0.08, 8, 32);
+            const ringGeo = new THREE.TorusGeometry(0.7, 0.1, 8, 32);
             const ringMat = new THREE.MeshBasicMaterial({
                 color: color,
                 transparent: true,
@@ -607,11 +932,11 @@
             scene.add(ring);
             effects.push(ring);
 
-            const flashGeo = new THREE.CircleGeometry(1, 32);
+            const flashGeo = new THREE.CircleGeometry(1.2, 32);
             const flashMat = new THREE.MeshBasicMaterial({
                 color: color,
                 transparent: true,
-                opacity: 0.5,
+                opacity: 0.6,
                 side: THREE.DoubleSide
             });
             const flash = new THREE.Mesh(flashGeo, flashMat);
@@ -625,7 +950,7 @@
         function updateEffects() {
             for (let i = effects.length - 1; i >= 0; i--) {
                 const effect = effects[i];
-                effect.userData.life -= 0.03;
+                effect.userData.life -= 0.025;
 
                 if (effect.userData.life <= 0) {
                     scene.remove(effect);
@@ -636,16 +961,16 @@
                 }
 
                 if (effect.userData.type === 'ring') {
-                    const scale = 1 + (1 - effect.userData.life) * 4;
+                    const scale = 1 + (1 - effect.userData.life) * 5;
                     effect.scale.set(scale, scale, scale);
                     effect.material.opacity = effect.userData.life;
                 } else if (effect.userData.type === 'flash') {
-                    const scale = 1 + (1 - effect.userData.life) * 2;
+                    const scale = 1 + (1 - effect.userData.life) * 2.5;
                     effect.scale.set(scale, scale, scale);
-                    effect.material.opacity = effect.userData.life * 0.5;
+                    effect.material.opacity = effect.userData.life * 0.6;
                 } else {
                     effect.position.add(effect.userData.velocity);
-                    effect.userData.velocity.y -= 0.01;
+                    effect.userData.velocity.y -= 0.012;
                     effect.material.opacity = effect.userData.life;
                 }
             }
@@ -688,8 +1013,7 @@
             if (bestNote) {
                 handleHit(bestNote);
             } else {
-                const emptyLaneMiss = Math.random() < 0.3;
-                if (emptyLaneMiss) {
+                if (Math.random() < 0.3) {
                     combo = 0;
                     missCount++;
                     updateComboDisplay();
@@ -725,34 +1049,32 @@
 
         function showJudgment(type) {
             const el = document.getElementById('judgment');
-            el.className = type + ' show';
-            el.textContent = type === 'perfect' ? 'PERFECT!' : type === 'good' ? 'GOOD!' : 'MISS';
+            el.className = type;
+            el.textContent = type === 'perfect' ? 'PERFECT' : type === 'good' ? 'GOOD' : 'MISS';
             
             setTimeout(() => {
                 el.className = '';
-            }, 400);
+            }, 500);
         }
 
         function updateScoreDisplay() {
             document.getElementById('score').textContent = score;
-            document.getElementById('max-combo').textContent = maxCombo;
         }
 
         function updateComboDisplay() {
-            const el = document.getElementById('combo-display');
+            const el = document.getElementById('combo-container');
             const countEl = document.getElementById('combo');
             countEl.textContent = combo;
 
-            if (combo >= 10) {
-                el.style.transform = 'scale(1.1)';
-                el.style.textShadow = '0 0 40px rgba(255, 105, 180, 1), 0 0 80px rgba(255, 105, 180, 0.8)';
-            } else {
-                el.style.transform = 'scale(1)';
-                el.style.textShadow = '0 0 20px rgba(255, 105, 180, 0.8)';
-            }
-
             el.classList.add('pulse');
             setTimeout(() => el.classList.remove('pulse'), 100);
+        }
+
+        function formatTime(ms) {
+            const seconds = Math.floor(ms / 1000);
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
 
         function startGame() {
@@ -844,13 +1166,14 @@
 
                 const progress = Math.min(gameTime / gameDuration, 1);
                 document.getElementById('progress-fill').style.width = (progress * 100) + '%';
+                document.getElementById('progress-time').textContent = formatTime(gameTime);
 
                 spawnNotes();
 
                 for (let i = notes.length - 1; i >= 0; i--) {
                     const note = notes[i];
                     note.position.z += NOTE_SPEED;
-                    note.rotation.z += 0.05;
+                    note.rotation.z += 0.06;
 
                     if (note.position.z > JUDGE_LINE_Z + 2) {
                         if (note.userData.active) {
@@ -870,15 +1193,6 @@
             }
 
             updateEffects();
-
-            const time2 = time * 0.001;
-            if (scene.children.length > 0) {
-                scene.children.forEach(child => {
-                    if (child.isMesh && child.geometry.type === 'CylinderGeometry' && child.position.z < -20) {
-                        child.rotation.y = time2;
-                    }
-                });
-            }
 
             renderer.render(scene, camera);
         }
