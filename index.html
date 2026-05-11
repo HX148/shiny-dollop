@@ -3,375 +3,887 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Three.js 3D 球体</title>
+    <title>音乐节奏游戏</title>
     <style>
-        body {
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
             overflow: hidden;
-            font-family: Arial, sans-serif;
-            touch-action: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            user-select: none;
+            -webkit-user-select: none;
         }
         canvas {
             display: block;
         }
+        #ui-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        #score-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(0, 255, 200, 0.5);
+        }
+        #combo-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #ff69b4;
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
+            transition: transform 0.1s;
+        }
+        #combo-display.pulse {
+            transform: scale(1.2);
+        }
+        #judgment {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #judgment.perfect {
+            color: #00ff88;
+            text-shadow: 0 0 30px #00ff88, 0 0 60px #00ff88;
+        }
+        #judgment.good {
+            color: #ffcc00;
+            text-shadow: 0 0 30px #ffcc00, 0 0 60px #ffcc00;
+        }
+        #judgment.miss {
+            color: #ff4466;
+            text-shadow: 0 0 30px #ff4466, 0 0 60px #ff4466;
+        }
+        #judgment.show {
+            animation: judgmentPop 0.4s ease-out forwards;
+        }
+        @keyframes judgmentPop {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -80%) scale(1); }
+        }
+        #lane-buttons {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            pointer-events: auto;
+        }
+        .lane-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid;
+            background: rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: all 0.1s;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .lane-btn:active {
+            transform: scale(0.9);
+            box-shadow: 0 0 30px currentColor;
+        }
+        .lane-btn:nth-child(1) {
+            border-color: #ff68fd;
+            color: #ff68fd;
+        }
+        .lane-btn:nth-child(2) {
+            border-color: #ffe528;
+            color: #ffe528;
+        }
+        .lane-btn:nth-child(3) {
+            border-color: #15befc;
+            color: #15befc;
+        }
+        #start-screen, #end-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+        #end-screen {
+            display: none;
+        }
+        .title {
+            font-size: 64px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff68fd, #ffe528, #15befc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            text-shadow: none;
+        }
+        .subtitle {
+            color: #888;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+        .start-btn, .restart-btn {
+            padding: 20px 60px;
+            font-size: 24px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #ff68fd, #15befc);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+        }
+        .start-btn:hover, .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 50px rgba(255, 105, 180, 0.8);
+        }
+        .instructions {
+            color: #666;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+        .key-hint {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin: 0 5px;
+            color: #fff;
+        }
+        .final-score {
+            font-size: 72px;
+            color: #00ff88;
+            text-shadow: 0 0 40px #00ff88;
+            margin: 20px 0;
+        }
+        .stat {
+            color: #fff;
+            font-size: 24px;
+            margin: 10px 0;
+        }
+        .grade {
+            font-size: 120px;
+            font-weight: bold;
+            margin: 30px 0;
+            text-shadow: 0 0 50px currentColor;
+        }
+        .grade.s { color: #ffd700; }
+        .grade.a { color: #00ff88; }
+        .grade.b { color: #15befc; }
+        .grade.c { color: #ff68fd; }
+        .grade.d { color: #888; }
+        #progress-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        #progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff68fd, #ffe528, #15befc);
+            width: 0%;
+            transition: width 0.1s;
+        }
+        @media (max-width: 600px) {
+            .title { font-size: 36px; }
+            .lane-btn { width: 60px; height: 60px; font-size: 12px; }
+            #score-display { font-size: 18px; }
+            #combo-display { font-size: 24px; }
+            #judgment { font-size: 36px; }
+        }
     </style>
 </head>
 <body>
+    <div id="ui-layer">
+        <div id="score-display">
+            <div>分数: <span id="score">0</span></div>
+            <div style="font-size: 16px; color: #888;">最高连击: <span id="max-combo">0</span></div>
+        </div>
+        <div id="combo-display">
+            <span id="combo">0</span> COMBO
+        </div>
+        <div id="judgment"></div>
+        <div id="lane-buttons">
+            <button class="lane-btn" id="btn-0">D</button>
+            <button class="lane-btn" id="btn-1">F</button>
+            <button class="lane-btn" id="btn-2">J</button>
+        </div>
+        <div id="progress-bar">
+            <div id="progress-fill"></div>
+        </div>
+        
+        <div id="start-screen">
+            <div class="title">节拍冲击</div>
+            <div class="subtitle">音乐节奏游戏</div>
+            <button class="start-btn" id="start-btn">开始游戏</button>
+            <div class="instructions">
+                按键: <span class="key-hint">D</span><span class="key-hint">F</span><span class="key-hint">J</span> 
+                或 <span class="key-hint">空格</span><br><br>
+                鼠标点击按钮或触屏
+            </div>
+        </div>
+        
+        <div id="end-screen">
+            <div class="title">游戏结束</div>
+            <div class="grade" id="grade">A</div>
+            <div class="final-score" id="final-score">0</div>
+            <div class="stat">最大连击: <span id="final-max-combo">0</span></div>
+            <div class="stat" style="color: #888;">
+                Perfect: <span id="perfect-count">0</span> | 
+                Good: <span id="good-count">0</span> | 
+                Miss: <span id="miss-count">0</span>
+            </div>
+            <button class="restart-btn" id="restart-btn" style="margin-top: 30px;">再来一次</button>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script>
-        // 创建场景
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x1a1a2e);
+        const LANE_COLORS = [0xff68fd, 0xffe528, 0x15befc];
+        const LANE_COLORS_HEX = ['#ff68fd', '#ffe528', '#15befc'];
+        const COLOR_NAMES = ['pink', 'yellow', 'blue'];
+        const LANE_POSITIONS = [-2.5, 0, 2.5];
+        const NOTE_SPEED = 0.15;
+        const SPAWN_DISTANCE = 25;
+        const JUDGE_LINE_Z = 5;
+        const PERFECT_WINDOW = 50;
+        const GOOD_WINDOW = 100;
+        
+        let scene, camera, renderer;
+        let audioCtx;
+        let gameState = 'start';
+        let score = 0;
+        let combo = 0;
+        let maxCombo = 0;
+        let perfectCount = 0;
+        let goodCount = 0;
+        let missCount = 0;
+        let notes = [];
+        let effects = [];
+        let gameTime = 0;
+        let gameDuration = 60000;
+        let lastSpawnTime = 0;
+        let spawnInterval = 500;
+        let activeLanes = [true, true, true];
 
-        // 创建相机
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 6, 12);
-        camera.lookAt(0, 0, 0);
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+            scene.fog = new THREE.Fog(0x1a1a2e, 20, 40);
 
-        // 创建渲染器
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild(renderer.domElement);
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 8, 12);
+            camera.lookAt(0, 0, 2);
 
-        // 创建球体
-        const geometry = new THREE.SphereGeometry(1, 64, 64);
-        const material = new THREE.MeshStandardMaterial({ 
-            color: 0x00ff88,
-            roughness: 0.3,
-            metalness: 0.7,
-            emissive: 0x003322,
-            emissiveIntensity: 0.5
-        });
-        const sphere = new THREE.Mesh(geometry, material);
-        scene.add(sphere);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.body.insertBefore(renderer.domElement, document.getElementById('ui-layer'));
 
-        // 增强光照
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
+            const ambientLight = new THREE.AmbientLight(0x404060, 0.5);
+            scene.add(ambientLight);
 
-        const pointLight = new THREE.PointLight(0xffffff, 1.5);
-        pointLight.position.set(5, 5, 5);
-        scene.add(pointLight);
+            const spotLight = new THREE.SpotLight(0xffffff, 2);
+            spotLight.position.set(0, 15, 5);
+            spotLight.angle = Math.PI / 4;
+            spotLight.penumbra = 0.5;
+            spotLight.target.position.set(0, 0, JUDGE_LINE_Z);
+            scene.add(spotLight);
+            scene.add(spotLight.target);
 
-        const pointLight2 = new THREE.PointLight(0x00ffff, 1);
-        pointLight2.position.set(-5, -5, -5);
-        scene.add(pointLight2);
+            createLanes();
+            createJudgeLine();
+            createBackgroundParticles();
 
-        const pointLight3 = new THREE.PointLight(0xff00ff, 0.8);
-        pointLight3.position.set(0, 5, 0);
-        scene.add(pointLight3);
+            document.getElementById('start-btn').addEventListener('click', startGame);
+            document.getElementById('restart-btn').addEventListener('click', restartGame);
+            document.getElementById('btn-0').addEventListener('click', () => handleLaneHit(0));
+            document.getElementById('btn-1').addEventListener('click', () => handleLaneHit(1));
+            document.getElementById('btn-2').addEventListener('click', () => handleLaneHit(2));
 
-        const pointLight4 = new THREE.PointLight(0xffff00, 0.6);
-        pointLight4.position.set(0, -5, 0);
-        scene.add(pointLight4);
+            document.addEventListener('keydown', (e) => {
+                if (gameState !== 'playing') return;
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    handleSpaceHit();
+                } else if (e.code === 'KeyD') {
+                    handleLaneHit(0);
+                } else if (e.code === 'KeyF') {
+                    handleLaneHit(1);
+                } else if (e.code === 'KeyJ') {
+                    handleLaneHit(2);
+                }
+            });
 
-        // 添加聚光灯
-        const spotLight = new THREE.SpotLight(0x00ff88, 2);
-        spotLight.position.set(0, 10, 0);
-        spotLight.angle = Math.PI / 6;
-        spotLight.penumbra = 0.5;
-        spotLight.target = sphere;
-        scene.add(spotLight);
-
-        // 跟随球体的点光源
-        const sphereLight = new THREE.PointLight(0x00ff88, 1, 10);
-        sphere.add(sphereLight);
-
-        // 添加辅助网格
-        const gridHelper = new THREE.GridHelper(10, 10, 0x444444, 0x222222);
-        gridHelper.position.y = -1.5;
-        scene.add(gridHelper);
-
-        // 特效管理
-        const effects = []; // 存储特效对象
-
-        // 轨道颜色定义
-        const colors = {
-            pink: new THREE.Color(255/255, 104/255, 253/255),    // RGB(255,104,253)
-            yellow: new THREE.Color(255/255, 229/255, 40/255),   // RGB(255,229,40)
-            blue: new THREE.Color(21/255, 190/255, 252/255)     // RGB(21,190,252)
-        };
-        const colorKeys = ['pink', 'yellow', 'blue'];
-
-        // 轨道参数
-        const trackPieceSize = 2; // 每片轨道的长度（Z轴方向）
-        const trackGap = 0.3; // 轨道片之间的间隙
-        const trackWidth = 6; // 轨道总宽度
-        const trackSegments = []; // 存储当前轨道段
-        let lastGeneratedTrackZ = 0; // 最后生成的轨道的Z位置
-
-        // 类型1: 长直轨道（粉、黄、蓝三种颜色中随机一种）
-        function createLongTrack(zCenter) {
-            const randomColor = colors[colorKeys[Math.floor(Math.random() * 3)]];
-            const material = new THREE.MeshBasicMaterial({ color: randomColor });
-            const geometry = new THREE.BoxGeometry(trackWidth, 0.1, trackPieceSize);
-            const track = new THREE.Mesh(geometry, material);
-            track.position.set(0, 0, zCenter);
-            scene.add(track);
-            trackSegments.push(track);
+            window.addEventListener('resize', onResize);
+            animate();
         }
 
-        // 类型2: 三块有间隔的方形轨道（粉、黄、蓝三种颜色都有）
-        function createThreePieceTrack(zCenter) {
-            const pieceWidth = 1.2;
-            const gap = 0.6;
-            // 计算总宽度和起始位置以居中对齐
-            const totalWidth = 3 * pieceWidth + 2 * gap; // 4.8
-            const startX = -totalWidth / 2; // 从左边开始 -2.4
-            
+        function createLanes() {
             for (let i = 0; i < 3; i++) {
-                const material = new THREE.MeshBasicMaterial({ color: colors[colorKeys[i]] });
-                const geometry = new THREE.BoxGeometry(pieceWidth, 0.1, trackPieceSize);
-                const track = new THREE.Mesh(geometry, material);
-                // 每块的中心位置
-                const xPos = startX + pieceWidth / 2 + i * (pieceWidth + gap);
-                track.position.set(xPos, 0, zCenter);
-                scene.add(track);
-                trackSegments.push(track);
+                const laneGeo = new THREE.PlaneGeometry(2, 30);
+                const laneMat = new THREE.MeshBasicMaterial({
+                    color: LANE_COLORS[i],
+                    transparent: true,
+                    opacity: 0.1,
+                    side: THREE.DoubleSide
+                });
+                const lane = new THREE.Mesh(laneGeo, laneMat);
+                lane.rotation.x = -Math.PI / 2;
+                lane.position.set(LANE_POSITIONS[i], -0.01, 5);
+                scene.add(lane);
+
+                const glowGeo = new THREE.PlaneGeometry(2.1, 30);
+                const glowMat = new THREE.MeshBasicMaterial({
+                    color: LANE_COLORS[i],
+                    transparent: true,
+                    opacity: 0.05,
+                    side: THREE.DoubleSide
+                });
+                const glow = new THREE.Mesh(glowGeo, glowMat);
+                glow.rotation.x = -Math.PI / 2;
+                glow.position.set(LANE_POSITIONS[i], 0, 5);
+                scene.add(glow);
             }
         }
 
-        // 类型3: 两块有间隔的方形轨道（粉、黄、蓝中三选二）
-        function createTwoPieceTrack(zCenter) {
-            const pieceWidth = 1.5;
-            const gap = 2;
-            // 计算总宽度和起始位置以居中对齐
-            const totalWidth = 2 * pieceWidth + gap; // 5
-            const startX = -totalWidth / 2; // 从左边开始 -2.5
-            // 随机选择两个不同的颜色索引
-            const pieceIndices = [0, 1, 2].sort(() => Math.random() - 0.5).slice(0, 2);
-            
-            for (let i = 0; i < 2; i++) {
-                const material = new THREE.MeshBasicMaterial({ color: colors[colorKeys[pieceIndices[i]]] });
-                const geometry = new THREE.BoxGeometry(pieceWidth, 0.1, trackPieceSize);
-                const track = new THREE.Mesh(geometry, material);
-                // 每块的中心位置
-                const xPos = startX + pieceWidth / 2 + i * (pieceWidth + gap);
-                track.position.set(xPos, 0, zCenter);
-                scene.add(track);
-                trackSegments.push(track);
+        function createJudgeLine() {
+            const lineGeo = new THREE.BoxGeometry(8, 0.2, 0.3);
+            const lineMat = new THREE.MeshBasicMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8
+            });
+            const judgeLine = new THREE.Mesh(lineGeo, lineMat);
+            judgeLine.position.set(0, 0.1, JUDGE_LINE_Z);
+            scene.add(judgeLine);
+
+            for (let i = 0; i < 3; i++) {
+                const ringGeo = new THREE.TorusGeometry(0.5, 0.05, 8, 32);
+                const ringMat = new THREE.MeshBasicMaterial({
+                    color: LANE_COLORS[i],
+                    transparent: true,
+                    opacity: 0.6
+                });
+                const ring = new THREE.Mesh(ringGeo, ringMat);
+                ring.rotation.x = -Math.PI / 2;
+                ring.position.set(LANE_POSITIONS[i], 0.15, JUDGE_LINE_Z);
+                scene.add(ring);
+            }
+
+            const pillarGeo = new THREE.CylinderGeometry(0.1, 0.1, 10, 8);
+            const pillarMat = new THREE.MeshBasicMaterial({
+                color: 0x333355,
+                transparent: true,
+                opacity: 0.5
+            });
+            for (let x = -4; x <= 4; x += 2) {
+                const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+                pillar.position.set(x, 5, 0);
+                scene.add(pillar);
             }
         }
 
-        // 创建一段轨道（随机选择类型）
-        function createTrackSegment(zCenter) {
-            const type = Math.floor(Math.random() * 3);
-            if (type === 0) {
-                createLongTrack(zCenter);
-            } else if (type === 1) {
-                createThreePieceTrack(zCenter);
+        function createBackgroundParticles() {
+            const particleCount = 200;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 30;
+                positions[i * 3 + 1] = Math.random() * 15;
+                positions[i * 3 + 2] = Math.random() * 40 - 10;
+
+                const color = new THREE.Color(LANE_COLORS[Math.floor(Math.random() * 3)]);
+                colors[i * 3] = color.r;
+                colors[i * 3 + 1] = color.g;
+                colors[i * 3 + 2] = color.b;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.1,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+
+            const particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+        }
+
+        function initAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playHitSound(type, lane) {
+            if (!audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            const baseFreq = [261.63, 329.63, 392.00][lane];
+
+            if (type === 'perfect') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq * 2, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            } else if (type === 'good') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(baseFreq * 0.8, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
             } else {
-                createTwoPieceTrack(zCenter);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            }
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function playBeat() {
+            if (!audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(60, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function createNote(lane) {
+            const geometry = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 16);
+            const material = new THREE.MeshStandardMaterial({
+                color: LANE_COLORS[lane],
+                emissive: LANE_COLORS[lane],
+                emissiveIntensity: 0.5,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+
+            const note = new THREE.Mesh(geometry, material);
+            note.rotation.x = Math.PI / 2;
+            note.position.set(LANE_POSITIONS[lane], 0.5, -SPAWN_DISTANCE);
+            note.userData = { lane, active: true };
+
+            const glowGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.3, 16);
+            const glowMat = new THREE.MeshBasicMaterial({
+                color: LANE_COLORS[lane],
+                transparent: true,
+                opacity: 0.3
+            });
+            const glow = new THREE.Mesh(glowGeo, glowMat);
+            glow.rotation.x = Math.PI / 2;
+            note.add(glow);
+
+            scene.add(note);
+            notes.push(note);
+        }
+
+        function spawnNotes() {
+            if (gameTime - lastSpawnTime < spawnInterval) return;
+
+            lastSpawnTime = gameTime;
+
+            const difficulty = Math.min(gameTime / gameDuration, 1);
+            spawnInterval = Math.max(200, 500 - difficulty * 250);
+
+            const pattern = Math.random();
+
+            if (pattern < 0.3) {
+                const lane = Math.floor(Math.random() * 3);
+                createNote(lane);
+            } else if (pattern < 0.6) {
+                const startLane = Math.floor(Math.random() * 2);
+                createNote(startLane);
+                createNote(startLane + 1);
+            } else if (pattern < 0.8) {
+                for (let i = 0; i < 3; i++) {
+                    if (activeLanes[i]) createNote(i);
+                }
+            } else {
+                const lane = Math.floor(Math.random() * 3);
+                createNote(lane);
+                setTimeout(() => {
+                    if (gameState === 'playing') createNote((lane + 1 + Math.floor(Math.random() * 2)) % 3);
+                }, spawnInterval / 2);
+            }
+
+            if (Math.random() < 0.1 + difficulty * 0.1) {
+                playBeat();
             }
         }
 
-        // 初始化轨道 - 创建初始轨道片
-        for (let i = 0; i < 50; i++) {
-            createTrackSegment(-i * (trackPieceSize + trackGap));
-            lastGeneratedTrackZ = -i * (trackPieceSize + trackGap);
-        }
+        function createHitEffect(lane, type) {
+            const color = LANE_COLORS[lane];
+            const count = type === 'perfect' ? 20 : 12;
+            const speed = type === 'perfect' ? 0.3 : 0.2;
 
-        // 弹跳物理参数 - 球体半径1，轨道顶部y=0.05，所以球体最低点y=0.05时球体位置y=1.05
-        const groundLevel = 1.05;
+            for (let i = 0; i < count; i++) {
+                const geometry = new THREE.SphereGeometry(0.1, 8, 8);
+                const material = new THREE.MeshBasicMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: 1
+                });
+                const particle = new THREE.Mesh(geometry, material);
+                particle.position.set(LANE_POSITIONS[lane], 0.5, JUDGE_LINE_Z);
 
-        let velocity = 0;
-        const gravity = -0.015;
-        const targetHeight = 3;
-        
-        // 计算达到目标高度所需的速度
-        const heightDiff = targetHeight - groundLevel;
-        const requiredVelocity = Math.sqrt(2 * Math.abs(gravity) * heightDiff);
-        velocity = requiredVelocity;
+                const angle = (i / count) * Math.PI * 2;
+                const speedVar = speed * (0.5 + Math.random() * 0.5);
+                particle.userData = {
+                    velocity: new THREE.Vector3(
+                        Math.cos(angle) * speedVar,
+                        Math.random() * speedVar,
+                        Math.sin(angle) * speedVar
+                    ),
+                    life: 1
+                };
 
-        // 计算弹跳周期（上升+下降）
-        const bounceTime = 2 * requiredVelocity / Math.abs(gravity);
-        // 调整 zVelocity 使得每次弹跳轨道移动一个轨道片+间隙的距离
-        let zVelocity = -(trackPieceSize + trackGap) / bounceTime;
-
-        // 追踪球体状态
-        let wasOnGround = true; // 追踪球是否在地面上
-        let bounceCount = 0; // 记录弹跳次数，用于调试
-        let xOffset = 0; // X方向偏移
-        
-        // 鼠标和触摸控制
-        let targetX = 0;
-        const maxX = (trackWidth / 2) - 0.5; // 限制在轨道内，留一点余量
-        
-        // 通用函数：更新球的位置
-        function updateTargetX(clientX) {
-            // 将坐标归一化到[-1, 1]范围
-            const normalizedX = (clientX / window.innerWidth) * 2 - 1;
-            
-            // 计算相机视野
-            const fov = 75; // 视角
-            const aspect = window.innerWidth / window.innerHeight;
-            const distance = camera.position.y - groundLevel; // 相机到地面的距离
-            
-            // 计算在地面高度处的视口宽度
-            const viewHeight = 2 * Math.tan((fov * Math.PI / 180) / 2) * distance;
-            const viewWidth = viewHeight * aspect;
-            
-            // 位置直接对应球的世界坐标，并限制在轨道范围内
-            let calculatedX = normalizedX * viewWidth / 2;
-            targetX = Math.max(-maxX, Math.min(maxX, calculatedX));
-        }
-        
-        // 鼠标移动
-        window.addEventListener('mousemove', (event) => {
-            updateTargetX(event.clientX);
-        });
-        
-        // 触摸移动
-        window.addEventListener('touchmove', (event) => {
-            event.preventDefault();
-            if (event.touches.length > 0) {
-                updateTargetX(event.touches[0].clientX);
+                scene.add(particle);
+                effects.push(particle);
             }
-        }, { passive: false });
-        
-        // 触摸开始
-        window.addEventListener('touchstart', (event) => {
-            if (event.touches.length > 0) {
-                updateTargetX(event.touches[0].clientX);
-            }
-        });
 
-        // 创建落点特效
-        function createImpactEffect(x, z) {
-            const ringGeometry = new THREE.TorusGeometry(0.5, 0.05, 16, 100);
-            const ringMaterial = new THREE.MeshBasicMaterial({ 
-                color: 0x00ffff, 
+            const ringGeo = new THREE.TorusGeometry(0.6, 0.08, 8, 32);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: color,
                 transparent: true,
                 opacity: 1
             });
-            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-            ring.rotation.x = Math.PI / 2;
-            ring.position.set(x, 0.2, z); // 提高位置避免被遮挡
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.set(LANE_POSITIONS[lane], 0.2, JUDGE_LINE_Z);
+            ring.userData = { type: 'ring', life: 1 };
             scene.add(ring);
-            
-            effects.push({
-                mesh: ring,
-                startTime: Date.now(),
-                duration: 800 // 延长动画时间
+            effects.push(ring);
+
+            const flashGeo = new THREE.CircleGeometry(1, 32);
+            const flashMat = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0.5,
+                side: THREE.DoubleSide
             });
+            const flash = new THREE.Mesh(flashGeo, flashMat);
+            flash.rotation.x = -Math.PI / 2;
+            flash.position.set(LANE_POSITIONS[lane], 0.15, JUDGE_LINE_Z);
+            flash.userData = { type: 'flash', life: 1 };
+            scene.add(flash);
+            effects.push(flash);
         }
 
-        // 更新特效
         function updateEffects() {
-            const now = Date.now();
             for (let i = effects.length - 1; i >= 0; i--) {
                 const effect = effects[i];
-                const elapsed = now - effect.startTime;
-                const progress = elapsed / effect.duration;
-                
-                if (progress >= 1) {
-                    scene.remove(effect.mesh);
-                    effect.mesh.geometry.dispose();
-                    effect.mesh.material.dispose();
+                effect.userData.life -= 0.03;
+
+                if (effect.userData.life <= 0) {
+                    scene.remove(effect);
+                    effect.geometry.dispose();
+                    effect.material.dispose();
                     effects.splice(i, 1);
+                    continue;
+                }
+
+                if (effect.userData.type === 'ring') {
+                    const scale = 1 + (1 - effect.userData.life) * 4;
+                    effect.scale.set(scale, scale, scale);
+                    effect.material.opacity = effect.userData.life;
+                } else if (effect.userData.type === 'flash') {
+                    const scale = 1 + (1 - effect.userData.life) * 2;
+                    effect.scale.set(scale, scale, scale);
+                    effect.material.opacity = effect.userData.life * 0.5;
                 } else {
-                    // 扩大圆环 - 更大的缩放
-                    const scale = 1 + progress * 4;
-                    effect.mesh.scale.set(scale, scale, scale);
-                    // 淡出
-                    effect.mesh.material.opacity = 1 - progress;
+                    effect.position.add(effect.userData.velocity);
+                    effect.userData.velocity.y -= 0.01;
+                    effect.material.opacity = effect.userData.life;
                 }
             }
         }
 
-        // 动画循环
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            // 球体旋转
-            sphere.rotation.x += 0.005;
-            sphere.rotation.y += 0.01;
-            
-            // 平滑地向鼠标目标位置移动，确保在轨道范围内
-            xOffset += (targetX - xOffset) * 0.08;
-            xOffset = Math.max(-maxX, Math.min(maxX, xOffset));
-            sphere.position.x = xOffset;
-            
-            // 弹跳物理 - 保持恒定高度
-            velocity += gravity;
-            sphere.position.y += velocity;
-            
-            // 检测是否刚从空中落地
-            const isOnGround = sphere.position.y <= groundLevel;
-            const justLanded = !wasOnGround && isOnGround;
-            
-            if (isOnGround) {
-                sphere.position.y = groundLevel;
-                velocity = requiredVelocity;
-                
-                // 只在刚落地时创建特效
-                if (justLanded) {
-                    createImpactEffect(xOffset, 0);
-                    bounceCount++;
+        function handleSpaceHit() {
+            let hit = false;
+            for (let i = 0; i < 3; i++) {
+                const nearbyNote = notes.find(n =>
+                    n.userData.active &&
+                    n.userData.lane === i &&
+                    Math.abs(n.position.z - JUDGE_LINE_Z) < 1.5
+                );
+                if (nearbyNote) {
+                    handleHit(nearbyNote);
+                    hit = true;
+                    break;
                 }
             }
-            
-            wasOnGround = isOnGround;
-
-            // 轨道向后移动（向Z正方向）
-            for (const track of trackSegments) {
-                track.position.z -= zVelocity;
+            if (!hit) {
+                showJudgment('miss');
+                playHitSound('miss', 0);
             }
-
-            // 特效也跟着轨道一起移动
-            for (const effect of effects) {
-                effect.mesh.position.z -= zVelocity;
-            }
-
-            // 动态轨道管理
-            manageTrackSegments();
-            
-            // 更新特效
-            updateEffects();
-            
-            renderer.render(scene, camera);
         }
 
-        // 动态加载和回收轨道片
-        function manageTrackSegments() {
-            // 检查是否需要生成新的轨道片（在前面）
-            while (lastGeneratedTrackZ > -3 * trackPieceSize) {
-                lastGeneratedTrackZ -= (trackPieceSize + trackGap);
-                createTrackSegment(lastGeneratedTrackZ);
-            }
+        function handleLaneHit(lane) {
+            const targetZ = JUDGE_LINE_Z;
+            let bestNote = null;
+            let bestDist = Infinity;
 
-            // 更新最后生成的位置
-            if (trackSegments.length > 0) {
-                let minZ = Infinity;
-                for (const track of trackSegments) {
-                    if (track.position.z < minZ) {
-                        minZ = track.position.z;
-                    }
+            for (const note of notes) {
+                if (!note.userData.active || note.userData.lane !== lane) continue;
+                const dist = Math.abs(note.position.z - targetZ);
+                if (dist < 1.5 && dist < bestDist) {
+                    bestDist = dist;
+                    bestNote = note;
                 }
-                lastGeneratedTrackZ = minZ;
             }
 
-            // 回收远离的轨道片（后面的轨道）
-            const maxDistance = 20 * trackPieceSize;
-            for (let i = trackSegments.length - 1; i >= 0; i--) {
-                const track = trackSegments[i];
-                if (track.position.z > maxDistance) {
-                    scene.remove(track);
-                    track.geometry.dispose();
-                    trackSegments.splice(i, 1);
+            if (bestNote) {
+                handleHit(bestNote);
+            } else {
+                const emptyLaneMiss = Math.random() < 0.3;
+                if (emptyLaneMiss) {
+                    combo = 0;
+                    missCount++;
+                    updateComboDisplay();
                 }
             }
         }
 
-        animate();
+        function handleHit(note) {
+            const distance = Math.abs(note.position.z - JUDGE_LINE_Z);
+            note.userData.active = false;
+            scene.remove(note);
 
-        // 处理窗口大小变化
-        window.addEventListener('resize', () => {
+            if (distance <= PERFECT_WINDOW * 0.02) {
+                score += 100;
+                combo++;
+                perfectCount++;
+                showJudgment('perfect');
+                playHitSound('perfect', note.userData.lane);
+                createHitEffect(note.userData.lane, 'perfect');
+            } else if (distance <= GOOD_WINDOW * 0.02) {
+                score += 50;
+                combo++;
+                goodCount++;
+                showJudgment('good');
+                playHitSound('good', note.userData.lane);
+                createHitEffect(note.userData.lane, 'good');
+            }
+
+            if (combo > maxCombo) maxCombo = combo;
+            updateScoreDisplay();
+            updateComboDisplay();
+        }
+
+        function showJudgment(type) {
+            const el = document.getElementById('judgment');
+            el.className = type + ' show';
+            el.textContent = type === 'perfect' ? 'PERFECT!' : type === 'good' ? 'GOOD!' : 'MISS';
+            
+            setTimeout(() => {
+                el.className = '';
+            }, 400);
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('max-combo').textContent = maxCombo;
+        }
+
+        function updateComboDisplay() {
+            const el = document.getElementById('combo-display');
+            const countEl = document.getElementById('combo');
+            countEl.textContent = combo;
+
+            if (combo >= 10) {
+                el.style.transform = 'scale(1.1)';
+                el.style.textShadow = '0 0 40px rgba(255, 105, 180, 1), 0 0 80px rgba(255, 105, 180, 0.8)';
+            } else {
+                el.style.transform = 'scale(1)';
+                el.style.textShadow = '0 0 20px rgba(255, 105, 180, 0.8)';
+            }
+
+            el.classList.add('pulse');
+            setTimeout(() => el.classList.remove('pulse'), 100);
+        }
+
+        function startGame() {
+            if (!audioCtx) initAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            gameState = 'playing';
+            score = 0;
+            combo = 0;
+            maxCombo = 0;
+            perfectCount = 0;
+            goodCount = 0;
+            missCount = 0;
+            gameTime = 0;
+            lastSpawnTime = 0;
+            spawnInterval = 500;
+
+            notes.forEach(n => scene.remove(n));
+            notes = [];
+            effects.forEach(e => {
+                scene.remove(e);
+                e.geometry.dispose();
+                e.material.dispose();
+            });
+            effects = [];
+
+            updateScoreDisplay();
+            document.getElementById('combo').textContent = '0';
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'none';
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        function endGame() {
+            gameState = 'end';
+
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-max-combo').textContent = maxCombo;
+            document.getElementById('perfect-count').textContent = perfectCount;
+            document.getElementById('good-count').textContent = goodCount;
+            document.getElementById('miss-count').textContent = missCount;
+
+            const totalNotes = perfectCount + goodCount + missCount;
+            const accuracy = totalNotes > 0 ? (perfectCount + goodCount * 0.5) / totalNotes : 0;
+
+            let grade, gradeClass;
+            if (accuracy >= 0.95 && missCount <= 3) {
+                grade = 'S';
+                gradeClass = 's';
+            } else if (accuracy >= 0.85) {
+                grade = 'A';
+                gradeClass = 'a';
+            } else if (accuracy >= 0.70) {
+                grade = 'B';
+                gradeClass = 'b';
+            } else if (accuracy >= 0.50) {
+                grade = 'C';
+                gradeClass = 'c';
+            } else {
+                grade = 'D';
+                gradeClass = 'd';
+            }
+
+            const gradeEl = document.getElementById('grade');
+            gradeEl.textContent = grade;
+            gradeEl.className = 'grade ' + gradeClass;
+
+            document.getElementById('end-screen').style.display = 'flex';
+        }
+
+        function onResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        }
+
+        let lastTime = 0;
+        function animate(time = 0) {
+            requestAnimationFrame(animate);
+
+            const delta = time - lastTime;
+            lastTime = time;
+
+            if (gameState === 'playing') {
+                gameTime += delta || 16;
+
+                const progress = Math.min(gameTime / gameDuration, 1);
+                document.getElementById('progress-fill').style.width = (progress * 100) + '%';
+
+                spawnNotes();
+
+                for (let i = notes.length - 1; i >= 0; i--) {
+                    const note = notes[i];
+                    note.position.z += NOTE_SPEED;
+                    note.rotation.z += 0.05;
+
+                    if (note.position.z > JUDGE_LINE_Z + 2) {
+                        if (note.userData.active) {
+                            combo = 0;
+                            missCount++;
+                            updateComboDisplay();
+                            showJudgment('miss');
+                        }
+                        scene.remove(note);
+                        notes.splice(i, 1);
+                    }
+                }
+
+                if (gameTime >= gameDuration) {
+                    endGame();
+                }
+            }
+
+            updateEffects();
+
+            const time2 = time * 0.001;
+            if (scene.children.length > 0) {
+                scene.children.forEach(child => {
+                    if (child.isMesh && child.geometry.type === 'CylinderGeometry' && child.position.z < -20) {
+                        child.rotation.y = time2;
+                    }
+                });
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        init();
     </script>
 </body>
 </html>
