@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="动态壁纸">
     <title>动态壁纸</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23667eea' width='100' height='100' rx='20'/><polygon fill='white' points='40,30 40,70 75,50'/></svg>">
+    
     <style>
         * {
             margin: 0;
@@ -20,6 +31,39 @@
             overflow-x: hidden;
         }
 
+        .install-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        .install-banner span {
+            font-size: 14px;
+        }
+
+        .install-btn {
+            background: #fff;
+            color: #667eea;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
         .app-container {
             max-width: 480px;
             margin: 0 auto;
@@ -27,20 +71,18 @@
             min-height: 100vh;
         }
 
-        /* Header */
         .header {
             text-align: center;
             padding: 20px 0;
-            animation: fadeInDown 0.6s ease-out;
+            animation: fadeIn 0.6s ease-out;
         }
 
         .header h1 {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f64f59 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
             margin-bottom: 8px;
         }
 
@@ -49,10 +91,9 @@
             color: #b0b0c0;
         }
 
-        /* Upload Section */
         .upload-section {
             margin: 24px 0;
-            animation: fadeInUp 0.6s ease-out 0.2s both;
+            animation: fadeIn 0.6s ease-out 0.2s both;
         }
 
         .upload-box {
@@ -63,8 +104,6 @@
             cursor: pointer;
             transition: all 0.3s ease;
             background: rgba(102, 126, 234, 0.1);
-            position: relative;
-            overflow: hidden;
         }
 
         .upload-box:hover, .upload-box:active {
@@ -73,15 +112,9 @@
             transform: scale(1.02);
         }
 
-        .upload-box.drag-over {
-            border-color: #f64f59;
-            background: rgba(246, 79, 89, 0.2);
-        }
-
         .upload-icon {
             font-size: 64px;
             margin-bottom: 16px;
-            animation: bounce 2s infinite;
         }
 
         .upload-text {
@@ -95,26 +128,9 @@
             color: #b0b0c0;
         }
 
-        .upload-btn {
-            display: inline-block;
-            padding: 12px 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 25px;
-            color: #fff;
-            font-weight: 600;
-            margin-top: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .upload-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-
-        /* Video Preview */
         .video-preview {
             margin: 24px 0;
-            animation: fadeInUp 0.6s ease-out 0.3s both;
+            animation: fadeIn 0.6s ease-out 0.3s both;
         }
 
         .video-container {
@@ -130,51 +146,9 @@
             display: block;
         }
 
-        .video-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(transparent 60%, rgba(0,0,0,0.8));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .video-container:hover .video-overlay {
-            opacity: 1;
-        }
-
-        .play-btn {
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .play-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .play-btn svg {
-            width: 32px;
-            height: 32px;
-            fill: #667eea;
-            margin-left: 4px;
-        }
-
-        /* Controls */
         .controls {
             margin: 24px 0;
-            animation: fadeInUp 0.6s ease-out 0.4s both;
+            animation: fadeIn 0.6s ease-out 0.4s both;
         }
 
         .control-group {
@@ -184,11 +158,7 @@
         .control-label {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .control-label span {
+            margin-bottom: 8px;
             font-size: 14px;
             color: #b0b0c0;
         }
@@ -198,7 +168,7 @@
             font-weight: 600;
         }
 
-        .range-slider {
+        input[type="range"] {
             width: 100%;
             height: 6px;
             -webkit-appearance: none;
@@ -207,7 +177,7 @@
             outline: none;
         }
 
-        .range-slider::-webkit-slider-thumb {
+        input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             width: 24px;
             height: 24px;
@@ -217,10 +187,9 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
-        /* Action Buttons */
         .actions {
             margin: 32px 0;
-            animation: fadeInUp 0.6s ease-out 0.5s both;
+            animation: fadeIn 0.6s ease-out 0.5s both;
         }
 
         .action-btn {
@@ -255,23 +224,80 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .action-btn.secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
         .action-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            transform: none !important;
         }
 
-        /* Tips Section */
+        #videoInput {
+            display: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: #fff;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 1001;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(102, 126, 234, 0.3);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .tips {
             margin: 32px 0;
             padding: 20px;
             background: rgba(102, 126, 234, 0.1);
             border-radius: 16px;
-            animation: fadeInUp 0.6s ease-out 0.6s both;
         }
 
         .tips h3 {
@@ -299,673 +325,246 @@
             color: #667eea;
         }
 
-        /* Hidden file input */
-        #videoInput {
-            display: none;
-        }
-
-        /* Toast */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: #333;
-            color: #fff;
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-size: 14px;
-            z-index: 1000;
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
-        /* Loading */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .loading-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(102, 126, 234, 0.3);
-            border-top-color: #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        .loading-text {
-            margin-top: 20px;
-            color: #fff;
-            font-size: 14px;
-        }
-
-        /* Thumbnails */
-        .thumbnails {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin: 24px 0;
-            animation: fadeInUp 0.6s ease-out 0.35s both;
-        }
-
-        .thumbnail {
-            aspect-ratio: 16/9;
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            position: relative;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .thumbnail:hover, .thumbnail.selected {
-            border-color: #667eea;
-            transform: scale(1.05);
-        }
-
-        .thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .thumbnail-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .thumbnail:hover .thumbnail-overlay {
-            opacity: 1;
-        }
-
-        /* Fullscreen video */
-        .fullscreen-video {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #000;
-            z-index: 100;
-            display: none;
-        }
-
-        .fullscreen-video.show {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .fullscreen-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            background: rgba(0, 0, 0, 0.5);
-        }
-
-        .fullscreen-header h3 {
-            font-size: 16px;
-        }
-
-        .close-btn {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 50%;
-            color: #fff;
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .fullscreen-video video {
-            flex: 1;
-            width: 100%;
-            object-fit: contain;
-        }
-
-        .fullscreen-controls {
-            padding: 16px;
-            background: rgba(0, 0, 0, 0.8);
-        }
-
-        /* Animations */
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes bounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Recent Videos Section */
-        .recent-section {
-            margin: 24px 0;
-            animation: fadeInUp 0.6s ease-out 0.25s both;
-        }
-
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            color: #fff;
-        }
-
-        /* Mode Selection */
-        .mode-selection {
-            margin: 24px 0;
-            animation: fadeInUp 0.6s ease-out 0.15s both;
-        }
-
-        .mode-buttons {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .mode-btn {
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
+        .install-guide {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(246, 79, 89, 0.1);
             border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
+            border: 1px solid rgba(246, 79, 89, 0.3);
         }
 
-        .mode-btn:hover, .mode-btn.selected {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.2);
+        .install-guide h3 {
+            color: #f64f59;
+            margin-bottom: 12px;
         }
 
-        .mode-btn .icon {
-            font-size: 32px;
+        .install-guide p {
+            font-size: 13px;
+            color: #b0b0c0;
             margin-bottom: 8px;
         }
 
-        .mode-btn .label {
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+        }
+
+        .step-num {
+            width: 28px;
+            height: 28px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 14px;
+            font-weight: 600;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            font-size: 13px;
             color: #fff;
         }
     </style>
 </head>
 <body>
+    <!-- Install Banner -->
+    <div class="install-banner" id="installBanner">
+        <span>添加到主屏幕</span>
+        <button class="install-btn" onclick="installPWA()">安装</button>
+    </div>
+
     <div class="app-container">
-        <!-- Header -->
         <div class="header">
             <h1>🎬 动态壁纸</h1>
             <p>选择视频，设置个性化动态壁纸</p>
         </div>
 
-        <!-- Mode Selection -->
-        <div class="mode-selection">
-            <div class="mode-buttons">
-                <div class="mode-btn selected" onclick="selectMode('video')">
-                    <div class="icon">🎥</div>
-                    <div class="label">视频壁纸</div>
-                </div>
-                <div class="mode-btn" onclick="selectMode('slideshow')">
-                    <div class="icon">🖼️</div>
-                    <div class="label">图片轮播</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Upload Section -->
         <div class="upload-section">
-            <div class="upload-box" id="uploadBox" onclick="document.getElementById('videoInput').click()">
+            <div class="upload-box" onclick="document.getElementById('videoInput').click()">
                 <div class="upload-icon">📁</div>
                 <div class="upload-text">点击选择视频文件</div>
-                <div class="upload-hint">支持 MP4, MOV, AVI 格式</div>
-                <div class="upload-btn">选择视频</div>
+                <div class="upload-hint">支持 MP4, MOV, AVI, MKV 格式</div>
             </div>
             <input type="file" id="videoInput" accept="video/*" onchange="handleVideoSelect(event)">
         </div>
 
-        <!-- Video Preview -->
         <div class="video-preview" id="videoPreview" style="display: none;">
             <div class="video-container">
-                <video id="selectedVideo" loop muted playsinline></video>
-                <div class="video-overlay">
-                    <div class="play-btn" onclick="toggleVideo()">
-                        <svg viewBox="0 0 24 24" id="playIcon">
-                            <path d="M8 5v14l11-7z"/>
-                        </svg>
-                    </div>
-                </div>
+                <video id="video" loop muted playsinline controls></video>
             </div>
         </div>
 
-        <!-- Video Thumbnails -->
-        <div class="thumbnails" id="thumbnails"></div>
-
-        <!-- Controls -->
         <div class="controls" id="controls" style="display: none;">
-            <div class="control-group">
-                <div class="control-label">
-                    <span>播放起始位置</span>
-                    <span class="value" id="startTimeValue">0:00</span>
-                </div>
-                <input type="range" class="range-slider" id="startSlider" min="0" max="100" value="0" oninput="updateStartTime()">
-            </div>
-            
-            <div class="control-group">
-                <div class="control-label">
-                    <span>播放结束位置</span>
-                    <span class="value" id="endTimeValue">0:00</span>
-                </div>
-                <input type="range" class="range-slider" id="endSlider" min="0" max="100" value="100" oninput="updateEndTime()">
-            </div>
-            
             <div class="control-group">
                 <div class="control-label">
                     <span>播放速度</span>
                     <span class="value" id="speedValue">1.0x</span>
                 </div>
-                <input type="range" class="range-slider" id="speedSlider" min="50" max="200" value="100" oninput="updateSpeed()">
+                <input type="range" id="speedSlider" min="50" max="200" value="100" oninput="updateSpeed()">
             </div>
         </div>
 
-        <!-- Action Buttons -->
         <div class="actions" id="actions" style="display: none;">
-            <button class="action-btn primary" onclick="setAsWallpaper()">
-                <span>✨</span>
-                <span>设为壁纸</span>
-            </button>
-            <button class="action-btn secondary" onclick="previewWallpaper()">
-                <span>👁️</span>
-                <span>全屏预览</span>
+            <button class="action-btn primary" onclick="downloadVideo()">
+                <span>📥</span>
+                <span>保存视频</span>
             </button>
             <button class="action-btn secondary" onclick="resetSelection()">
                 <span>🔄</span>
-                <span>重置</span>
+                <span>重选视频</span>
             </button>
         </div>
 
-        <!-- Tips -->
+        <div class="install-guide" id="installGuide" style="display: none;">
+            <h3>📱 设置为壁纸步骤</h3>
+            <div class="step">
+                <span class="step-num">1</span>
+                <span class="step-text">点击上方"保存视频"下载视频</span>
+            </div>
+            <div class="step">
+                <span class="step-num">2</span>
+                <span class="step-text">打开手机相册找到下载的视频</span>
+            </div>
+            <div class="step">
+                <span class="step-num">3</span>
+                <span class="step-text">点击"设为壁纸"或"更多"→"设置为"</span>
+            </div>
+            <div class="step">
+                <span class="step-num">4</span>
+                <span class="step-text">选择"动态壁纸"或"主屏幕"</span>
+            </div>
+        </div>
+
         <div class="tips">
             <h3>💡 使用提示</h3>
             <ul>
-                <li>建议选择15-30秒的视频效果最佳</li>
-                <li>视频会被裁剪为竖屏比例</li>
-                <li>选择视频的精彩片段作为壁纸</li>
-                <li>调整播放速度可以获得不同效果</li>
+                <li>建议选择 15-30 秒的视频效果最佳</li>
+                <li>视频会被保存到相册中</li>
+                <li>不同手机设置壁纸方式略有不同</li>
+                <li>可在设置中调整播放速度</li>
             </ul>
         </div>
     </div>
 
-    <!-- Fullscreen Video Preview -->
-    <div class="fullscreen-video" id="fullscreenVideo">
-        <div class="fullscreen-header">
-            <h3>壁纸预览</h3>
-            <button class="close-btn" onclick="closeFullscreen()">×</button>
-        </div>
-        <video id="fullscreenPlayer" loop muted playsinline></video>
-    </div>
-
-    <!-- Toast -->
     <div class="toast" id="toast"></div>
-
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">正在处理...</div>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p style="margin-top: 20px; color: #fff;">处理中...</p>
     </div>
 
     <script>
-        // State
-        let selectedVideoFile = null;
-        let videoDuration = 0;
-        let startPercent = 0;
-        let endPercent = 100;
-        let playbackSpeed = 1.0;
+        let selectedFile = null;
 
-        // Elements
-        const videoInput = document.getElementById('videoInput');
-        const uploadBox = document.getElementById('uploadBox');
-        const videoPreview = document.getElementById('videoPreview');
-        const selectedVideo = document.getElementById('selectedVideo');
-        const controls = document.getElementById('controls');
-        const actions = document.getElementById('actions');
-        const startSlider = document.getElementById('startSlider');
-        const endSlider = document.getElementById('endSlider');
-        const speedSlider = document.getElementById('speedSlider');
-        const fullscreenVideo = document.getElementById('fullscreenVideo');
-        const fullscreenPlayer = document.getElementById('fullscreenPlayer');
-
-        // Handle video selection
         function handleVideoSelect(event) {
             const file = event.target.files[0];
             if (file) {
-                selectedVideoFile = file;
+                selectedFile = file;
                 const url = URL.createObjectURL(file);
-                selectedVideo.src = url;
-                
-                selectedVideo.onloadedmetadata = () => {
-                    videoDuration = selectedVideo.duration;
-                    videoPreview.style.display = 'block';
-                    controls.style.display = 'block';
-                    actions.style.display = 'block';
-                    
-                    updateTimeDisplay();
-                    generateThumbnail(url);
-                    showToast('视频加载成功！');
-                };
+                document.getElementById('video').src = url;
+                document.getElementById('videoPreview').style.display = 'block';
+                document.getElementById('controls').style.display = 'block';
+                document.getElementById('actions').style.display = 'block';
+                document.getElementById('installGuide').style.display = 'block';
+                showToast('视频已加载');
             }
         }
 
-        // Generate thumbnail
-        function generateThumbnail(url) {
-            const video = document.createElement('video');
-            video.src = url;
-            video.crossOrigin = 'anonymous';
-            video.currentTime = 1;
-            
-            video.onloadeddata = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = 320;
-                canvas.height = 180;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                const img = document.createElement('img');
-                img.src = canvas.toDataURL();
-                img.style.width = '100%';
-                img.style.height = '100%';
-                img.style.objectFit = 'cover';
-                
-                const thumbnail = document.createElement('div');
-                thumbnail.className = 'thumbnail selected';
-                thumbnail.innerHTML = '';
-                thumbnail.appendChild(img);
-                
-                const thumbnails = document.getElementById('thumbnails');
-                thumbnails.innerHTML = '';
-                thumbnails.appendChild(thumbnail);
-            };
-        }
-
-        // Toggle video playback
-        function toggleVideo() {
-            if (selectedVideo.paused) {
-                selectedVideo.play();
-                document.getElementById('playIcon').innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
-            } else {
-                selectedVideo.pause();
-                document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
-            }
-        }
-
-        // Update start time
-        function updateStartTime() {
-            startPercent = parseInt(startSlider.value);
-            if (startPercent >= endPercent) {
-                endSlider.value = startPercent + 1;
-                endPercent = startPercent + 1;
-            }
-            updateTimeDisplay();
-            
-            const startTime = (startPercent / 100) * videoDuration;
-            selectedVideo.currentTime = startTime;
-        }
-
-        // Update end time
-        function updateEndTime() {
-            endPercent = parseInt(endSlider.value);
-            if (endPercent <= startPercent) {
-                startSlider.value = endPercent - 1;
-                startPercent = endPercent - 1;
-            }
-            updateTimeDisplay();
-        }
-
-        // Update playback speed
         function updateSpeed() {
-            playbackSpeed = parseInt(speedSlider.value) / 100;
-            document.getElementById('speedValue').textContent = playbackSpeed.toFixed(1) + 'x';
-            selectedVideo.playbackRate = playbackSpeed;
+            const speed = document.getElementById('speedSlider').value / 100;
+            document.getElementById('speedValue').textContent = speed.toFixed(1) + 'x';
+            document.getElementById('video').playbackRate = speed;
         }
 
-        // Update time display
-        function updateTimeDisplay() {
-            const startTime = (startPercent / 100) * videoDuration;
-            const endTime = (endPercent / 100) * videoDuration;
-            
-            document.getElementById('startTimeValue').textContent = formatTime(startTime);
-            document.getElementById('endTimeValue').textContent = formatTime(endTime);
-        }
+        function downloadVideo() {
+            if (!selectedFile) {
+                showToast('请先选择视频');
+                return;
+            }
 
-        // Format time
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
-
-        // Set as wallpaper (simulated)
-        function setAsWallpaper() {
             showLoading();
-            
+
             setTimeout(() => {
                 hideLoading();
-                
-                // Check if it's Android
-                const isAndroid = /Android/i.test(navigator.userAgent);
-                
-                if (isAndroid && navigator.share) {
-                    // Try to use Web API for wallpaper (if supported)
-                    showToast('正在打开系统壁纸设置...');
-                    
-                    // Create a downloadable video blob
-                    const blob = new Blob([selectedVideoFile], { type: 'video/mp4' });
-                    const url = URL.createObjectURL(blob);
-                    
-                    // Note: Direct wallpaper setting requires native app
-                    // This shows a guide for manual setting
-                    setTimeout(() => {
-                        showToast('请保存视频后手动设为壁纸');
-                        
-                        // Trigger download
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'live_wallpaper.mp4';
-                        a.click();
-                    }, 1500);
-                } else {
-                    // For other platforms, show instructions
-                    showToast('请在 Android 设备上打开此应用');
-                    
-                    // Download the video
-                    const blob = new Blob([selectedVideoFile], { type: 'video/mp4' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'live_wallpaper.mp4';
-                    a.click();
-                }
-            }, 2000);
+
+                const url = URL.createObjectURL(selectedFile);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'live_wallpaper_' + Date.now() + '.mp4';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showToast('视频已保存到相册');
+            }, 1500);
         }
 
-        // Preview wallpaper fullscreen
-        function previewWallpaper() {
-            fullscreenPlayer.src = selectedVideo.src;
-            
-            const startTime = (startPercent / 100) * videoDuration;
-            const endTime = (endPercent / 100) * videoDuration;
-            
-            fullscreenPlayer.currentTime = startTime;
-            fullscreenPlayer.playbackRate = playbackSpeed;
-            
-            fullscreenPlayer.onTimeupdate = () => {
-                if (fullscreenPlayer.currentTime >= endTime) {
-                    fullscreenPlayer.currentTime = startTime;
-                }
-            };
-            
-            fullscreenVideo.classList.add('show');
-            fullscreenPlayer.play();
-        }
-
-        // Close fullscreen
-        function closeFullscreen() {
-            fullscreenVideo.classList.remove('show');
-            fullscreenPlayer.pause();
-        }
-
-        // Reset selection
         function resetSelection() {
-            selectedVideoFile = null;
-            videoDuration = 0;
-            startPercent = 0;
-            endPercent = 100;
-            playbackSpeed = 1.0;
-            
-            videoInput.value = '';
-            videoPreview.style.display = 'none';
-            controls.style.display = 'none';
-            actions.style.display = 'none';
-            document.getElementById('thumbnails').innerHTML = '';
-            
-            startSlider.value = 0;
-            endSlider.value = 100;
-            speedSlider.value = 100;
-            
+            selectedFile = null;
+            document.getElementById('videoInput').value = '';
+            document.getElementById('video').src = '';
+            document.getElementById('videoPreview').style.display = 'none';
+            document.getElementById('controls').style.display = 'none';
+            document.getElementById('actions').style.display = 'none';
+            document.getElementById('installGuide').style.display = 'none';
+            document.getElementById('speedSlider').value = 100;
+            document.getElementById('speedValue').textContent = '1.0x';
             showToast('已重置');
         }
 
-        // Mode selection
-        function selectMode(mode) {
-            const buttons = document.querySelectorAll('.mode-btn');
-            buttons.forEach(btn => btn.classList.remove('selected'));
-            event.currentTarget.classList.add('selected');
-            
-            if (mode === 'slideshow') {
-                showToast('图片轮播功能即将推出');
-            }
-        }
-
-        // Toast
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2500);
+            setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        // Loading
         function showLoading() {
-            document.getElementById('loadingOverlay').classList.add('show');
+            document.getElementById('loading').classList.add('show');
         }
 
         function hideLoading() {
-            document.getElementById('loadingOverlay').classList.remove('show');
+            document.getElementById('loading').classList.remove('show');
         }
 
-        // Drag and drop
-        uploadBox.addEventListener('dragover', (e) => {
+        // PWA Installation
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
-            uploadBox.classList.add('drag-over');
+            deferredPrompt = e;
+            document.getElementById('installBanner').style.display = 'flex';
         });
 
-        uploadBox.addEventListener('dragleave', () => {
-            uploadBox.classList.remove('drag-over');
-        });
-
-        uploadBox.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadBox.classList.remove('drag-over');
-            
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('video/')) {
-                selectedVideoFile = file;
-                const url = URL.createObjectURL(file);
-                selectedVideo.src = url;
-                
-                selectedVideo.onloadedmetadata = () => {
-                    videoDuration = selectedVideo.duration;
-                    videoPreview.style.display = 'block';
-                    controls.style.display = 'block';
-                    actions.style.display = 'block';
-                    
-                    updateTimeDisplay();
-                    generateThumbnail(url);
-                    showToast('视频加载成功！');
-                };
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showToast('安装成功！');
+                    }
+                    deferredPrompt = null;
+                    document.getElementById('installBanner').style.display = 'none';
+                });
             } else {
-                showToast('请选择视频文件');
+                showToast('请使用浏览器打开，然后添加到主屏幕');
             }
+        }
+
+        // Hide banner if already installed
+        window.addEventListener('appinstalled', () => {
+            document.getElementById('installBanner').style.display = 'none';
+            showToast('应用已安装到主屏幕！');
         });
 
-        // Touch events for mobile
-        document.addEventListener('touchstart', function() {}, { passive: true });
+        // Check if running in standalone mode
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            document.getElementById('installBanner').style.display = 'none';
+        }
     </script>
 </body>
 </html>
