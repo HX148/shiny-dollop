@@ -293,7 +293,25 @@
             letter-spacing: 2px;
         }
 
-        #start-screen, #end-screen {
+        #track-info {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        #track-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
+            margin-bottom: 5px;
+        }
+
+        .screen-overlay {
             position: absolute;
             top: 0;
             left: 0;
@@ -305,22 +323,27 @@
             justify-content: center;
             align-items: center;
             pointer-events: auto;
+            padding: 40px;
         }
 
-        #end-screen {
+        #song-select-screen, #difficulty-select-screen, #start-screen, #end-screen {
             display: none;
+        }
+
+        #song-select-screen.active, #difficulty-select-screen.active, #start-screen.active, #end-screen.active {
+            display: flex;
         }
 
         .title-container {
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 50px;
         }
 
         .game-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 80px;
+            font-size: 72px;
             font-weight: 900;
-            letter-spacing: 12px;
+            letter-spacing: 10px;
             background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple), var(--neon-cyan));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -336,33 +359,195 @@
 
         .game-subtitle {
             font-family: 'Rajdhani', sans-serif;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 300;
             color: var(--text-secondary);
-            letter-spacing: 15px;
-            margin-top: 15px;
+            letter-spacing: 12px;
+            margin-top: 12px;
         }
 
-        .start-btn, .restart-btn {
-            padding: 25px 80px;
+        .song-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .song-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .song-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--neon-cyan);
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .song-item.selected {
+            border-color: var(--neon-pink);
+            background: rgba(255, 45, 149, 0.1);
+        }
+
+        .song-info {
+            text-align: left;
+        }
+
+        .song-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 20px;
             font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .song-artist {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .song-meta {
+            text-align: right;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .song-bpm {
+            color: var(--neon-yellow);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .difficulty-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 600px;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .difficulty-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 3px solid;
+            border-radius: 20px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .difficulty-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .difficulty-btn.easy {
+            border-color: #00ff88;
+        }
+
+        .difficulty-btn.easy:hover, .difficulty-btn.easy.selected {
+            background: rgba(0, 255, 136, 0.2);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+
+        .difficulty-btn.normal {
+            border-color: var(--neon-yellow);
+        }
+
+        .difficulty-btn.normal:hover, .difficulty-btn.normal.selected {
+            background: rgba(255, 237, 74, 0.2);
+            box-shadow: 0 0 30px rgba(255, 237, 74, 0.5);
+        }
+
+        .difficulty-btn.hard {
+            border-color: var(--neon-pink);
+        }
+
+        .difficulty-btn.hard:hover, .difficulty-btn.hard.selected {
+            background: rgba(255, 45, 149, 0.2);
+            box-shadow: 0 0 30px rgba(255, 45, 149, 0.5);
+        }
+
+        .difficulty-btn.insane {
+            border-color: var(--neon-purple);
+        }
+
+        .difficulty-btn.insane:hover, .difficulty-btn.insane.selected {
+            background: rgba(184, 41, 221, 0.2);
+            box-shadow: 0 0 30px rgba(184, 41, 221, 0.5);
+        }
+
+        .difficulty-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .difficulty-btn.easy .difficulty-name { color: #00ff88; }
+        .difficulty-btn.normal .difficulty-name { color: var(--neon-yellow); }
+        .difficulty-btn.hard .difficulty-name { color: var(--neon-pink); }
+        .difficulty-btn.insane .difficulty-name { color: var(--neon-purple); }
+
+        .difficulty-level {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .start-btn, .restart-btn, .back-btn, .confirm-btn {
+            padding: 20px 60px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
             border: none;
-            border-radius: 60px;
+            border-radius: 50px;
             background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
             color: #fff;
             cursor: pointer;
-            letter-spacing: 4px;
+            letter-spacing: 3px;
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
             box-shadow: 
                 0 0 30px rgba(255, 45, 149, 0.5),
                 0 0 60px rgba(184, 41, 221, 0.3);
+            margin-top: 30px;
         }
 
-        .start-btn::before, .restart-btn::before {
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+            padding: 15px 40px;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .confirm-btn {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            box-shadow: 
+                0 0 30px rgba(0, 240, 255, 0.5),
+                0 0 60px rgba(184, 41, 221, 0.3);
+        }
+
+        .start-btn::before, .restart-btn::before, .confirm-btn::before {
             content: '';
             position: absolute;
             top: 0;
@@ -373,19 +558,39 @@
             transition: left 0.5s;
         }
 
-        .start-btn:hover::before, .restart-btn:hover::before {
+        .start-btn:hover::before, .restart-btn:hover::before, .confirm-btn:hover::before {
             left: 100%;
         }
 
-        .start-btn:hover, .restart-btn:hover {
+        .start-btn:hover, .restart-btn:hover, .confirm-btn:hover {
             transform: scale(1.05);
             box-shadow: 
                 0 0 50px rgba(255, 45, 149, 0.7),
                 0 0 100px rgba(184, 41, 221, 0.5);
         }
 
+        .selected-track-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .selected-track-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 20px var(--neon-cyan);
+            margin-bottom: 10px;
+        }
+
+        .selected-difficulty {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
         .instructions {
-            margin-top: 50px;
+            margin-top: 30px;
             text-align: center;
         }
 
@@ -498,9 +703,17 @@
             margin: 20px 0;
         }
 
+        .result-track-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            color: var(--text-secondary);
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
+
         @media (max-width: 600px) {
-            .game-title { font-size: 40px; letter-spacing: 6px; }
-            .game-subtitle { font-size: 12px; letter-spacing: 8px; }
+            .game-title { font-size: 36px; letter-spacing: 5px; }
+            .game-subtitle { font-size: 12px; letter-spacing: 6px; }
             .lane-btn { width: 70px; height: 70px; font-size: 14px; }
             #lane-buttons { gap: 15px; bottom: 80px; }
             .score-value { font-size: 32px; }
@@ -510,7 +723,11 @@
             .grade { font-size: 100px; }
             .stats-container { gap: 20px; }
             .stat-value { font-size: 28px; }
-            .start-btn, .restart-btn { padding: 20px 50px; font-size: 16px; }
+            .start-btn, .restart-btn, .confirm-btn { padding: 15px 40px; font-size: 14px; }
+            .song-item { padding: 15px 20px; }
+            .song-title { font-size: 16px; }
+            .difficulty-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .difficulty-name { font-size: 18px; }
         }
     </style>
 </head>
@@ -530,6 +747,10 @@
         
         <div id="judgment"></div>
         
+        <div id="track-info">
+            <div id="track-name">-</div>
+        </div>
+        
         <div id="lane-buttons">
             <button class="lane-btn" id="btn-0">D</button>
             <button class="lane-btn" id="btn-1">F</button>
@@ -543,12 +764,53 @@
             <div id="progress-time">0:00</div>
         </div>
         
-        <div id="start-screen">
+        <div id="song-select-screen" class="screen-overlay active">
+            <div class="title-container">
+                <div class="game-title">NEON BEAT</div>
+                <div class="game-subtitle">SELECT TRACK</div>
+            </div>
+            <div class="song-list" id="song-list"></div>
+            <button class="confirm-btn" id="confirm-song-btn">CONTINUE</button>
+            <button class="back-btn" id="back-to-main-btn">BACK</button>
+        </div>
+        
+        <div id="difficulty-select-screen" class="screen-overlay">
+            <button class="back-btn" id="back-to-song-btn" style="position: absolute; top: 30px; left: 30px;">← BACK</button>
+            <div class="title-container">
+                <div class="game-title">NEON BEAT</div>
+                <div class="game-subtitle">SELECT DIFFICULTY</div>
+            </div>
+            <div class="selected-track-info">
+                <div class="selected-track-title" id="selected-track-title">-</div>
+                <div class="selected-difficulty" id="selected-difficulty">EASY / NORMAL / HARD / INSANE</div>
+            </div>
+            <div class="difficulty-grid" id="difficulty-grid">
+                <button class="difficulty-btn easy" data-difficulty="easy">
+                    <div class="difficulty-name">EASY</div>
+                    <div class="difficulty-level">★★☆☆☆</div>
+                </button>
+                <button class="difficulty-btn normal selected" data-difficulty="normal">
+                    <div class="difficulty-name">NORMAL</div>
+                    <div class="difficulty-level">★★★☆☆</div>
+                </button>
+                <button class="difficulty-btn hard" data-difficulty="hard">
+                    <div class="difficulty-name">HARD</div>
+                    <div class="difficulty-level">★★★★☆</div>
+                </button>
+                <button class="difficulty-btn insane" data-difficulty="insane">
+                    <div class="difficulty-name">INSANE</div>
+                    <div class="difficulty-level">★★★★★</div>
+                </button>
+            </div>
+            <button class="start-btn" id="start-btn">START</button>
+        </div>
+        
+        <div id="start-screen" class="screen-overlay">
             <div class="title-container">
                 <div class="game-title">NEON BEAT</div>
                 <div class="game-subtitle">RHYTHM GAME</div>
             </div>
-            <button class="start-btn" id="start-btn">START</button>
+            <button class="start-btn" id="main-start-btn">START</button>
             <div class="instructions">
                 <div class="key-row">
                     <span class="key-hint pink">D</span>
@@ -559,8 +821,9 @@
             </div>
         </div>
         
-        <div id="end-screen">
+        <div id="end-screen" class="screen-overlay">
             <div class="final-title">RESULT</div>
+            <div class="result-track-name" id="result-track-name">-</div>
             <div class="grade" id="grade">A</div>
             <div class="final-score" id="final-score">0</div>
             <div class="max-combo-display">MAX COMBO: <span id="final-max-combo">0</span></div>
@@ -586,15 +849,75 @@
     <script>
         const LANE_COLORS = [0xff2d95, 0xffed4a, 0x00f0ff];
         const LANE_POSITIONS = [-2.5, 0, 2.5];
-        const NOTE_SPEED = 0.15;
-        const SPAWN_DISTANCE = 25;
         const JUDGE_LINE_Z = 5;
         const PERFECT_WINDOW = 50;
         const GOOD_WINDOW = 100;
         
+        const TRACKS = [
+            {
+                id: 1,
+                name: "Digital Pulse",
+                artist: "Neon Waves",
+                bpm: 120,
+                duration: 45000,
+                noteSpeed: 0.12,
+                spawnBase: 600,
+                patterns: [[0], [1], [2], [0, 1], [1, 2], [0, 2], [0, 1, 2]]
+            },
+            {
+                id: 2,
+                name: "Cyber Rush",
+                artist: "Volt Factory",
+                bpm: 140,
+                duration: 50000,
+                noteSpeed: 0.14,
+                spawnBase: 500,
+                patterns: [[0], [1], [2], [0, 1], [1, 2], [0, 2], [0, 1, 2]]
+            },
+            {
+                id: 3,
+                name: "Midnight Circuit",
+                artist: "Dark Synth",
+                bpm: 128,
+                duration: 55000,
+                noteSpeed: 0.13,
+                spawnBase: 550,
+                patterns: [[0], [1], [2], [0, 1], [1, 2], [0, 2], [0, 1, 2]]
+            },
+            {
+                id: 4,
+                name: "Electric Storm",
+                artist: "Thunder Beat",
+                bpm: 160,
+                duration: 60000,
+                noteSpeed: 0.16,
+                spawnBase: 400,
+                patterns: [[0], [1], [2], [0, 1], [1, 2], [0, 2], [0, 1, 2]]
+            },
+            {
+                id: 5,
+                name: "Quantum Jump",
+                artist: "Space Runner",
+                bpm: 180,
+                duration: 50000,
+                noteSpeed: 0.18,
+                spawnBase: 350,
+                patterns: [[0], [1], [2], [0, 1], [1, 2], [0, 2], [0, 1, 2]]
+            }
+        ];
+
+        const DIFFICULTY_SETTINGS = {
+            easy: { speedMult: 0.7, spawnMult: 1.4, noteChance: 0.6 },
+            normal: { speedMult: 1.0, spawnMult: 1.0, noteChance: 0.8 },
+            hard: { speedMult: 1.3, spawnMult: 0.75, noteChance: 0.9 },
+            insane: { speedMult: 1.6, spawnMult: 0.55, noteChance: 1.0 }
+        };
+
         let scene, camera, renderer;
         let audioCtx;
-        let gameState = 'start';
+        let gameState = 'menu';
+        let selectedTrack = null;
+        let selectedDifficulty = 'normal';
         let score = 0;
         let combo = 0;
         let maxCombo = 0;
@@ -607,6 +930,8 @@
         let gameDuration = 60000;
         let lastSpawnTime = 0;
         let spawnInterval = 500;
+        let currentTrack = null;
+        let currentDifficulty = null;
 
         function init() {
             scene = new THREE.Scene();
@@ -638,8 +963,70 @@
             createBackgroundParticles();
             createAmbientLights();
 
+            populateSongList();
+            setupEventListeners();
+
+            window.addEventListener('resize', onResize);
+            animate();
+        }
+
+        function populateSongList() {
+            const songList = document.getElementById('song-list');
+            songList.innerHTML = '';
+            
+            TRACKS.forEach((track, index) => {
+                const item = document.createElement('div');
+                item.className = 'song-item' + (index === 0 ? ' selected' : '');
+                item.innerHTML = `
+                    <div class="song-info">
+                        <div class="song-title">${track.name}</div>
+                        <div class="song-artist">${track.artist}</div>
+                    </div>
+                    <div class="song-meta">
+                        <div class="song-bpm">${track.bpm} BPM</div>
+                        <div>${Math.floor(track.duration / 1000)}s</div>
+                    </div>
+                `;
+                item.addEventListener('click', () => selectTrack(track, item));
+                songList.appendChild(item);
+            });
+            
+            selectedTrack = TRACKS[0];
+        }
+
+        function selectTrack(track, element) {
+            document.querySelectorAll('.song-item').forEach(item => item.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedTrack = track;
+        }
+
+        function setupEventListeners() {
+            document.getElementById('main-start-btn').addEventListener('click', () => showScreen('song-select'));
+            document.getElementById('confirm-song-btn').addEventListener('click', () => {
+                if (selectedTrack) {
+                    document.getElementById('selected-track-title').textContent = selectedTrack.name;
+                    showScreen('difficulty');
+                }
+            });
+            document.getElementById('back-to-main-btn').addEventListener('click', () => showScreen('main'));
+            document.getElementById('back-to-song-btn').addEventListener('click', () => showScreen('song-select'));
+            
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedDifficulty = btn.dataset.difficulty;
+                });
+            });
+            
             document.getElementById('start-btn').addEventListener('click', startGame);
-            document.getElementById('restart-btn').addEventListener('click', restartGame);
+            document.getElementById('restart-btn').addEventListener('click', () => {
+                if (selectedTrack) {
+                    document.getElementById('selected-track-title').textContent = selectedTrack.name;
+                    showScreen('difficulty');
+                }
+            });
+            
             document.getElementById('btn-0').addEventListener('click', () => handleLaneHit(0));
             document.getElementById('btn-1').addEventListener('click', () => handleLaneHit(1));
             document.getElementById('btn-2').addEventListener('click', () => handleLaneHit(2));
@@ -657,9 +1044,27 @@
                     handleLaneHit(2);
                 }
             });
+        }
 
-            window.addEventListener('resize', onResize);
-            animate();
+        function showScreen(screen) {
+            document.querySelectorAll('.screen-overlay').forEach(s => s.classList.remove('active'));
+            
+            switch(screen) {
+                case 'main':
+                    document.getElementById('start-screen').classList.add('active');
+                    break;
+                case 'song-select':
+                    document.getElementById('song-select-screen').classList.add('active');
+                    break;
+                case 'difficulty':
+                    document.getElementById('difficulty-select-screen').classList.add('active');
+                    break;
+                case 'game':
+                    break;
+                case 'end':
+                    document.getElementById('end-screen').classList.add('active');
+                    break;
+            }
         }
 
         function createLanes() {
@@ -861,33 +1266,25 @@
 
             lastSpawnTime = gameTime;
 
-            const difficulty = Math.min(gameTime / gameDuration, 1);
-            spawnInterval = Math.max(200, 500 - difficulty * 250);
+            const settings = DIFFICULTY_SETTINGS[currentDifficulty];
+            const progress = Math.min(gameTime / gameDuration, 1);
+            spawnInterval = Math.max(
+                currentTrack.spawnBase * settings.spawnMult * 0.5,
+                currentTrack.spawnBase * settings.spawnMult - progress * currentTrack.spawnBase * settings.spawnMult * 0.3
+            );
 
-            const pattern = Math.random();
-
-            if (pattern < 0.3) {
-                createNote(Math.floor(Math.random() * 3));
-            } else if (pattern < 0.6) {
-                const startLane = Math.floor(Math.random() * 2);
-                createNote(startLane);
-                createNote(startLane + 1);
-            } else if (pattern < 0.8) {
-                for (let i = 0; i < 3; i++) {
-                    createNote(i);
-                }
-            } else {
-                const lane = Math.floor(Math.random() * 3);
-                createNote(lane);
-                setTimeout(() => {
-                    if (gameState === 'playing') createNote((lane + 1 + Math.floor(Math.random() * 2)) % 3);
-                }, spawnInterval / 2);
+            if (Math.random() < settings.noteChance) {
+                const patternIndex = Math.floor(Math.random() * currentTrack.patterns.length);
+                const pattern = currentTrack.patterns[patternIndex];
+                pattern.forEach(lane => createNote(lane));
             }
 
-            if (Math.random() < 0.1 + difficulty * 0.1) {
+            if (Math.random() < 0.1 + progress * 0.15) {
                 playBeat();
             }
         }
+
+        const SPAWN_DISTANCE = 25;
 
         function createHitEffect(lane, type) {
             const color = LANE_COLORS[lane];
@@ -1082,6 +1479,11 @@
             if (audioCtx.state === 'suspended') audioCtx.resume();
 
             gameState = 'playing';
+            currentTrack = selectedTrack;
+            currentDifficulty = selectedDifficulty;
+            
+            const settings = DIFFICULTY_SETTINGS[currentDifficulty];
+            
             score = 0;
             combo = 0;
             maxCombo = 0;
@@ -1090,7 +1492,7 @@
             missCount = 0;
             gameTime = 0;
             lastSpawnTime = 0;
-            spawnInterval = 500;
+            spawnInterval = currentTrack.spawnBase * settings.spawnMult;
 
             notes.forEach(n => scene.remove(n));
             notes = [];
@@ -1101,19 +1503,22 @@
             });
             effects = [];
 
+            gameDuration = currentTrack.duration;
+            NOTE_SPEED = currentTrack.noteSpeed * settings.speedMult;
+
             updateScoreDisplay();
             document.getElementById('combo').textContent = '0';
-            document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('end-screen').style.display = 'none';
-        }
-
-        function restartGame() {
-            startGame();
+            document.getElementById('track-name').textContent = currentTrack.name;
+            document.getElementById('start-screen').classList.remove('active');
+            document.getElementById('song-select-screen').classList.remove('active');
+            document.getElementById('difficulty-select-screen').classList.remove('active');
+            document.getElementById('end-screen').classList.remove('active');
         }
 
         function endGame() {
             gameState = 'end';
 
+            document.getElementById('result-track-name').textContent = currentTrack.name;
             document.getElementById('final-score').textContent = score;
             document.getElementById('final-max-combo').textContent = maxCombo;
             document.getElementById('perfect-count').textContent = perfectCount;
@@ -1145,8 +1550,10 @@
             gradeEl.textContent = grade;
             gradeEl.className = 'grade ' + gradeClass;
 
-            document.getElementById('end-screen').style.display = 'flex';
+            document.getElementById('end-screen').classList.add('active');
         }
+
+        let NOTE_SPEED = 0.15;
 
         function onResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
