@@ -1,0 +1,6 @@
+{
+    "name": "LiveWallpaper",
+    "defaultScene": "Assets/Scenes/MainScene.unity",
+    "version": "1.0.0",
+    "description": "Unity Live Wallpaper Application"
+}
