@@ -1,26 +1,152 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>转动正六边形内的小球</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hexagon Physics</title>
     <style>
-        body {
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
+        
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: #1a1a2e;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0d0d1f 100%);
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+            position: relative;
         }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 128, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+        
+        h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00ffff 0%, #ff00ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(0, 255, 255, 0.3);
+            letter-spacing: 0.1em;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5)); }
+            to { filter: drop-shadow(0 0 40px rgba(255, 0, 255, 0.5)); }
+        }
+        
+        .subtitle {
+            color: #7a7ab8;
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-top: -1rem;
+        }
+        
+        .canvas-wrapper {
+            position: relative;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 24px;
+            box-shadow: 
+                0 0 60px rgba(0, 255, 255, 0.15),
+                inset 0 0 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        
         canvas {
-            border: 2px solid #4a4a6a;
-            border-radius: 8px;
+            display: block;
+            border-radius: 16px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .stat {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            min-width: 140px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            display: block;
+            color: #5a5a9a;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+        
+        .stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #00ffff;
         }
     </style>
 </head>
 <body>
-    <canvas id="canvas" width="800" height="800"></canvas>
+    <div class="container">
+        <h1>PHYSICS CAGE</h1>
+        <p class="subtitle">Gravity • Friction • Rotation</p>
+        
+        <div class="canvas-wrapper">
+            <canvas id="canvas" width="800" height="800"></canvas>
+        </div>
+        
+        <div class="controls">
+            <div class="stat">
+                <span class="stat-label">Velocity</span>
+                <span class="stat-value" id="velStat">0.0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Rotation</span>
+                <span class="stat-value" id="rotStat">0°</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Bounces</span>
+                <span class="stat-value" id="bounceStat">0</span>
+            </div>
+        </div>
+    </div>
+
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
@@ -38,12 +164,16 @@
         const bounceFriction = 0.7;
         const wallFriction = 0.98;
 
+        let bounceCount = 0;
+        let trail = [];
+        const maxTrailLength = 50;
+
         const ball = {
             x: centerX,
             y: centerY - 100,
             vx: 2,
             vy: 0,
-            radius: 15
+            radius: 18
         };
 
         function getHexagonVertices(rotation) {
@@ -98,6 +228,11 @@
             ball.y += ball.vy;
             hexRotation += hexRotationSpeed;
 
+            trail.push({ x: ball.x, y: ball.y });
+            if (trail.length > maxTrailLength) {
+                trail.shift();
+            }
+
             const vertices = getHexagonVertices(hexRotation);
 
             for (let i = 0; i < 6; i++) {
@@ -124,40 +259,117 @@
                         const overlap = ball.radius - dist;
                         ball.x += nx * overlap;
                         ball.y += ny * overlap;
+                        bounceCount++;
                     }
                 }
+            }
+
+            document.getElementById('velStat').textContent = (Math.sqrt(ball.vx ** 2 + ball.vy ** 2)).toFixed(1);
+            document.getElementById('rotStat').textContent = Math.round((hexRotation * 180 / Math.PI) % 360) + '°';
+            document.getElementById('bounceStat').textContent = bounceCount;
+        }
+
+        function drawBackground() {
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 450);
+            gradient.addColorStop(0, '#1a1a3e');
+            gradient.addColorStop(1, '#0a0a1a');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < width; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < height; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(width, i);
+                ctx.stroke();
             }
         }
 
         function drawHexagon(vertices) {
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 30;
+            
             ctx.beginPath();
             ctx.moveTo(vertices[0].x, vertices[0].y);
             for (let i = 1; i < 6; i++) {
                 ctx.lineTo(vertices[i].x, vertices[i].y);
             }
             ctx.closePath();
-            ctx.strokeStyle = '#4cc9f0';
-            ctx.lineWidth = 4;
-            ctx.stroke();
-            ctx.fillStyle = 'rgba(76, 201, 240, 0.1)';
+            
+            const hexGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, hexRadius);
+            hexGradient.addColorStop(0, 'rgba(0, 255, 255, 0.02)');
+            hexGradient.addColorStop(1, 'rgba(0, 255, 255, 0.1)');
+            ctx.fillStyle = hexGradient;
             ctx.fill();
+            
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+            
+            ctx.strokeStyle = 'rgba(255, 0, 255, 0.8)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.shadowBlur = 0;
+        }
+
+        function drawTrail() {
+            for (let i = 0; i < trail.length - 1; i++) {
+                const alpha = i / trail.length;
+                const size = (i / trail.length) * ball.radius * 0.5;
+                
+                ctx.beginPath();
+                ctx.arc(trail[i].x, trail[i].y, size, 0, Math.PI * 2);
+                
+                const gradient = ctx.createRadialGradient(
+                    trail[i].x, trail[i].y, 0,
+                    trail[i].x, trail[i].y, size
+                );
+                gradient.addColorStop(0, `rgba(255, 0, 128, ${alpha * 0.8})`);
+                gradient.addColorStop(1, `rgba(255, 0, 128, 0)`);
+                
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            }
         }
 
         function drawBall() {
+            ctx.shadowColor = '#ff0080';
+            ctx.shadowBlur = 40;
+            
+            const gradient = ctx.createRadialGradient(
+                ball.x - 5, ball.y - 5, 0,
+                ball.x, ball.y, ball.radius
+            );
+            gradient.addColorStop(0, '#ff66aa');
+            gradient.addColorStop(0.5, '#ff0080');
+            gradient.addColorStop(1, '#aa0055');
+            
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-            ctx.fillStyle = '#f72585';
+            ctx.fillStyle = gradient;
             ctx.fill();
-            ctx.strokeStyle = '#ff6bb5';
-            ctx.lineWidth = 3;
-            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(ball.x - 4, ball.y - 4, ball.radius * 0.3, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.fill();
+            
+            ctx.shadowBlur = 0;
         }
 
         function draw() {
-            ctx.fillStyle = '#1a1a2e';
-            ctx.fillRect(0, 0, width, height);
+            drawBackground();
             const vertices = getHexagonVertices(hexRotation);
             drawHexagon(vertices);
+            drawTrail();
             drawBall();
         }
 
