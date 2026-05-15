@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>转动正六边形内的小球</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1a1a2e;
+        }
+        canvas {
+            border: 2px solid #4a4a6a;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="800"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        const hexRadius = 250;
+        let hexRotation = 0;
+        const hexRotationSpeed = 0.005;
+
+        const gravity = 0.15;
+        const friction = 0.995;
+        const bounceFriction = 0.7;
+        const wallFriction = 0.98;
+
+        const ball = {
+            x: centerX,
+            y: centerY - 100,
+            vx: 2,
+            vy: 0,
+            radius: 15
+        };
+
+        function getHexagonVertices(rotation) {
+            const vertices = [];
+            for (let i = 0; i < 6; i++) {
+                const angle = (Math.PI / 3) * i + rotation;
+                vertices.push({
+                    x: centerX + hexRadius * Math.cos(angle),
+                    y: centerY + hexRadius * Math.sin(angle)
+                });
+            }
+            return vertices;
+        }
+
+        function distance(x1, y1, x2, y2) {
+            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+        }
+
+        function closestPointOnSegment(px, py, x1, y1, x2, y2) {
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const len2 = dx * dx + dy * dy;
+            
+            if (len2 === 0) return { x: x1, y: y1 };
+            
+            let t = ((px - x1) * dx + (py - y1) * dy) / len2;
+            t = Math.max(0, Math.min(1, t));
+            
+            return {
+                x: x1 + t * dx,
+                y: y1 + t * dy
+            };
+        }
+
+        function getEdgeVelocity(i, vertices, nextIdx) {
+            const edgeCenterX = (vertices[i].x + vertices[nextIdx].x) / 2;
+            const edgeCenterY = (vertices[i].y + vertices[nextIdx].y) / 2;
+            const tangentAngle = Math.atan2(edgeCenterY - centerY, edgeCenterX - centerX) + Math.PI / 2;
+            const distFromCenter = distance(centerX, centerY, edgeCenterX, edgeCenterY);
+            const speed = hexRotationSpeed * distFromCenter;
+            return {
+                vx: speed * Math.cos(tangentAngle),
+                vy: speed * Math.sin(tangentAngle)
+            };
+        }
+
+        function update() {
+            ball.vy += gravity;
+            ball.vx *= friction;
+            ball.vy *= friction;
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+            hexRotation += hexRotationSpeed;
+
+            const vertices = getHexagonVertices(hexRotation);
+
+            for (let i = 0; i < 6; i++) {
+                const nextIdx = (i + 1) % 6;
+                const closest = closestPointOnSegment(ball.x, ball.y, vertices[i].x, vertices[i].y, vertices[nextIdx].x, vertices[nextIdx].y);
+                const dist = distance(ball.x, ball.y, closest.x, closest.y);
+
+                if (dist < ball.radius) {
+                    const nx = (ball.x - closest.x) / dist;
+                    const ny = (ball.y - closest.y) / dist;
+                    const tx = -ny;
+                    const ty = nx;
+                    const edgeVel = getEdgeVelocity(i, vertices, nextIdx);
+                    const relVx = ball.vx - edgeVel.vx;
+                    const relVy = ball.vy - edgeVel.vy;
+                    const normalVel = relVx * nx + relVy * ny;
+                    const tangentVel = relVx * tx + relVy * ty;
+
+                    if (normalVel < 0) {
+                        const newNormalVel = -normalVel * bounceFriction;
+                        const newTangentVel = tangentVel * wallFriction;
+                        ball.vx = newNormalVel * nx + newTangentVel * tx + edgeVel.vx;
+                        ball.vy = newNormalVel * ny + newTangentVel * ty + edgeVel.vy;
+                        const overlap = ball.radius - dist;
+                        ball.x += nx * overlap;
+                        ball.y += ny * overlap;
+                    }
+                }
+            }
+        }
+
+        function drawHexagon(vertices) {
+            ctx.beginPath();
+            ctx.moveTo(vertices[0].x, vertices[0].y);
+            for (let i = 1; i < 6; i++) {
+                ctx.lineTo(vertices[i].x, vertices[i].y);
+            }
+            ctx.closePath();
+            ctx.strokeStyle = '#4cc9f0';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(76, 201, 240, 0.1)';
+            ctx.fill();
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#f72585';
+            ctx.fill();
+            ctx.strokeStyle = '#ff6bb5';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
+        function draw() {
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, width, height);
+            const vertices = getHexagonVertices(hexRotation);
+            drawHexagon(vertices);
+            drawBall();
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+    </script>
+</body>
+</html>
